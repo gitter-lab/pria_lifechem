@@ -5,28 +5,6 @@ import numpy as np
 from sklearn.metrics import roc_auc_score, average_precision_score
 
 
-def getWholeData(file_path):
-    data_pd = pd.read_csv(file_path, dtype=str)
-    X_data = np.zeros(shape=(data_pd.shape[0], 1024))
-    for index, row in data_pd.iterrows():
-        fps = list(row['1024_fingerprint'])
-        X_data[index] = np.array(fps)
-    y_data = np.array(data_pd.as_matrix(columns=data_pd.columns[3:]))
-    X_data = X_data.astype(float)
-    y_data = y_data.astype(float)
-    label_names = data_pd.columns[3:]
-
-    # In case we just train on one target
-    # y would be (n,) vector
-    # then we should change it to (n,1) 1D matrix
-    # to keep consistency
-    if y_data.ndim == 1:
-        n = y_data.shape[0]
-        y_data = y_data.reshape(n, 1)
-
-    return X_data, y_data, label_names
-
-
 def roc_auc_multi(y_true, y_pred, eval_indices, eval_mean_or_median):
     '''
     this if for multi-task evaluation
