@@ -86,10 +86,7 @@ def enrichment_factor_single(labels_arr, scores_arr, percentile):
     indices = np.argsort(scores_arr)[::-1][:sample_size]        # get the index positions for these in library
     n_actives = np.nansum(labels_arr)                           # count number of positive labels in library
     n_experimental = np.nansum(labels_arr[indices])            # count number of positive labels in subset
-    print 'sample size: {} '.format(sample_size)
-    print("active: {},\thit: {} ".format(n_actives, n_experimental))
     temp = scores_arr[indices]
-    print('larget prob: {}'.format(temp[0]))
     if n_actives > 0.0:
         ef = float(n_experimental) / n_actives / percentile     # calc EF at percentile
     else:
