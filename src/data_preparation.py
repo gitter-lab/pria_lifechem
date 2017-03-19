@@ -2,50 +2,50 @@ import pandas as pd
 import numpy as np
 from rdkit.Chem import AllChem
 from rdkit import Chem
+import operator
 
 
-def transform_data(input_file_name, output_file_name, updated_binary_label):
-    suppl = Chem.SDMolSupplier(input_file_name)
-    output_file = open(output_file_name, 'w')
-    good = 0
-    bad = 0
-    i = 0
-    unique = set()
-    print >> output_file, "molecule ID(RegID),library,existing SMILES,generated SMILES,1024_fingerprint,Pria_SSB_%INH,true_label"
-    for mol in suppl:
-        i += 1
-        if mol is None:
-            bad += 1
-            continue
-        name = mol.GetProp("RegID")
-        if name in unique:
-            continue
-        unique.add(name)
-        good += 1
-        library = mol.GetProp("Library")
-        existing_smiles = mol.GetProp("SMILES")
-        generated_smiles = Chem.CanonSmiles(Chem.MolToSmiles(mol))
-        generated_mol = Chem.MolFromSmiles(existing_smiles)
-        fingerprints = AllChem.GetMorganFingerprintAsBitVect(mol, radius=2, nBits=1024)
+def transform_data(input_file_name, output_file_name):
+    from collections import OrderedDict
 
-        pria = mol.GetProp("Pria_SSB_%INH")
-        pria = float(pria)
+    f = open('../dataset/data_preprocessing/lifechem123_cleaned_2017_03_10.smi', 'r')
+    mol_smile_dict = {}
 
-        true_label = updated_binary_label[updated_binary_label['Molecule'] == name]['Keck_Pria_AS_Retest']
-        true_label = true_label.tolist()[0]
-        output_line = "{},{},{},{},{},{},{}".format(name,
-                                                    library,
-                                                    existing_smiles,
-                                                    generated_smiles,
-                                                    fingerprints.ToBitString(),
-                                                    pria,
-                                                    true_label)
-        print >> output_file, output_line
-    print("{} items in all, {} are good, {} are bad".format(i, good, bad))
+    for line in f:
+        line = line.strip()
+        row = line.split(' ')
+        smiles = row[0]
+        mol = row[1]
+        mol_smile_dict[mol] = smiles
+
+    mol_smile_map = sorted(mol_smile_dict.items())
+    
+    molecules = [item[0] for item in mol_smile_map]
+    smiles = [item[1] for item in mol_smile_map]
+    
+    df = pd.DataFrame({'Molecule': molecules, 'SMILES': smiles})
+    result = pd.merge(df, Keck_Pria_Retest, on='Molecule', how='outer')
+    result = pd.merge(result, Keck_Pria_FP, on='Molecule', how='outer')
+    result = pd.merge(result, Keck_Pria_Primary, on='Molecule', how='outer')
+    result = pd.merge(result, Keck_RMI, on='Molecule', how='outer')
+    result = pd.merge(result, Keck_RMI_cdd, on='Molecule', how='outer')
+
+    result.to_csv(output_file_name, index=None)
+
     return
 
 
 if __name__ == '__main__':
-    discrete_file = pd.ExcelFile('../dataset/screening_smsf_actives.xlsx')
-    updated_binary_label = discrete_file.parse('Keck_Pria_Retest')
-    transform_data('../dataset/lc123_keckdata.sdf', '../dataset/keck_complete.csv', updated_binary_label)
+    discrete_file = pd.ExcelFile('../dataset/data_preprocessing/screening_smsf_actives_2017_03_10.xlsx')
+    Keck_Pria_Retest = discrete_file.parse('Keck_Pria_Retest')
+    Keck_Pria_FP = discrete_file.parse('Keck_Pria_FP')
+    Keck_RMI = discrete_file.parse('Keck_RMI')
+    Xing_MTDH_Retest = discrete_file.parse('Xing_MTDH_Retest')
+    Xing_MTDH_DR = discrete_file.parse('Xing_MTDH_DR')
+    
+    continuous_file = pd.ExcelFile('../dataset/data_preprocessing/screening_smsf_continuous_2017_03_10.xlsx')
+    Keck_Pria_Primary = continuous_file.parse('Keck_Pria_Primary')
+    Keck_RMI_cdd = continuous_file.parse('Keck_RMI_cdd')
+    Xing_MTDH_cdd = continuous_file.parse('Xing_MTDH_cdd')
+        
+    transform_data('../dataset/data_preprocessing/lifechem123_cleaned_2017_03_10.smi', '../dataset/keck_complete.csv')
