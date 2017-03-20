@@ -55,7 +55,7 @@ def transform_data(output_file_name):
     result = pd.merge(result, Keck_RMI_cdd, on='Molecule', how='outer')
 
     result.to_csv(output_file_name, index=None)
-
+    
     return
 
 
