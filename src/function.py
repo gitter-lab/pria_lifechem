@@ -165,15 +165,15 @@ def read_merged_data(input_file_list):
 Get the fingerprints, with feature_name specified, and label_name specified
 '''
 def extract_feature_and_label(data_pd,
-                              feature_name='1024_fingerprint',
-                              label_name='true_label'):
+                              feature_name,
+                              label_name_list):
     X_data = np.zeros(shape=(data_pd.shape[0], 1024))
-    y_data = np.zeros(shape=(data_pd.shape[0], 1))
+    y_data = np.zeros(shape=(data_pd.shape[0], len(label_name_list)))
     for index, row in data_pd.iterrows():
         feature = list(row[feature_name])
-        label = row[label_name]
+        labels = row[label_name_list]
         X_data[index] = np.array(feature)
-        y_data[index] = label
+        y_data[index] = np.array(labels)
     X_data = X_data.astype(float)
     y_data = y_data.astype(float)
 
@@ -181,8 +181,10 @@ def extract_feature_and_label(data_pd,
     # y would be (n,) vector
     # then we should change it to (n,1) 1D matrix
     # to keep consistency
+    print y_data.shape
     if y_data.ndim == 1:
         n = y_data.shape[0]
         y_data = y_data.reshape(n, 1)
 
     return X_data, y_data
+
