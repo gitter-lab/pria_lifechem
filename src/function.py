@@ -169,11 +169,13 @@ def extract_feature_and_label(data_pd,
                               label_name_list):
     X_data = np.zeros(shape=(data_pd.shape[0], 1024))
     y_data = np.zeros(shape=(data_pd.shape[0], len(label_name_list)))
-    for index, row in data_pd.iterrows():
+    index = 0
+    for _, row in data_pd.iterrows():
         feature = list(row[feature_name])
         labels = row[label_name_list]
         X_data[index] = np.array(feature)
         y_data[index] = np.array(labels)
+        index += 1
     X_data = X_data.astype(float)
     y_data = y_data.astype(float)
 

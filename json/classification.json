@@ -1,23 +1,23 @@
 {
-  "input_file": "./dataset/keck.csv.gz",
+  "input_file": "./dataset/keck_original_complete.csv",
   "layers":[
     {
       "hidden_units": 2000,
       "init": "glorot_normal",
-      "activation": "sigmoid",
-      "dropout": 0.5
+      "activation": "relu",
+      "dropout": 0.25
     },{
-      "hidden_units": 2000,
+      "hidden_units": 1000,
       "init": "glorot_normal",
-      "activation": "sigmoid",
-      "dropout": 0.5
+      "activation": "relu",
+      "dropout": 0.25
     },{
       "init": "glorot_normal",
-      "activation": "linear"
+      "activation": "sigmoid"
     }
   ],
   "compile": {
-    "loss": "mse",
+    "loss": "binary_crossentropy",
     "optimizer": {
       "option":"adam",
       "sgd": {
@@ -28,7 +28,7 @@
       },
       "adam": {
         "lr": 0.0001,
-        "beta_1": 0.09,
+        "beta_1": 0.9,
         "beta_2": 0.999,
         "epsilon": 1e-8
       }
@@ -44,7 +44,7 @@
     }
   },
   "batch": {
-    "is_use":false,
+    "is_use":true,
     "epsilon":1e-6,
     "mode": 0,
     "axis":-1,
