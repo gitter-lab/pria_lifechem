@@ -112,6 +112,7 @@ class single_task:
                   batch_size=self.fit_batch_size,
                   verbose=self.fit_verbose,
                   validation_data=(X_val, y_val),
+                  shuffle=True,
                   callbacks=callbacks)
         model.save_weights(PMTNN_weight_file)
 
@@ -189,23 +190,24 @@ def enrichment_factor(labels_arr, scores_arr, percentile):
 # following class is used for keras to compute the AUC each epoch
 # and do early stoppping based on that
 class KeckCallBackOnAUC(keras.callbacks.Callback):
-    def __init__(self, X_train, y_train, X_val, y_val, patience=0):
+    def __init__(self, X_train, y_train, X_val, y_val,
+                 patience=0,
+                 file_path='best_model.weights'):
         super(keras.callbacks.Callback, self).__init__()
         self.curr_auc = 0
         self.best_auc = 0
         self.counter = 0
         self.patience = patience
-        self.best_model = None
         self.X_train = X_train
         self.y_train = y_train
         self.X_val = X_val
         self.y_val = y_val
+        self.file_path = file_path
 
     def on_train_begin(self, logs={}):
         self.nb_epoch = self.params['nb_epoch']
         self.curr_auc = roc_auc_score(self.y_val, self.model.predict(self.X_val))
         self.best_auc = self.curr_auc
-        self.best_model = self.model
 
     def on_epoch_end(self, epoch, logs={}):
         self.curr_auc = roc_auc_score(self.y_val, self.model.predict(self.X_val))
@@ -217,7 +219,7 @@ class KeckCallBackOnAUC(keras.callbacks.Callback):
         else:
             self.counter = 0
             self.best_auc = self.curr_auc
-            self.best_model = self.model
+            self.model.save_weights(self.file_path)
         train_auc = roc_auc_score(self.y_train, self.model.predict(self.X_train))
         train_precision = average_precision_score(self.y_train, self.model.predict(self.X_train))
         curr_precision = average_precision_score(self.y_val, self.model.predict(self.X_val))
@@ -227,7 +229,8 @@ class KeckCallBackOnAUC(keras.callbacks.Callback):
         print
 
     def get_best_model(self):
-        return self.best_model
+        self.model.load_weights(self.file_path)
+        return self.model
 
     def get_best_auc(self):
         return self.best_auc
@@ -237,24 +240,25 @@ class KeckCallBackOnAUC(keras.callbacks.Callback):
 # following class is used for keras to compute the precision each epoch
 # and do early stoppping based on that
 class KeckCallBackOnPrecision(keras.callbacks.Callback):
-    def __init__(self, X_train, y_train, X_val, y_val, patience=0):
+    def __init__(self, X_train, y_train, X_val, y_val,
+                 patience=0,
+                 file_path='best_model.weights'):
         super(keras.callbacks.Callback, self).__init__()
         self.curr_precision = 0
         self.best_precision = 0
         self.prev_precision = self.curr_precision
         self.counter = 0
         self.patience = patience
-        self.best_model = None
         self.X_train = X_train
         self.y_train = y_train
         self.X_val = X_val
         self.y_val = y_val
+        self.file_path = file_path
 
     def on_train_begin(self, logs={}):
         self.nb_epoch = self.params['nb_epoch']
         self.curr_precision = average_precision_score(self.y_val, self.model.predict(self.X_val))
         self.best_precision = self.curr_precision
-        self.best_model = self.model
 
     def on_epoch_end(self, epoch, logs={}):
         self.curr_precision = average_precision_score(self.y_val, self.model.predict(self.X_val))
@@ -266,24 +270,25 @@ class KeckCallBackOnPrecision(keras.callbacks.Callback):
         else:
             self.counter = 0
             self.best_precision = self.curr_precision
-            self.best_model = self.model
+            self.model.save_weights(self.file_path)
 
         self.prev_precision = self.curr_precision
         train_precision = average_precision_score(self.y_train, self.model.predict(self.X_train))
         train_auc = roc_auc_score(self.y_train, self.model.predict(self.X_train))
         curr_auc = roc_auc_score(self.y_val, self.model.predict(self.X_val))
-        print
         print('Epoch %d/%d' % (epoch + 1, self.nb_epoch))
         print('Precision Train: %f ---- Precision Val: %f' % (train_precision, self.curr_precision))
         print('AUC Train: %f ---- AUC Val: %f' % (train_auc, curr_auc))
+        print
 
     def get_best_model(self):
-        return self.best_model
+        self.model.load_weights(self.file_path)
+        return self.model
 
     def get_best_precision(self):
         return self.best_precision
 
-    
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--config_json_file', action="store", dest="config_json_file", required=True)
@@ -317,6 +322,5 @@ if __name__ == '__main__':
     del y_train
 
     task = single_task(config_json_file=config_json_file)
-
     task.train_and_predict(X_t, y_t, X_val, y_val, X_test, y_test, PMTNN_weight_file)
     task.store_data(transform_json_to_csv(config_json_file), config_csv_file)
