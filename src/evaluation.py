@@ -99,8 +99,6 @@ def enrichment_factor_single(labels_arr, scores_arr, percentile):
         ef = 'ND'
         ef_max = 'ND'
     return n_actives, ef, ef_max
-<<<<<<< HEAD
-=======
 
 
 def enrichment_factor_single_perc(y_true, y_pred, percentile):
@@ -308,4 +306,3 @@ def efp_efm_plotter(y_true, y_pred, perc_vec, file_name, label_names=None):
     plt.title('EF_perc and EF_max Curve')
     plt.legend(loc="lower right")
     plt.savefig(file_name)
->>>>>>> ce97eeef2f72f218f09973fb6984967ff5223800
