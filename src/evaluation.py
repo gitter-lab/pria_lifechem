@@ -9,15 +9,15 @@ import matplotlib.pyplot as plt
 from sklearn.metrics import auc
 
 
+'''
+this if for multi-task evaluation
+y_true and y_pred is two-dimension matrix
+can evaluate on mean or median of array
+called by
+roc_auc_multi(y_true, y_pred, [-1], np.mean)
+roc_auc_multi(y_true, y_pred, [0], np.median)
+'''
 def roc_auc_multi(y_true, y_pred, eval_indices, eval_mean_or_median):
-    '''
-    this if for multi-task evaluation
-    y_true and y_pred is two-dimension matrix
-    can evaluate on mean or median of array
-    call by
-    roc_auc_multi(y_true, y_pred, [-1], np.mean)
-    roc_auc_multi(y_true, y_pred, [0], np.median)
-    '''
     y_true = y_true[:, eval_indices]
     y_pred = y_pred[:, eval_indices]
     nb_classes = y_true.shape[1]
@@ -36,15 +36,15 @@ def roc_auc_single(actual, predicted):
     return roc_auc_score(actual, predicted)
 
 
+'''
+this if for multi-task evaluation
+y_true and y_pred is two-dimension matrix
+can evaluate on mean or median of array
+called by
+precision_auc_multi(y_true, y_pred, [-1], np.mean)
+precision_auc_multi(y_true, y_pred, [0], np.median)
+'''
 def precision_auc_multi(y_true, y_pred, eval_indices, eval_mean_or_median):
-    '''
-    this if for multi-task evaluation
-    y_true and y_pred is two-dimension matrix
-    can evaluate on mean or median of array
-    call by
-    precision_auc_multi(y_true, y_pred, [-1], np.mean)
-    precision_auc_multi(y_true, y_pred, [0], np.median)
-    '''
     y_true = y_true[:, eval_indices]
     y_pred = y_pred[:, eval_indices]
     nb_classes = y_true.shape[1]
