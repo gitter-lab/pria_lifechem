@@ -2,7 +2,7 @@ import pandas as pd
 import csv
 import json
 import numpy as np
-from sklearn.metrics import roc_auc_score
+from sklearn.metrics import roc_auc_score, average_precision_score
 import rpy2.robjects as robjects
 import rpy2.robjects.packages as rpackages
 import matplotlib.pyplot as plt
@@ -62,20 +62,22 @@ def precision_auc_multi(y_true, y_pred, eval_indices, eval_mean_or_median):
 '''
 the average_precision_score() function in sklearn has interpolation issue
 we call this through a R package called PRROC
-the mode can be either 'Integeral' or 'DavisGoadrich'
+the mode can be either 'auc.integral' or 'auc.davis.goadrich'
 '''
-def precision_auc_single(actual, predicted, mode='Integral'):
+def precision_auc_single(actual, predicted, mode='auc.integral'):
     prroc = rpackages.importr('PRROC')
     x = robjects.FloatVector(actual)
     y = robjects.FloatVector(predicted)
-    pr = prroc.pr_curve(x, y)
-    if mode == 'Integral':
-        prec_auc = pr[1]
-    elif mode == 'DavisGoardrich':
-        prec_auc = pr[2]
-    else:
-        raise Exception('Wrong mode value. Should be either Integral or DavisGoardrich.')
+    # print len(x)
+    # print len(y)
+    print 'neo'
+    pr = prroc.pr_curve(x, y, curve=True)
+    try:
+        prec_auc = pr.rx2(mode)[0]
+    except:
+        print 'Error: Wrong mode value. Should be either auc.integral or auc.davis.goadrich.'
     return prec_auc
+    # return average_precision_score(actual, predicted)
 
 
 def enrichment_factor_multi(actual, predicted, percentile):
