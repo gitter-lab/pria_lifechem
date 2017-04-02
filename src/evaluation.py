@@ -3,19 +3,21 @@ import csv
 import json
 import numpy as np
 from sklearn.metrics import roc_auc_score, average_precision_score
+import rpy2.robjects as robjects
+import rpy2.robjects.packages as rpackages
 import matplotlib.pyplot as plt
 from sklearn.metrics import auc
 
 
+'''
+this if for multi-task evaluation
+y_true and y_pred is two-dimension matrix
+can evaluate on mean or median of array
+called by
+roc_auc_multi(y_true, y_pred, [-1], np.mean)
+roc_auc_multi(y_true, y_pred, [0], np.median)
+'''
 def roc_auc_multi(y_true, y_pred, eval_indices, eval_mean_or_median):
-    '''
-    this if for multi-task evaluation
-    y_true and y_pred is two-dimension matrix
-    can evaluate on mean or median of array
-    call by
-    roc_auc_multi(y_true, y_pred, [-1], np.mean)
-    roc_auc_multi(y_true, y_pred, [0], np.median)
-    '''
     y_true = y_true[:, eval_indices]
     y_pred = y_pred[:, eval_indices]
     nb_classes = y_true.shape[1]
@@ -34,15 +36,15 @@ def roc_auc_single(actual, predicted):
     return roc_auc_score(actual, predicted)
 
 
+'''
+this if for multi-task evaluation
+y_true and y_pred is two-dimension matrix
+can evaluate on mean or median of array
+called by
+precision_auc_multi(y_true, y_pred, [-1], np.mean)
+precision_auc_multi(y_true, y_pred, [0], np.median)
+'''
 def precision_auc_multi(y_true, y_pred, eval_indices, eval_mean_or_median):
-    '''
-    this if for multi-task evaluation
-    y_true and y_pred is two-dimension matrix
-    can evaluate on mean or median of array
-    call by
-    precision_auc_multi(y_true, y_pred, [-1], np.mean)
-    precision_auc_multi(y_true, y_pred, [0], np.median)
-    '''
     y_true = y_true[:, eval_indices]
     y_pred = y_pred[:, eval_indices]
     nb_classes = y_true.shape[1]
@@ -56,9 +58,47 @@ def precision_auc_multi(y_true, y_pred, eval_indices, eval_mean_or_median):
         auc[i] = precision_auc_single(actual, predicted)
     return eval_mean_or_median(auc)
 
-
+'''
+this if for multi-task evaluation
+y_true and y_pred is two-dimension matrix
+can evaluate on mean or median of array
+called by
+precision_auc_single(y_true, y_pred, [-1], np.mean)
+precision_auc_single(y_true, y_pred, [0], np.median)
+'''
 def precision_auc_single(actual, predicted):
     return average_precision_score(actual, predicted)
+
+
+'''
+the average_precision_score() function in sklearn has interpolation issue
+we call this through a R package called PRROC
+the mode can be either 'auc.integral' or 'auc.davis.goadrich'
+'''
+global_index = 0
+
+def precision_auc_single_prroc(actual, predicted, mode='auc.integral'):
+    prroc = rpackages.importr('PRROC')
+    x = robjects.FloatVector(actual)
+    y = robjects.FloatVector(predicted)
+    pr = prroc.pr_curve(x, y, curve=True)
+    prec_auc = pr.rx2(mode)[0]
+    pr_curve = np.array(pr[3])
+    plt.plot(pr_curve[:, 0], pr_curve[:, 1],
+             label='(integral area = %0.7f) \n (d+g area = %0.7f)' %
+                   (pr[1][0], pr[2][0]))
+    plt.xlim([-0.05, 1.05])
+    plt.ylim([-0.05, 1.05])
+    plt.xlabel('Recall')
+    plt.ylabel('Precision')
+    plt.title('PrAUC')
+    plt.legend(loc="lower right")
+    global global_index
+    global_index += 1
+    print 'plot {}'.format(global_index)
+    plt.savefig('../plottings/pr_curve_{}.png'.format(global_index))
+    return prec_auc
+
 
 
 def enrichment_factor_multi(actual, predicted, percentile):
