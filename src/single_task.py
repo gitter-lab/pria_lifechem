@@ -26,6 +26,7 @@ class single_task:
         self.early_stopping_option = conf['fitting']['early_stopping']['option']
 
         self.fit_nb_epoch = conf['fitting']['nb_epoch']
+        self.fit_nb_epoch = 1
         self.fit_batch_size = conf['fitting']['batch_size']
         self.fit_verbose = conf['fitting']['verbose']
 
