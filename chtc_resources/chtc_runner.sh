@@ -7,19 +7,19 @@ echo 'Done getting from squid'
 
 ./Anaconda3-4.3.1-Linux-x86_64.sh -b -p ./anaconda > /dev/null #install anaconda, I also add an argument to the directory name
 
-export PATH=./anaconda/bin:$PATH
+export PATH=$PWD/anaconda/bin:$PATH
 
 echo 'Done installing anaconda'
 chmod 777 *
 
 #keras stuff
-conda install pyyaml > /dev/null
-conda install HDF5 > /dev/null
-conda install h5py > /dev/null
-conda install libgpuarray > /dev/null
-conda install theano > /dev/null
-conda install keras > /dev/null
-#conda install -c conda-forge keras=2.0.2 > /dev/null
+conda install --yes pyyaml > /dev/null
+conda install --yes HDF5 > /dev/null
+conda install --yes h5py > /dev/null
+conda install --yes libgpuarray > /dev/null
+conda install --yes theano > /dev/null
+conda install --yes keras > /dev/null
+#conda install --yes -c conda-forge keras=2.0.2 > /dev/null
 
 echo 'Done installing libraries'
 
@@ -29,12 +29,11 @@ chmod 777 -R ./anaconda
 curl -H "Authorization: token 01f32242cdb9725726f581d93ef0c37e713311b7" -L https://api.github.com/repos/lscHacker/virtual-screening/zipball > virtual-screening-master.zip
 unzip virtual-screening-master.zip 
 mv lsc* virtual-screening
-ls
 cd virtual-screening
 
 #run python job
 python_jobs_dir=$1
-KERAS_BACKEND=theano THEANO_FLAGS="base_compiledir=./tmp,floatX=float32,device=cuda" python src/chtc_distributor.py $python_jobs_dir ; #run pcsf
+KERAS_BACKEND=theano THEANO_FLAGS="base_compiledir=./tmp,floatX=float32,device=cuda,gpuarray.preallocate=0.8" python src/chtc_distributor.py $python_jobs_dir
 
 echo 'Done running job'
 

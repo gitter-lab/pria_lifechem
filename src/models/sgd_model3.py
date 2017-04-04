@@ -79,4 +79,5 @@ score = model.evaluate(x_test, y_test, verbose=0)
 print('Test loss:', score[0])
 print('Test accuracy:', score[1])
 
-model.save_weights('$_CONDOR_JOB_IWD/w2.h5')
+scratch_dir = os.environ.get('_CONDOR_JOB_IWD')
+model.save_weights(scratch_dir + '/w2.h5')
