@@ -1,0 +1,48 @@
+#!/bin/bash
+wget -q –retry-connrefused –waitretry=10 http://proxy.chtc.wisc.edu/SQUID/alnammi/Anaconda3-4.3.1-Linux-x86_64.sh #here I get the anaconda file from squid
+
+chmod 777 * #wget does strange things
+
+echo 'Done getting from squid'
+
+./Anaconda3-4.3.1-Linux-x86_64.sh -b -p ./anaconda > /dev/null #install anaconda, I also add an argument to the directory name
+
+export PATH=./anaconda/bin:$PATH
+
+echo 'Done installing anaconda'
+chmod 777 *
+
+#keras stuff
+conda install pyyaml > /dev/null
+conda install HDF5 > /dev/null
+conda install h5py > /dev/null
+conda install Theano > /dev/null
+conda install -c conda-forge keras=2.0.2 > /dev/null
+
+echo 'Done installing libraries'
+
+chmod 777 -R ./anaconda
+
+#get virtual-screening from github
+wget -q –retry-connrefused –waitretry=10 http://github.com/lscHacker/virtual-screening/archive/master.zip
+unzip virtual-screening-master.zip
+cd virtual-screening
+
+#run python job
+python_jobs_dir=$1
+KERAS_BACKEND=theano THEANO_FLAGS="base_compiledir=./tmp,floatX=float32,device=cuda" python src/chtc_distributor.py $python_jobs_dir ; #run pcsf
+
+echo 'Done running job'
+
+cd ..
+
+#clean up everything I don't want transfered back
+rm -f Anaconda*
+rm -f virtual-screening*
+rm -rf ./anaconda{2}
+
+
+echo _CONDOR_JOB_IWD $_CONDOR_JOB_IWD
+echo Cluster $cluster
+echo Process $process
+echo RunningOn $runningon
