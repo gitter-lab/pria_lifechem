@@ -20,6 +20,8 @@ def process_jobs(file_dir):
     if process_id == None:
         print('Error: No environemnt variable $process exists.')
         return    
+    
+    process_id = int(process_id)
     if process_id >= len(python_jobs) or process_id < 0:
         print('Error: Process id value invalid range: ' + str(process_id))
         return
