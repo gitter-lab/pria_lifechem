@@ -61,7 +61,7 @@ def bedroc_auc_multi(y_true, y_pred, eval_indices, eval_mean_or_median):
 
 
 def bedroc_auc_single(actual, predicted, alpha=10):
-    data = np.hstack((actual, predicted))
+    data = np.hstack((predicted, actual))
     data = ScoredData(data)
     results = BEDROC(data, alpha)
     return results['area']
