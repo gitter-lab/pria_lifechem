@@ -121,12 +121,18 @@ class single_task:
         y_pred_on_val = model.predict(X_val)
         y_pred_on_test = model.predict(X_test)
 
+        print
         print('train precision: {}'.format(precision_auc_single(y_train, y_pred_on_train)))
         print('train roc: {}'.format(roc_auc_single(y_train, y_pred_on_train)))
+        print('train bedroc: {}'.format(bedroc_auc_single(y_train, y_pred_on_train)))
+        print
         print('validation precision: {}'.format(precision_auc_single(y_val, y_pred_on_val)))
         print('validation roc: {}'.format(roc_auc_single(y_val, y_pred_on_val)))
+        print('validation bedroc: {}'.format(bedroc_auc_single(y_val, y_pred_on_val)))
+        print
         print('test precision: {}'.format(precision_auc_single(y_test, y_pred_on_test)))
         print('test roc: {}'.format(roc_auc_single(y_test, y_pred_on_test)))
+        print('test bedroc: {}'.format(bedroc_auc_single(y_test, y_pred_on_test)))
 
         for EF_ratio in self.EF_ratio_list:
             n_actives, ef = enrichment_factor(y_test, y_pred_on_test, EF_ratio)
@@ -147,11 +153,14 @@ class single_task:
         y_pred_on_test = model.predict(X_test)
 
         print('train precision: {}'.format(precision_auc_single(y_train, y_pred_on_train)))
-        print('train auc: {}'.format(roc_auc_single(y_train, y_pred_on_train)))
+        print('train roc: {}'.format(roc_auc_single(y_train, y_pred_on_train)))
+        print('train bedroc: {}'.format(bedroc_auc_single(y_train, y_pred_on_train)))
         print('validation precision: {}'.format(precision_auc_single(y_val, y_pred_on_val)))
-        print('validation auc: {}'.format(roc_auc_single(y_val, y_pred_on_val)))
+        print('validation roc: {}'.format(roc_auc_single(y_val, y_pred_on_val)))
+        print('validation bedroc: {}'.format(bedroc_auc_single(y_val, y_pred_on_val)))
         print('test precision: {}'.format(precision_auc_single(y_test, y_pred_on_test)))
-        print('test auc: {}'.format(roc_auc_single(y_test, y_pred_on_test)))
+        print('test roc: {}'.format(roc_auc_single(y_test, y_pred_on_test)))
+        print('test bedroc: {}'.format(bedroc_auc_single(y_test, y_pred_on_test)))
 
         return
 

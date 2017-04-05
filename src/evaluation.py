@@ -7,6 +7,7 @@ import rpy2.robjects as robjects
 import rpy2.robjects.packages as rpackages
 import matplotlib.pyplot as plt
 from sklearn.metrics import auc
+from croc import BEDROC, ScoredData
 
 
 '''
@@ -41,6 +42,36 @@ this if for multi-task evaluation
 y_true and y_pred is two-dimension matrix
 can evaluate on mean or median of array
 called by
+bedroc_auc_multi(y_true, y_pred, [-1], np.mean)
+bedroc_auc_multi(y_true, y_pred, [0], np.median)
+'''
+def bedroc_auc_multi(y_true, y_pred, eval_indices, eval_mean_or_median):
+    y_true = y_true[:, eval_indices]
+    y_pred = y_pred[:, eval_indices]
+    nb_classes = y_true.shape[1]
+    auc = np.zeros(nb_classes)
+    for i in range(len(auc)):
+        # -1 represents missing value
+        # and remove them when in evaluation
+        non_missing_indices = np.argwhere(y_true[:, i] != -1)[:, 0]
+        actual = y_true[non_missing_indices, i]
+        predicted = y_pred[non_missing_indices, i]
+        auc[i] = bedroc_auc_single(actual, predicted)
+    return eval_mean_or_median(auc)
+
+
+def bedroc_auc_single(actual, predicted, alpha=10):
+    data = np.hstack((predicted, actual))
+    data = ScoredData(data)
+    results = BEDROC(data, alpha)
+    return results['area']
+
+
+'''
+this if for multi-task evaluation
+y_true and y_pred is two-dimension matrix
+can evaluate on mean or median of array
+called by
 precision_auc_multi(y_true, y_pred, [-1], np.mean)
 precision_auc_multi(y_true, y_pred, [0], np.median)
 '''
@@ -59,15 +90,17 @@ def precision_auc_multi(y_true, y_pred, eval_indices, eval_mean_or_median):
     return eval_mean_or_median(auc)
 
 '''
-this if for multi-task evaluation
-y_true and y_pred is two-dimension matrix
-can evaluate on mean or median of array
-called by
-precision_auc_single(y_true, y_pred, [-1], np.mean)
-precision_auc_single(y_true, y_pred, [0], np.median)
+the average_precision_score() function in sklearn has interpolation issue
+we call this through a R package called PRROC
+the mode can be either 'auc.integral' or 'auc.davis.goadrich'
 '''
-def precision_auc_single(actual, predicted):
-    return average_precision_score(actual, predicted)
+def precision_auc_single(actual, predicted, mode='auc.integral'):
+    prroc = rpackages.importr('PRROC')
+    x = robjects.FloatVector(actual)
+    y = robjects.FloatVector(predicted)
+    pr = prroc.pr_curve(weights_class0=x, scores_class0=y, curve=False)
+    prec_auc = pr.rx2(mode)[0]
+    return prec_auc
 
 
 '''
