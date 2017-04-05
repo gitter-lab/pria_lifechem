@@ -24,6 +24,7 @@ def check_keck_fold_integrity(fold_directory):
               } 
               
     file_list = os.listdir(fold_directory)
+    file_list = sorted(file_list)
     k = len(file_list)
     key_hash_list = None
     
@@ -40,7 +41,7 @@ def check_keck_fold_integrity(fold_directory):
     
     no_errors = True
     for i in range(k):
-        if key_hash_list[i][1] != md5_hash_list[i][1]:
+        if key_hash_list[i] != md5_hash_list[i]:
             no_errors = False
           
     if no_errors:

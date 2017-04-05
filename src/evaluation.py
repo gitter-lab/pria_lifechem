@@ -103,6 +103,37 @@ def precision_auc_single(actual, predicted, mode='auc.integral'):
     return prec_auc
 
 
+'''
+the average_precision_score() function in sklearn has interpolation issue
+we call this through a R package called PRROC
+the mode can be either 'auc.integral' or 'auc.davis.goadrich'
+'''
+global_index = 0
+
+def precision_auc_single_prroc(actual, predicted, mode='auc.integral'):
+    prroc = rpackages.importr('PRROC')
+    x = robjects.FloatVector(actual)
+    y = robjects.FloatVector(predicted)
+    pr = prroc.pr_curve(x, y, curve=True)
+    prec_auc = pr.rx2(mode)[0]
+    pr_curve = np.array(pr[3])
+    plt.plot(pr_curve[:, 0], pr_curve[:, 1],
+             label='(integral area = %0.7f) \n (d+g area = %0.7f)' %
+                   (pr[1][0], pr[2][0]))
+    plt.xlim([-0.05, 1.05])
+    plt.ylim([-0.05, 1.05])
+    plt.xlabel('Recall')
+    plt.ylabel('Precision')
+    plt.title('PrAUC')
+    plt.legend(loc="lower right")
+    global global_index
+    global_index += 1
+    print 'plot {}'.format(global_index)
+    plt.savefig('../plottings/pr_curve_{}.png'.format(global_index))
+    return prec_auc
+
+
+
 def enrichment_factor_multi(actual, predicted, percentile):
     EF_list = []
     for i in range(actual.shape[1]):
