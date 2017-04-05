@@ -94,11 +94,11 @@ the average_precision_score() function in sklearn has interpolation issue
 we call this through a R package called PRROC
 the mode can be either 'auc.integral' or 'auc.davis.goadrich'
 '''
-def precision_auc_single(actual, predicted):
+def precision_auc_single(actual, predicted, mode='auc.integral'):
     prroc = rpackages.importr('PRROC')
     x = robjects.FloatVector(actual)
     y = robjects.FloatVector(predicted)
-    pr = prroc.pr_curve(weights_class0=x, scores_class0=y, curve=True)
+    pr = prroc.pr_curve(weights_class0=x, scores_class0=y, curve=False)
     prec_auc = pr.rx2(mode)[0]
     return prec_auc
 
