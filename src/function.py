@@ -2,6 +2,8 @@ import pandas as pd
 import numpy as np
 import random
 import os
+import json
+import csv
 from sklearn.cross_validation import StratifiedKFold, KFold
 
 
@@ -190,3 +192,126 @@ def extract_feature_and_label(data_pd,
 
     return X_data, y_data
 
+
+'''
+Store result
+'''
+def store_data(data, file):
+    with open(file, 'w') as csvfile:
+        writer = csv.writer(csvfile, delimiter=',', quoting=csv.QUOTE_MINIMAL)
+        for d in data:
+            writer.writerow([d])
+    return
+
+'''
+Transform data format
+'''
+
+def transform_json_to_csv(conf_file):
+    with open(conf_file, 'r') as f:
+        conf = json.load(f)
+
+    configuration = []
+
+    layers = conf['layers']
+    layer_number = len(layers)
+    for i in range(layer_number):
+        init = layers[i]['init']
+        activation = layers[i]['activation']
+        if i == 0:
+            hidden_units = int(layers[i]['hidden_units'])
+            dropout = float(layers[i]['dropout'])
+            layer_info = 'hidden unit number:{}, ' \
+                         'init:{}, ' \
+                         'activation:{}, ' \
+                         'drop-out:{}'.format(hidden_units,
+                                              init,
+                                              activation,
+                                              dropout)
+        elif i == layer_number-1:
+            layer_info = 'init:{}, activation:{}'.format(init, activation)
+        else:
+            hidden_units = int(layers[i]['hidden_units'])
+            dropout = float(layers[i]['dropout'])
+            layer_info = 'hidden unit number:{},' \
+                         'init:{}, activation:{},' \
+                         'drop-out:{}'.format(hidden_units,
+                                              init,
+                                              activation,
+                                              dropout)
+        configuration.append([str(i+1), layer_info])
+
+    fit_nb_epoch = conf['fitting']['nb_epoch']
+    fit_batch_size = conf['fitting']['batch_size']
+    early_stopping_patience = conf['fitting']['early_stopping']['patience']
+    early_stopping_option = conf['fitting']['early_stopping']['option']
+    fit_parameters_config = 'epoch:{}, ' \
+                            'batch_size:{}, ' \
+                            'early stopping: {} with {} tolerance'.format(fit_nb_epoch,
+                                                                          fit_batch_size,
+                                                                          early_stopping_option,
+                                                                          early_stopping_patience)
+    configuration.append(['fit paramters', fit_parameters_config])
+
+    compile_loss = conf['compile']['loss']
+    compile_optimizer_option = conf['compile']['optimizer']['option']
+    if compile_optimizer_option == 'sgd':
+        sgd_lr = conf['compile']['optimizer']['sgd']['lr']
+        sgd_momentum = conf['compile']['optimizer']['sgd']['momentum']
+        sgd_decay = conf['compile']['optimizer']['sgd']['decay']
+        sgd_nestrov = conf['compile']['optimizer']['sgd']['nestrov']
+        optimizer_info = '{}: ' \
+                         'learning rate:{}, ' \
+                         'momentum:{}, ' \
+                         'decay:{}, ' \
+                         'nestrov:{}'.format(compile_optimizer_option,
+                                             sgd_lr,
+                                             sgd_momentum,
+                                             sgd_decay,
+                                             sgd_nestrov)
+    elif compile_optimizer_option == 'adam':
+        adam_lr = conf['compile']['optimizer']['adam']['lr']
+        adam_beta_1 = conf['compile']['optimizer']['adam']['beta_1']
+        adam_beta_2 = conf['compile']['optimizer']['adam']['beta_2']
+        adam_epsilon = conf['compile']['optimizer']['adam']['epsilon']
+        optimizer_info = '{}: ' \
+                         'learning rate:{}, ' \
+                         'beta_1:{}, ' \
+                         'beta_2:{}, ' \
+                         'epsilon:{}'.format(compile_optimizer_option,
+                                             adam_lr,
+                                             adam_beta_1,
+                                             adam_beta_2,
+                                             adam_epsilon)
+    else:
+        optimizer_info = 'not use'
+    compiler_config = 'loss:{}, optimizer:{}'.format(compile_loss, optimizer_info)
+    configuration.append(['optimizer', compiler_config])
+
+    batch_is_use = conf['batch']['is_use']
+    if batch_is_use:
+        batch_normalizer_epsilon = conf['batch']['epsilon']
+        batch_normalizer_mode = conf['batch']['mode']
+        batch_normalizer_axis = conf['batch']['axis']
+        batch_normalizer_momentum = conf['batch']['momentum']
+        batch_normalizer_weights = conf['batch']['weights']
+        batch_normalizer_beta_init = conf['batch']['beta_init']
+        batch_normalizer_gamma_init = conf['batch']['gamma_init']
+        batch_normalizer_config = 'epsilon:{}, ' \
+                                  'mode:{}, ' \
+                                  'axis:{}, ' \
+                                  'momentum:{}, ' \
+                                  'weights:{}, ' \
+                                  'beta_init:{}, ' \
+                                  'gamma_init:{}'.format(batch_normalizer_epsilon,
+                                                         batch_normalizer_mode,
+                                                         batch_normalizer_axis,
+                                                         batch_normalizer_momentum,
+                                                         batch_normalizer_weights,
+                                                         batch_normalizer_beta_init,
+                                                         batch_normalizer_gamma_init)
+    else:
+        batch_normalizer_config = 'not use'
+    configuration.append(['batch normalizer', batch_normalizer_config])
+
+    return configuration

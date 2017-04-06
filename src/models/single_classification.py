@@ -237,4 +237,4 @@ if __name__ == '__main__':
         conf = json.load(f)
     task = SingleClassification(conf=conf)
     task.train_and_predict(X_t, y_t, X_val, y_val, X_test, y_test, PMTNN_weight_file)
-    task.store_data(transform_json_to_csv(config_json_file), config_csv_file)
+    store_data(transform_json_to_csv(config_json_file), config_csv_file)
