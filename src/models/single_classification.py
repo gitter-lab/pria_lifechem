@@ -10,15 +10,14 @@ from keras.layers import Dense, Dropout
 from keras.layers.normalization import BatchNormalization
 from keras.optimizers import SGD, Adam
 from sklearn.cross_validation import StratifiedShuffleSplit
-
-# Add path from parent folder
-sys.path.insert(0, '..')
-# Add path from current folder
-sys.path.insert(0, '.')
+sys.path.insert(0, '..')  # Add path from parent folder
+sys.path.insert(0, '.')  # Add path from current folder
 from function import *
 from evaluation import *
+from CallBacks import *
 
-class single_classification:
+
+class SingleClassification:
     def __init__(self, conf):
 
         self.conf = conf
@@ -188,118 +187,7 @@ class single_classification:
         return
 
 
-# define custom classes
-# following class is used for keras to compute the AUC each epoch
-# and do early stoppping based on that
-class KeckCallBackOnAUC(keras.callbacks.Callback):
-    def __init__(self, X_train, y_train, X_val, y_val,
-                 patience=0,
-                 file_path='best_model.weights'):
-        super(keras.callbacks.Callback, self).__init__()
-        self.curr_roc = 0
-        self.best_roc = 0
-        self.counter = 0
-        self.patience = patience
-        self.X_train = X_train
-        self.y_train = y_train
-        self.X_val = X_val
-        self.y_val = y_val
-        self.file_path = file_path
-
-    def on_train_begin(self, logs={}):
-        self.nb_epoch = self.params['nb_epoch']
-        self.curr_roc = roc_auc_single(self.y_val, self.model.predict(self.X_val))
-        self.best_roc = self.curr_roc
-
-    def on_epoch_end(self, epoch, logs={}):
-        self.curr_roc = roc_auc_single(self.y_val, self.model.predict(self.X_val))
-        if self.curr_roc < self.best_roc:
-            if self.counter >= self.patience:
-                self.model.stop_training = True
-            else:
-                self.counter += 1
-        else:
-            self.counter = 0
-            self.best_roc = self.curr_roc
-            self.model.save_weights(self.file_path)
-            
-        train_roc = roc_auc_single(self.y_train, self.model.predict(self.X_train))
-        train_bedroc = bedroc_auc_single(self.y_train, self.model.predict(self.X_train))
-        train_pr = precision_auc_single(self.y_train, self.model.predict(self.X_train))
-        curr_bedroc = bedroc_auc_single(self.y_val, self.model.predict(self.X_val))
-        curr_pr = precision_auc_single(self.y_val, self.model.predict(self.X_val))
-        print('Epoch %d/%d' % (epoch + 1, self.nb_epoch))
-        print 'Train\tAUC[ROC]: %.6f\tAUC[BEDROC]: %.6f\tAUC[PR]: %.6f' % \
-              (train_roc, train_bedroc, train_pr)
-        print 'Val\tAUC[ROC]: %.6f\tAUC[BEDROC]: %.6f\tAUC[PR]: %.6f' % \
-              (self.curr_roc, curr_bedroc, curr_pr)
-        print
-
-    def get_best_model(self):
-        self.model.load_weights(self.file_path)
-        return self.model
-
-    def get_best_auc(self):
-        return self.best_roc
-
-
-# define custom classes
-# following class is used for keras to compute the precision each epoch
-# and do early stoppping based on that
-class KeckCallBackOnPrecision(keras.callbacks.Callback):
-    def __init__(self, X_train, y_train, X_val, y_val,
-                 patience=0,
-                 file_path='best_model.weights'):
-        super(keras.callbacks.Callback, self).__init__()
-        self.curr_pr = 0
-        self.best_pr = 0
-        self.counter = 0
-        self.patience = patience
-        self.X_train = X_train
-        self.y_train = y_train
-        self.X_val = X_val
-        self.y_val = y_val
-        self.file_path = file_path
-
-    def on_train_begin(self, logs={}):
-        self.nb_epoch = self.params['nb_epoch']
-        self.curr_pr = precision_auc_single(self.y_val, self.model.predict(self.X_val))
-        self.best_pr = self.curr_pr
-
-    def on_epoch_end(self, epoch, logs={}):
-        self.curr_pr = precision_auc_single(self.y_val, self.model.predict(self.X_val))
-        if self.curr_pr < self.best_pr:
-            if self.counter >= self.patience:
-                self.model.stop_training = True
-            else:
-                self.counter += 1
-        else:
-            self.counter = 0
-            self.best_pr = self.curr_pr
-            self.model.save_weights(self.file_path)
-
-        train_roc = roc_auc_single(self.y_train, self.model.predict(self.X_train))
-        train_bedroc = bedroc_auc_single(self.y_train, self.model.predict(self.X_train))
-        train_pr = precision_auc_single(self.y_train, self.model.predict(self.X_train))
-        curr_roc = roc_auc_single(self.y_val, self.model.predict(self.X_val))
-        curr_bedroc = bedroc_auc_single(self.y_val, self.model.predict(self.X_val))
-        print('Epoch %d/%d' % (epoch + 1, self.nb_epoch))
-        print 'Train\tAUC[ROC]: %.6f\tAUC[BEDROC]: %.6f\tAUC[PR]: %.6f' %\
-              (train_roc, train_bedroc, train_pr)
-        print 'Val\tAUC[ROC]: %.6f\tAUC[BEDROC]: %.6f\tAUC[PR]: %.6f' %\
-              (curr_roc, curr_bedroc, self.curr_pr)
-        print
-
-    def get_best_model(self):
-        self.model.load_weights(self.file_path)
-        return self.model
-
-    def get_best_auc(self):
-        return self.best_pr
-
-
 if __name__ == '__main__':
-
     parser = argparse.ArgumentParser()
     parser.add_argument('--config_json_file', action="store", dest="config_json_file", required=True)
     parser.add_argument('--PMTNN_weight_file', action="store", dest="PMTNN_weight_file", required=True)
@@ -347,6 +235,6 @@ if __name__ == '__main__':
 
     with open(config_json_file, 'r') as f:
         conf = json.load(f)
-    task = single_classification(conf=conf)
+    task = SingleClassification(conf=conf)
     task.train_and_predict(X_t, y_t, X_val, y_val, X_test, y_test, PMTNN_weight_file)
     task.store_data(transform_json_to_csv(config_json_file), config_csv_file)
