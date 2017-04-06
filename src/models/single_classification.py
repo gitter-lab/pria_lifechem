@@ -11,8 +11,14 @@ from keras.layers.normalization import BatchNormalization
 from keras.optimizers import SGD, Adam
 from sklearn.cross_validation import StratifiedShuffleSplit
 
+# Add path from parent folder
+sys.path.insert(0, '..')
+# Add path from current folder
+sys.path.insert(0, '.')
+from function import *
+from evaluation import *
 
-class single_task:
+class single_classification:
     def __init__(self, conf):
 
         self.conf = conf
@@ -293,12 +299,6 @@ class KeckCallBackOnPrecision(keras.callbacks.Callback):
 
 
 if __name__ == '__main__':
-    # Add path from parent folder
-    sys.path.insert(0, '..')
-    # Add path from current folder
-    sys.path.insert(0, '.')
-    from function import *
-    from evaluation import *
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--config_json_file', action="store", dest="config_json_file", required=True)
@@ -347,6 +347,6 @@ if __name__ == '__main__':
 
     with open(config_json_file, 'r') as f:
         conf = json.load(f)
-    task = single_task(conf=conf)
+    task = single_classification(conf=conf)
     task.train_and_predict(X_t, y_t, X_val, y_val, X_test, y_test, PMTNN_weight_file)
     task.store_data(transform_json_to_csv(config_json_file), config_csv_file)
