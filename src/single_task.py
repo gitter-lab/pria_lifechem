@@ -24,6 +24,7 @@ class single_task:
 
         self.early_stopping_patience = conf['fitting']['early_stopping']['patience']
         self.early_stopping_option = conf['fitting']['early_stopping']['option']
+        self.early_stopping_option = 'auc'
 
         self.fit_nb_epoch = conf['fitting']['nb_epoch']
         self.fit_batch_size = conf['fitting']['batch_size']
@@ -133,6 +134,7 @@ class single_task:
         print('test precision: {}'.format(precision_auc_single(y_test, y_pred_on_test)))
         print('test roc: {}'.format(roc_auc_single(y_test, y_pred_on_test)))
         print('test bedroc: {}'.format(bedroc_auc_single(y_test, y_pred_on_test)))
+        print
 
         for EF_ratio in self.EF_ratio_list:
             n_actives, ef = enrichment_factor(y_test, y_pred_on_test, EF_ratio)
@@ -152,15 +154,20 @@ class single_task:
         y_pred_on_val = model.predict(X_val)
         y_pred_on_test = model.predict(X_test)
 
+
+        print
         print('train precision: {}'.format(precision_auc_single(y_train, y_pred_on_train)))
         print('train roc: {}'.format(roc_auc_single(y_train, y_pred_on_train)))
         print('train bedroc: {}'.format(bedroc_auc_single(y_train, y_pred_on_train)))
+        print
         print('validation precision: {}'.format(precision_auc_single(y_val, y_pred_on_val)))
         print('validation roc: {}'.format(roc_auc_single(y_val, y_pred_on_val)))
         print('validation bedroc: {}'.format(bedroc_auc_single(y_val, y_pred_on_val)))
+        print
         print('test precision: {}'.format(precision_auc_single(y_test, y_pred_on_test)))
         print('test roc: {}'.format(roc_auc_single(y_test, y_pred_on_test)))
         print('test bedroc: {}'.format(bedroc_auc_single(y_test, y_pred_on_test)))
+        print
 
         return
 
@@ -202,8 +209,8 @@ class KeckCallBackOnAUC(keras.callbacks.Callback):
                  patience=0,
                  file_path='best_model.weights'):
         super(keras.callbacks.Callback, self).__init__()
-        self.curr_auc = 0
-        self.best_auc = 0
+        self.curr_roc = 0
+        self.best_roc = 0
         self.counter = 0
         self.patience = patience
         self.X_train = X_train
@@ -214,26 +221,31 @@ class KeckCallBackOnAUC(keras.callbacks.Callback):
 
     def on_train_begin(self, logs={}):
         self.nb_epoch = self.params['nb_epoch']
-        self.curr_auc = roc_auc_single(self.y_val, self.model.predict(self.X_val))
-        self.best_auc = self.curr_auc
+        self.curr_roc = roc_auc_single(self.y_val, self.model.predict(self.X_val))
+        self.best_roc = self.curr_roc
 
     def on_epoch_end(self, epoch, logs={}):
-        self.curr_auc = roc_auc_single(self.y_val, self.model.predict(self.X_val))
-        if self.curr_auc < self.best_auc:
+        self.curr_roc = roc_auc_single(self.y_val, self.model.predict(self.X_val))
+        if self.curr_roc < self.best_roc:
             if self.counter >= self.patience:
                 self.model.stop_training = True
             else:
                 self.counter += 1
         else:
             self.counter = 0
-            self.best_auc = self.curr_auc
+            self.best_roc = self.curr_roc
             self.model.save_weights(self.file_path)
-        train_auc = roc_auc_single(self.y_train, self.model.predict(self.X_train))
-        train_precision = precision_auc_single(self.y_train, self.model.predict(self.X_train))
-        curr_precision = precision_auc_single(self.y_val, self.model.predict(self.X_val))
+            
+        train_roc = roc_auc_single(self.y_train, self.model.predict(self.X_train))
+        train_bedroc = bedroc_auc_single(self.y_train, self.model.predict(self.X_train))
+        train_pr = precision_auc_single(self.y_train, self.model.predict(self.X_train))
+        curr_bedroc = bedroc_auc_single(self.y_val, self.model.predict(self.X_val))
+        curr_pr = precision_auc_single(self.y_val, self.model.predict(self.X_val))
         print('Epoch %d/%d' % (epoch + 1, self.nb_epoch))
-        print('ROC Train: %f ---- ROC Val: %f' % (train_auc, self.curr_auc))
-        print('Precision Train: %f ---- Precision Val: %f' % (train_precision, curr_precision))
+        print 'Train\tAUC[ROC]: %.6f\tAUC[BEDROC]: %.6f\tAUC[PR]: %.6f' % \
+              (train_roc, train_bedroc, train_pr)
+        print 'Val\tAUC[ROC]: %.6f\tAUC[BEDROC]: %.6f\tAUC[PR]: %.6f' % \
+              (self.curr_roc, curr_bedroc, curr_pr)
         print
 
     def get_best_model(self):
@@ -241,7 +253,7 @@ class KeckCallBackOnAUC(keras.callbacks.Callback):
         return self.model
 
     def get_best_auc(self):
-        return self.best_auc
+        return self.best_roc
 
 
 # define custom classes
@@ -252,9 +264,8 @@ class KeckCallBackOnPrecision(keras.callbacks.Callback):
                  patience=0,
                  file_path='best_model.weights'):
         super(keras.callbacks.Callback, self).__init__()
-        self.curr_precision = 0
-        self.best_precision = 0
-        self.prev_precision = self.curr_precision
+        self.curr_pr = 0
+        self.best_pr = 0
         self.counter = 0
         self.patience = patience
         self.X_train = X_train
@@ -265,36 +276,39 @@ class KeckCallBackOnPrecision(keras.callbacks.Callback):
 
     def on_train_begin(self, logs={}):
         self.nb_epoch = self.params['nb_epoch']
-        self.curr_precision = precision_auc_single(self.y_val, self.model.predict(self.X_val))
-        self.best_precision = self.curr_precision
+        self.curr_pr = precision_auc_single(self.y_val, self.model.predict(self.X_val))
+        self.best_pr = self.curr_pr
 
     def on_epoch_end(self, epoch, logs={}):
-        self.curr_precision = precision_auc_single(self.y_val, self.model.predict(self.X_val))
-        if self.curr_precision < self.best_precision:
+        self.curr_pr = precision_auc_single(self.y_val, self.model.predict(self.X_val))
+        if self.curr_pr < self.best_pr:
             if self.counter >= self.patience:
                 self.model.stop_training = True
             else:
                 self.counter += 1
         else:
             self.counter = 0
-            self.best_precision = self.curr_precision
+            self.best_pr = self.curr_pr
             self.model.save_weights(self.file_path)
 
-        self.prev_precision = self.curr_precision
-        train_precision = precision_auc_single(self.y_train, self.model.predict(self.X_train))
-        train_auc = roc_auc_single(self.y_train, self.model.predict(self.X_train))
-        curr_auc = roc_auc_single(self.y_val, self.model.predict(self.X_val))
+        train_roc = roc_auc_single(self.y_train, self.model.predict(self.X_train))
+        train_bedroc = bedroc_auc_single(self.y_train, self.model.predict(self.X_train))
+        train_pr = precision_auc_single(self.y_train, self.model.predict(self.X_train))
+        curr_roc = roc_auc_single(self.y_val, self.model.predict(self.X_val))
+        curr_bedroc = bedroc_auc_single(self.y_val, self.model.predict(self.X_val))
         print('Epoch %d/%d' % (epoch + 1, self.nb_epoch))
-        print('Precision Train: %f ---- Precision Val: %f' % (train_precision, self.curr_precision))
-        print('ROC Train: %f ---- ROC Val: %f' % (train_auc, curr_auc))
+        print 'Train\tAUC[ROC]: %.6f\tAUC[BEDROC]: %.6f\tAUC[PR]: %.6f' %\
+              (train_roc, train_bedroc, train_pr)
+        print 'Val\tAUC[ROC]: %.6f\tAUC[BEDROC]: %.6f\tAUC[PR]: %.6f' %\
+              (curr_roc, curr_bedroc, self.curr_pr)
         print
 
     def get_best_model(self):
         self.model.load_weights(self.file_path)
         return self.model
 
-    def get_best_precision(self):
-        return self.best_precision
+    def get_best_auc(self):
+        return self.best_pr
 
 
 if __name__ == '__main__':
