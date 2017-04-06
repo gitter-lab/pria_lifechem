@@ -35,7 +35,7 @@
     }
   },
   "fitting": {
-    "nb_epoch": 1,
+    "nb_epoch": 3,
     "batch_size": 2048,
     "verbose": 0,
     "early_stopping": {
