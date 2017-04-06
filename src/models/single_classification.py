@@ -4,13 +4,12 @@ import csv
 import numpy as np
 import json
 import keras
+import sys
 from keras.models import Sequential
 from keras.layers import Dense, Dropout
 from keras.layers.normalization import BatchNormalization
 from keras.optimizers import SGD, Adam
 from sklearn.cross_validation import StratifiedShuffleSplit
-from function import *
-from evaluation import *
 
 
 class single_task:
@@ -135,7 +134,7 @@ class single_task:
         print
 
         for EF_ratio in self.EF_ratio_list:
-            n_actives, ef = enrichment_factor(y_test, y_pred_on_test, EF_ratio)
+            n_actives, ef, ef_max = enrichment_factor_single(y_test, y_pred_on_test, EF_ratio)
             print('ratio: {}, EF: {},\tactive: {}'.format(EF_ratio, ef, n_actives))
 
         return
@@ -175,28 +174,12 @@ class single_task:
         model = setup_model()
         model.load_weights(file_path)
         y_pred_on_test = model.predict(X_test)
-        n_actives, ef = enrichment_factor(y_test, y_pred_on_test, EF_ratio)
+        n_actives, ef, ef_max = enrichment_factor_single(y_test, y_pred_on_test, EF_ratio)
         print('test precision: {}'.format(precision_auc_single(y_test, y_pred_on_test)))
         print('test auc: {}'.format(roc_auc_single(y_test, y_pred_on_test)))
         print('EF: {},\tactive: {}'.format(ef, n_actives))
 
         return
-
-
-def enrichment_factor(labels_arr, scores_arr, percentile):
-    '''calculate the enrichment factor based on some upper fraction
-       of library ordered by docking scores. upper fraction is determined
-       by percentile (actually a fraction of value 0.0-1.0)'''
-    sample_size = int(labels_arr.shape[0] * percentile)  # determine number mols in subset
-    pred = np.sort(scores_arr)[::-1][:sample_size]  # sort the scores list, take top subset from library
-    indices = np.argsort(scores_arr, axis=0)[::-1][:sample_size]  # get the index positions for these in library
-    n_actives = np.nansum(labels_arr)  # count number of positive labels in library
-    n_experimental = np.nansum(labels_arr[indices])  # count number of positive labels in subset
-    if n_actives > 0.0:
-        ef = float(n_experimental) / n_actives / percentile  # calc EF at percentile
-    else:
-        ef = 'ND'
-    return n_actives, ef
 
 
 # define custom classes
@@ -310,6 +293,13 @@ class KeckCallBackOnPrecision(keras.callbacks.Callback):
 
 
 if __name__ == '__main__':
+    # Add path from parent folder
+    sys.path.insert(0, '..')
+    # Add path from current folder
+    sys.path.insert(0, '.')
+    from function import *
+    from evaluation import *
+
     parser = argparse.ArgumentParser()
     parser.add_argument('--config_json_file', action="store", dest="config_json_file", required=True)
     parser.add_argument('--PMTNN_weight_file', action="store", dest="PMTNN_weight_file", required=True)
@@ -319,9 +309,11 @@ if __name__ == '__main__':
     PMTNN_weight_file = given_args.PMTNN_weight_file
     config_csv_file = given_args.config_csv_file
 
+    print sys.path
+
     # specify dataset
     k = 5
-    directory = '../dataset/fixed_dataset/fold_{}/'.format(k)
+    directory = '../../dataset/fixed_dataset/fold_{}/'.format(k)
     file_list = []
     for i in range(k):
         file_list.append('file_{}.csv'.format(i))
@@ -336,7 +328,7 @@ if __name__ == '__main__':
                   'Keck_RMI_cdd': np.float64}
     output_file_list = [directory + f_ for f_ in file_list]
     print output_file_list[:4]
-    train_pd = read_merged_data(output_file_list[:4])
+    train_pd = read_merged_data(output_file_list[0:1])
     print output_file_list[4]
     test_pd = read_merged_data([output_file_list[4]])
 
