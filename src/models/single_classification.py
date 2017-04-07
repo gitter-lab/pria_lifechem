@@ -123,6 +123,7 @@ class SingleClassification:
         y_pred_on_val = model.predict(X_val)
         y_pred_on_test = model.predict(X_test)
 
+        print
         print('train precision: {}'.format(precision_auc_single(y_train, y_pred_on_train)))
         print('train roc: {}'.format(roc_auc_single(y_train, y_pred_on_train)))
         print('train bedroc: {}'.format(bedroc_auc_single(y_train, y_pred_on_train)))
