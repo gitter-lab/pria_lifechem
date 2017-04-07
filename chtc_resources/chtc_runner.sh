@@ -1,4 +1,6 @@
 #!/bin/bash
+mkdir job_results
+
 wget -q –retry-connrefused –waitretry=10 http://proxy.chtc.wisc.edu/SQUID/alnammi/Anaconda3-4.3.1-Linux-x86_64.sh #here I get the anaconda file from squid
 
 chmod 777 * #wget does strange things

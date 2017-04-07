@@ -9,11 +9,11 @@
 
 #first argument is path to python jobs txt file
 arguments = chtc_resources/gpu_jobs/gpu_jobs_1.txt
-transfer_output_files = tmp
+transfer_output_files = job_results
 
 Executable = chtc_runner.sh
 Universe = vanilla
-initialdir = /mnt/ws/virology/shared/lab_folders/GitterLab/virtual-screening/
+initialdir = /mnt/ws/virology/shared/lab_folders/GitterLab/virtual-screening/job_results/
 
 # Include the cluster id and process id that are set at runtime
 Log = /mnt/ws/virology/shared/lab_folders/GitterLab/virtual-screening/chtc_logs/chtc_gpu_job.$(Cluster).log
