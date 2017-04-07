@@ -36,7 +36,7 @@ KERAS_BACKEND=theano THEANO_FLAGS="base_compiledir=./tmp,floatX=float32,device=c
 
 echo 'Done running job'
 
-THEANO_FLAGS="base_compiledir=./tmp,floatX=float32,device=cuda,gpuarray.preallocate=0.8" python -c 'import theano; print(theano.config)' | less
+#THEANO_FLAGS="base_compiledir=./tmp,floatX=float32,device=cuda,gpuarray.preallocate=0.8" python -c 'import theano; print(theano.config)' | less
 
 cd ..
 

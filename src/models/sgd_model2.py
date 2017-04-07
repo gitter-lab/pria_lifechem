@@ -80,7 +80,7 @@ print('Test loss:', score[0])
 print('Test accuracy:', score[1])
 
 
-scratch_dir = os.environ.get('_CONDOR_JOB_IWD') + "/neural_networks"
+scratch_dir = os.environ.get('_CONDOR_JOB_IWD') + "/tmp/neural_networks"
 if not os.path.exists(scratch_dir):
     os.makedirs(scratch_dir)
 model.save_weights(scratch_dir + '/w1.h5')
