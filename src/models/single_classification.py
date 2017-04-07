@@ -19,7 +19,6 @@ from CallBacks import *
 
 class SingleClassification:
     def __init__(self, conf):
-
         self.conf = conf
         self.input_layer_dimension = 1024
         self.output_layer_dimension = 1
@@ -124,7 +123,6 @@ class SingleClassification:
         y_pred_on_val = model.predict(X_val)
         y_pred_on_test = model.predict(X_test)
 
-        print
         print('train precision: {}'.format(precision_auc_single(y_train, y_pred_on_train)))
         print('train roc: {}'.format(roc_auc_single(y_train, y_pred_on_train)))
         print('train bedroc: {}'.format(bedroc_auc_single(y_train, y_pred_on_train)))
@@ -156,8 +154,6 @@ class SingleClassification:
         y_pred_on_val = model.predict(X_val)
         y_pred_on_test = model.predict(X_test)
 
-
-        print
         print('train precision: {}'.format(precision_auc_single(y_train, y_pred_on_train)))
         print('train roc: {}'.format(roc_auc_single(y_train, y_pred_on_train)))
         print('train bedroc: {}'.format(bedroc_auc_single(y_train, y_pred_on_train)))
@@ -215,7 +211,7 @@ if __name__ == '__main__':
                   'Keck_Pria_Continuous': np.float64,
                   'Keck_RMI_cdd': np.float64}
     output_file_list = [directory + f_ for f_ in file_list]
-    print output_file_list[:4]
+    print output_file_list[0:4]
     train_pd = read_merged_data(output_file_list[0:1])
     print output_file_list[4]
     test_pd = read_merged_data([output_file_list[4]])
