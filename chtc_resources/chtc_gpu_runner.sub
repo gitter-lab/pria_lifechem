@@ -12,11 +12,12 @@ arguments = chtc_resources/gpu_jobs/gpu_jobs_1.txt
 
 Executable = chtc_runner.sh
 Universe = vanilla
+initialdir = /mnt/ws/virology/shared/lab_folders/GitterLab/virtual-screening/
 
 # Include the cluster id and process id that are set at runtime
-Log = chtc_gpu_job.$(Cluster).log
-Error = chtc_gpu_job.$(Cluster)_$(Process).err
-Output = chtc_gpu_job.$(Cluster)_$(Process).out
+Log = /mnt/ws/virology/shared/lab_folders/GitterLab/virtual-screening/chtc_logs/chtc_gpu_job.$(Cluster).log
+Error = /mnt/ws/virology/shared/lab_folders/GitterLab/virtual-screening/chtc_logs/chtc_gpu_job.$(Cluster)_$(Process).err
+Output = /mnt/ws/virology/shared/lab_folders/GitterLab/virtual-screening/chtc_logs/chtc_gpu_job.$(Cluster)_$(Process).out
 
 # File transfer generally needed for non-trivial jobs
 # See http://chtc.cs.wisc.edu/file-availability.shtml
@@ -36,6 +37,9 @@ Request_disk = 6GB
 # that request GPUs
 Request_Gpus = 1
 +AccountingGroup = "BMI_Gitter"
+
+# Allow flocking to the larger CHTC pool
++WantFlocking = true
 
 # Copy environment variables that are set dynamically by HTCondor
 # Could also pass these as command line arguments

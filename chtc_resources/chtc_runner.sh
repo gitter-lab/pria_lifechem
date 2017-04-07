@@ -17,9 +17,8 @@ conda install --yes pyyaml > /dev/null
 conda install --yes HDF5 > /dev/null
 conda install --yes h5py > /dev/null
 conda install --yes libgpuarray > /dev/null
-conda install --yes theano > /dev/null
-conda install --yes keras > /dev/null
-#conda install --yes -c conda-forge keras=2.0.2 > /dev/null
+conda install --yes -c conda-forge theano > /dev/null
+conda install --yes -c conda-forge keras > /dev/null
 
 echo 'Done installing libraries'
 
@@ -27,7 +26,7 @@ chmod 777 -R ./anaconda
 
 #get virtual-screening from github
 curl -H "Authorization: token 01f32242cdb9725726f581d93ef0c37e713311b7" -L https://api.github.com/repos/lscHacker/virtual-screening/zipball > virtual-screening-master.zip
-unzip virtual-screening-master.zip 
+unzip virtual-screening-master.zip > /dev/null
 mv lsc* virtual-screening
 cd virtual-screening
 
@@ -37,12 +36,14 @@ KERAS_BACKEND=theano THEANO_FLAGS="base_compiledir=./tmp,floatX=float32,device=c
 
 echo 'Done running job'
 
+THEANO_FLAGS="base_compiledir=./tmp,floatX=float32,device=cuda,gpuarray.preallocate=0.8" python -c 'import theano; print(theano.config)' | less
+
 cd ..
 
 #clean up everything I don't want transfered back
 rm -f Anaconda*
-rm -f virtual-screening*
-rm -rf ./anaconda{2}
+rm -R -f virtual-screening*
+rm -rf ./anaconda*
 
 
 echo _CONDOR_JOB_IWD $_CONDOR_JOB_IWD
