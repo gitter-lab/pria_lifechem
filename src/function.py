@@ -192,6 +192,45 @@ def extract_feature_and_label(data_pd,
 
     return X_data, y_data
 
+def extract_SMILES_and_label(data_pd,
+                             feature_name,
+                             label_name_list):
+    y_data = np.zeros(shape=(data_pd.shape[0], len(label_name_list)))
+
+
+    X_data = []
+    dictionary_set = set()
+    for smile in data_pd['SMILES']:
+        dictionary_set = dictionary_set | set(list(smile))
+    index = 0
+    dictionary = {}
+    for element in dictionary_set:
+        dictionary[element] = index
+        index += 1
+    print 'different alphabets ', index
+
+    for smile in data_pd['SMILES']:
+        X_data.append([dictionary[s] for s in smile])
+    X_data = np.array(X_data)
+
+    index = 0
+    for _, row in data_pd.iterrows():
+        labels = row[label_name_list]
+        y_data[index] = np.array(labels)
+        index += 1
+    y_data = y_data.astype(np.float64)
+
+    # In case we just train on one target
+    # y would be (n,) vector
+    # then we should change it to (n,1) 1D matrix
+    # to keep consistency
+    print y_data.shape
+    if y_data.ndim == 1:
+        n = y_data.shape[0]
+        y_data = y_data.reshape(n, 1)
+
+    return X_data, y_data
+
 
 '''
 Store result
