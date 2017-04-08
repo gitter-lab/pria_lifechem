@@ -9,6 +9,7 @@
 
 #first argument is path to python jobs txt file
 arguments = chtc_resources/cpu_jobs/cpu_jobs_1.txt
+transfer_output_files = job_results
 
 Executable = chtc_runner.sh
 Universe = vanilla
@@ -45,6 +46,6 @@ Request_disk = 6GB
 Environment = "cluster=$(Cluster) process=$(Process) runningon=$$(Name)"
 getenv = true
 
-Queue 1
+Queue 2
 
 #END

@@ -9,6 +9,7 @@
 
 #first argument is path to python jobs txt file
 arguments = chtc_resources/gpu_jobs/gpu_jobs_1.txt
+transfer_output_files = job_results
 
 Executable = chtc_runner.sh
 Universe = vanilla
