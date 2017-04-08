@@ -9,7 +9,7 @@ from keras.models import Sequential
 from keras.layers import Dense, Dropout
 from keras.layers.normalization import BatchNormalization
 from keras.optimizers import SGD, Adam
-from sklearn.cross_validation import StratifiedShuffleSplit
+from sklearn.cross_validation import StratifiedShuffleSplit, ShuffleSplit
 sys.path.insert(0, '..')  # Add path from parent folder
 sys.path.insert(0, '.')  # Add path from current folder
 from function import *
@@ -97,48 +97,18 @@ class SingleClassification:
                           X_test, y_test,
                           PMTNN_weight_file):
         model = self.setup_model()
-        if self.early_stopping_option == 'auc':
-            early_stopping = KeckCallBackOnAUC(X_train, y_train, X_val, y_val, patience=self.early_stopping_patience)
-            callbacks = [early_stopping]
-        elif self.early_stopping_option == 'precision':
-            early_stopping = KeckCallBackOnPrecision(X_train, y_train, X_val, y_val,
-                                                     patience=self.early_stopping_patience)
-            callbacks = [early_stopping]
-        else:
-            callbacks = []
 
         model.compile(loss=self.compile_loss, optimizer=self.compile_optimizer)
-        model.fit(X_train, y_train,
+        model.fit(x=X_train, y=y_train,
                   nb_epoch=self.fit_nb_epoch,
                   batch_size=self.fit_batch_size,
                   verbose=self.fit_verbose,
-                  shuffle=True,
-                  callbacks=callbacks)
+                  shuffle=True)
         model.save_weights(PMTNN_weight_file)
 
-        if self.early_stopping_option == 'auc' or self.early_stopping_option == 'precision':
-            model = early_stopping.get_best_model()
         y_pred_on_train = model.predict(X_train)
         y_pred_on_val = model.predict(X_val)
         y_pred_on_test = model.predict(X_test)
-
-        print
-        print('train precision: {}'.format(precision_auc_single(y_train, y_pred_on_train)))
-        print('train roc: {}'.format(roc_auc_single(y_train, y_pred_on_train)))
-        print('train bedroc: {}'.format(bedroc_auc_single(y_train, y_pred_on_train)))
-        print
-        print('validation precision: {}'.format(precision_auc_single(y_val, y_pred_on_val)))
-        print('validation roc: {}'.format(roc_auc_single(y_val, y_pred_on_val)))
-        print('validation bedroc: {}'.format(bedroc_auc_single(y_val, y_pred_on_val)))
-        print
-        print('test precision: {}'.format(precision_auc_single(y_test, y_pred_on_test)))
-        print('test roc: {}'.format(roc_auc_single(y_test, y_pred_on_test)))
-        print('test bedroc: {}'.format(bedroc_auc_single(y_test, y_pred_on_test)))
-        print
-
-        for EF_ratio in self.EF_ratio_list:
-            n_actives, ef, ef_max = enrichment_factor_single(y_test, y_pred_on_test, EF_ratio)
-            print('ratio: {}, EF: {},\tactive: {}'.format(EF_ratio, ef, n_actives))
 
         return
 
@@ -154,19 +124,6 @@ class SingleClassification:
         y_pred_on_val = model.predict(X_val)
         y_pred_on_test = model.predict(X_test)
 
-        print('train precision: {}'.format(precision_auc_single(y_train, y_pred_on_train)))
-        print('train roc: {}'.format(roc_auc_single(y_train, y_pred_on_train)))
-        print('train bedroc: {}'.format(bedroc_auc_single(y_train, y_pred_on_train)))
-        print
-        print('validation precision: {}'.format(precision_auc_single(y_val, y_pred_on_val)))
-        print('validation roc: {}'.format(roc_auc_single(y_val, y_pred_on_val)))
-        print('validation bedroc: {}'.format(bedroc_auc_single(y_val, y_pred_on_val)))
-        print
-        print('test precision: {}'.format(precision_auc_single(y_test, y_pred_on_test)))
-        print('test roc: {}'.format(roc_auc_single(y_test, y_pred_on_test)))
-        print('test bedroc: {}'.format(bedroc_auc_single(y_test, y_pred_on_test)))
-        print
-
         return
 
     def get_EF_score_with_existing_model(self,
@@ -176,7 +133,6 @@ class SingleClassification:
         model.load_weights(file_path)
         y_pred_on_test = model.predict(X_test)
         n_actives, ef, ef_max = enrichment_factor_single(y_test, y_pred_on_test, EF_ratio)
-        print('test precision: {}'.format(precision_auc_single(y_test, y_pred_on_test)))
         print('test auc: {}'.format(roc_auc_single(y_test, y_pred_on_test)))
         print('EF: {},\tactive: {}'.format(ef, n_actives))
 
@@ -192,8 +148,6 @@ if __name__ == '__main__':
     config_json_file = given_args.config_json_file
     PMTNN_weight_file = given_args.PMTNN_weight_file
     config_csv_file = given_args.config_csv_file
-
-    print sys.path
 
     # specify dataset
     k = 5
@@ -212,18 +166,18 @@ if __name__ == '__main__':
                   'Keck_RMI_cdd': np.float64}
     output_file_list = [directory + f_ for f_ in file_list]
     print output_file_list[0:4]
-    train_pd = read_merged_data(output_file_list[0:1])
+    train_pd = read_merged_data(output_file_list[0:4])
     print output_file_list[4]
     test_pd = read_merged_data([output_file_list[4]])
 
     # extract data, and split training data into training and val
     X_train, y_train = extract_feature_and_label(train_pd,
                                                  feature_name='Fingerprints',
-                                                 label_name_list=['Keck_Pria_AS_Retest'])
+                                                 label_name_list=['Keck_Pria_Continuous'])
     X_test, y_test = extract_feature_and_label(test_pd,
                                                feature_name='Fingerprints',
-                                               label_name_list=['Keck_Pria_AS_Retest'])
-    cross_validation_split = StratifiedShuffleSplit(y_train, 1, test_size=0.15, random_state=1)
+                                               label_name_list=['Keck_Pria_Continuous'])
+    cross_validation_split = ShuffleSplit(y_train.shape[0], n_iter=1, test_size=0.15, random_state=1)
     for t_index, val_index in cross_validation_split:
         X_t, X_val = X_train[t_index], X_train[val_index]
         y_t, y_val = y_train[t_index], y_train[val_index]

@@ -3,9 +3,12 @@ import numpy as np
 from rdkit.Chem import AllChem
 from rdkit import Chem
 import operator
+import json
 
 
-
+'''
+Transform the data from raw xlsx into csv format
+'''
 def transform_data(output_file_name):
     discrete_file = pd.ExcelFile('../dataset/data_preprocessing/screening_smsf_actives_2017_03_10.xlsx')
     Keck_Pria_Retest = discrete_file.parse('Keck_Pria_Retest')
@@ -55,6 +58,28 @@ def transform_data(output_file_name):
     result = pd.merge(result, Keck_RMI_cdd, on='Molecule', how='outer')
 
     result.to_csv(output_file_name, index=None)
+
+    return
+
+'''
+Get the mappings for SMILES
+Pre-train this for only once
+'''
+SMILES_mapping_json_file = '../dataset/SMILES_mapping.json'
+def mapping_SMILES(data_pd, json_file=SMILES_mapping_json_file):
+    dictionary_set = set()
+    for smile in data_pd['SMILES']:
+        dictionary_set = dictionary_set | set(list(smile))
+    index = 1
+    dictionary = {}
+    for element in dictionary_set:
+        dictionary[element] = index
+        index += 1
+    print dictionary
+    print 'alphabet set size {}'.format(len(dictionary))
+
+    with open(json_file, 'w') as f:
+        json.dump(dictionary, f)
 
     return
 

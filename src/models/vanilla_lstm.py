@@ -34,7 +34,6 @@ class VanillaLSTM:
         self.first_hidden_size = conf['lstm']['first_hidden_size']
         self.second_hidden_size = conf['lstm']['second_hidden_size']
 
-        self.input_layer_dimension = 1024
         self.output_layer_dimension = 1
 
         self.early_stopping_patience = conf['fitting']['early_stopping']['patience']
@@ -90,10 +89,10 @@ class VanillaLSTM:
         #                dropout_W=0.2,
         #                dropout_U=0.2,
         #                return_sequences=True))
-        model.add(LSTM(self.first_hidden_size,
-                       dropout_W=0.2,
-                       dropout_U=0.2,
-                       return_sequences=True))
+        # model.add(LSTM(self.first_hidden_size,
+        #                dropout_W=0.2,
+        #                dropout_U=0.2,
+        #                return_sequences=True))
         model.add(LSTM(self.second_hidden_size,
                        dropout_W=0.2,
                        dropout_U=0.2))
@@ -108,9 +107,6 @@ class VanillaLSTM:
                           X_val, y_val,
                           X_test, y_test,
                           PMTNN_weight_file):
-        print 'X_train shape', X_train.shape
-        print 'y_train shape', y_train.shape
-        print
         model = self.setup_model()
         if self.early_stopping_option == 'auc':
             early_stopping = KeckCallBackOnAUC(X_train, y_train, X_val, y_val, patience=self.early_stopping_patience)
@@ -123,12 +119,11 @@ class VanillaLSTM:
             callbacks = []
 
         model.compile(loss=self.compile_loss, optimizer=self.compile_optimizer)
-        model.fit(X_t, y_t, nb_epoch=self.fit_nb_epoch, batch_size=self.fit_batch_size,
+        model.fit(X_train, y_train, nb_epoch=self.fit_nb_epoch, batch_size=self.fit_batch_size,
                   callbacks=callbacks,
                   verbose=self.fit_verbose)
 
         if self.early_stopping_option == 'auc' or self.early_stopping_option == 'precision':
-            print 'load best'
             model = early_stopping.get_best_model()
         y_pred_on_train = model.predict(X_train)
         y_pred_on_val = model.predict(X_val)
@@ -151,33 +146,6 @@ class VanillaLSTM:
             n_actives, ef, ef_max = enrichment_factor_single(y_test, y_pred_on_test, EF_ratio)
             print('ratio: {}, EF: {},\tactive: {}'.format(EF_ratio, ef, n_actives))
         return
-
-
-def readKeckDataLSTM(file_path='./dataset/keck_data_threshold_50.csv'):
-    data_pd = pd.read_csv(file_path)
-    y_data = data_pd['true_label']
-    y_data = y_data.astype(np.float64)
-
-    X_data = []
-    dictionary_set = set()
-    for smile in data_pd['existing SMILES']:
-        dictionary_set = dictionary_set | set(list(smile))
-
-    index = 0
-    dictionary = {}
-    for element in dictionary_set:
-        dictionary[element] = index
-        index += 1
-    print 'different alphabets ', index
-
-    for smile in data_pd['existing SMILES']:
-        X_data.append([dictionary[s] for s in smile])
-    X_data = np.array(X_data)
-
-    y_data = np.array(y_data)
-    y_data = y_data.astype(np.float64)
-
-    return X_data, y_data
 
 
 if __name__ == '__main__':
@@ -212,7 +180,6 @@ if __name__ == '__main__':
     output_file_list = [directory + f_ for f_ in file_list]
     print output_file_list[:4]
     train_pd = read_merged_data(output_file_list[0:4])
-    train_pd = read_merged_data(output_file_list[0:1])
     print output_file_list[4]
     test_pd = read_merged_data([output_file_list[4]])
 

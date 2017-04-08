@@ -6,22 +6,6 @@
     "first_hidden_size": 100,
     "second_hidden_size": 10
   },
-  "layers":[
-    {
-      "hidden_units": 2000,
-      "init": "glorot_normal",
-      "activation": "relu",
-      "dropout": 0.25
-    },{
-      "hidden_units": 1000,
-      "init": "glorot_normal",
-      "activation": "relu",
-      "dropout": 0.25
-    },{
-      "init": "glorot_normal",
-      "activation": "sigmoid"
-    }
-  ],
   "compile": {
     "loss": "binary_crossentropy",
     "optimizer": {
@@ -37,15 +21,18 @@
         "beta_1": 0.9,
         "beta_2": 0.999,
         "epsilon": 1e-8
+      },
+      "rmsprop": {
+        "lr": 0.0001
       }
     }
   },
   "fitting": {
-    "nb_epoch": 1,
+    "nb_epoch": 10,
     "batch_size": 2048,
     "verbose": 1,
     "early_stopping": {
-      "option": "no",
+      "option": "auc",
       "patience": 50
     }
   },

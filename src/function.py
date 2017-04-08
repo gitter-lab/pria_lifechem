@@ -5,7 +5,7 @@ import os
 import json
 import csv
 from sklearn.cross_validation import StratifiedKFold, KFold
-
+from data_preparation import *
 
 '''
 Analyze the original dataset
@@ -192,22 +192,20 @@ def extract_feature_and_label(data_pd,
 
     return X_data, y_data
 
+
+'''
+This function is used for extracting SMILES
+in order to form sequential data
+for use in RNN models, like LSTM
+'''
 def extract_SMILES_and_label(data_pd,
                              feature_name,
                              label_name_list):
     y_data = np.zeros(shape=(data_pd.shape[0], len(label_name_list)))
-
-
     X_data = []
-    dictionary_set = set()
-    for smile in data_pd['SMILES']:
-        dictionary_set = dictionary_set | set(list(smile))
-    index = 0
-    dictionary = {}
-    for element in dictionary_set:
-        dictionary[element] = index
-        index += 1
-    print 'different alphabets ', index
+    with open(SMILES_mapping_json_file, 'r') as f:
+        dictionary = json.load(f)
+    print 'alphabet set size {}'.format(len(dictionary))
 
     for smile in data_pd['SMILES']:
         X_data.append([dictionary[s] for s in smile])
