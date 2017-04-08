@@ -1,2 +1,10 @@
 python src/models/sgd_model2.py
 python src/models/sgd_model3.py
+python src/models/sgd_model2.py
+python src/models/sgd_model3.py
+python src/models/sgd_model2.py
+python src/models/sgd_model3.py
+python src/models/sgd_model2.py
+python src/models/sgd_model3.py
+python src/models/sgd_model2.py
+python src/models/sgd_model3.py

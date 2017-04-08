@@ -19,6 +19,7 @@ conda install --yes pyyaml > /dev/null
 conda install --yes HDF5 > /dev/null
 conda install --yes h5py > /dev/null
 conda install --yes libgpuarray > /dev/null
+conda install --yes -c trung pygpu > /dev/null
 conda install --yes -c conda-forge theano > /dev/null
 conda install --yes -c conda-forge keras > /dev/null
 
@@ -38,7 +39,7 @@ KERAS_BACKEND=theano THEANO_FLAGS="base_compiledir=./tmp,floatX=float32,device=c
 
 echo 'Done running job'
 
-#THEANO_FLAGS="base_compiledir=./tmp,floatX=float32,device=cuda,gpuarray.preallocate=0.8" python -c 'import theano; print(theano.config)' | less
+#THEANO_FLAGS="dnn.library_path=/usr/local/cuda-7.5/lib64,dnn.include_path=/usr/local/cuda-7.5/include,base_compiledir=./tmp,floatX=float32,device=cuda,gpuarray.preallocate=0.8" python -c 'import theano; print(theano.config)' | less
 
 cd ..
 

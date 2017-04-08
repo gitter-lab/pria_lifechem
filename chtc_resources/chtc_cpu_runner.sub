@@ -13,7 +13,7 @@ transfer_output_files = job_results
 
 Executable = chtc_runner.sh
 Universe = vanilla
-initialdir = /mnt/ws/virology/shared/lab_folders/GitterLab/virtual-screening/job_results/
+initialdir = /mnt/ws/virology/shared/lab_folders/GitterLab/virtual-screening/
 
 # Include the cluster id and process id that are set at runtime
 Log = /mnt/ws/virology/shared/lab_folders/GitterLab/virtual-screening/chtc_logs/chtc_cpu_job.$(Cluster).log
