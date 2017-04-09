@@ -10,6 +10,7 @@ from keras.layers import Dense, Dropout
 from keras.layers.normalization import BatchNormalization
 from keras.optimizers import SGD, Adam
 from sklearn.cross_validation import StratifiedShuffleSplit
+from sklearn.grid_search import ParameterGrid
 sys.path.insert(0, '..')  # Add path from parent folder
 sys.path.insert(0, '.')  # Add path from current folder
 from function import *
@@ -188,10 +189,12 @@ if __name__ == '__main__':
     parser.add_argument('--config_json_file', action="store", dest="config_json_file", required=True)
     parser.add_argument('--PMTNN_weight_file', action="store", dest="PMTNN_weight_file", required=True)
     parser.add_argument('--config_csv_file', action="store", dest="config_csv_file", required=True)
+    parser.add_argument('--process_num', action='store', dest='process_num', required=True)
     given_args = parser.parse_args()
     config_json_file = given_args.config_json_file
     PMTNN_weight_file = given_args.PMTNN_weight_file
     config_csv_file = given_args.config_csv_file
+    process_num = int(given_args.process_num)
 
     # specify dataset
     k = 5
@@ -229,6 +232,34 @@ if __name__ == '__main__':
 
     with open(config_json_file, 'r') as f:
         conf = json.load(f)
+        
+    hyperparameter_sets = {'optimizer': ['adam'],
+                       'learning rate': [0.00003, 0.0001, 0.003],
+                       'weighted schema': ['no-weight'],
+                       'epoch size': [200, 1000],
+                       'patience': [20, 200],
+                       'early stopping': ['precision'],
+                       'activation': [{0:'sigmoid', 1:'sigmoid', 2:'linear'},
+                                      {0:'relu', 1:'relu', 2:'linear'}]}
+    hyperparameters = ParameterGrid(hyperparameter_sets)
+    
+    cnt = 0
+    for param in hyperparameters:
+        if cnt != process_num:
+            cnt += 1
+            continue
+        conf['compile']['optimizer']['option'] = param['optimizer']
+        conf['compile']['optimizer'][param['optimizer']]['lr'] = param['learning rate']
+        conf['class_weight_option'] = param['weighted schema']
+        conf['fitting']['nb_epoch'] = param['epoch size']
+        conf['fitting']['early_stopping']['patience'] = param['patience']
+        conf['fitting']['early_stopping']['option'] = param['early stopping']
+        activations = param['activation']
+        conf['layers'][0]['activation'] = activations[0]
+        conf['layers'][1]['activation'] = activations[1]
+        conf['layers'][2]['activation'] = activations[2]
+        break
+        
     task = SingleClassification(conf=conf)
     task.train_and_predict(X_t, y_t, X_val, y_val, X_test, y_test, PMTNN_weight_file)
     store_data(transform_json_to_csv(config_json_file), config_csv_file)

@@ -241,9 +241,8 @@ def store_data(data, file):
     return
 
 '''
-Transform data format
+Store json file to csv
 '''
-
 def transform_json_to_csv(conf_file):
     with open(conf_file, 'r') as f:
         conf = json.load(f)

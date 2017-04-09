@@ -65,7 +65,7 @@ def transform_data(output_file_name):
 Get the mappings for SMILES
 Pre-train this for only once
 '''
-SMILES_mapping_json_file = '../dataset/SMILES_mapping.json'
+SMILES_mapping_json_file = '../json/SMILES_mapping.json'
 def mapping_SMILES(data_pd, json_file=SMILES_mapping_json_file):
     dictionary_set = set()
     for smile in data_pd['SMILES']:
