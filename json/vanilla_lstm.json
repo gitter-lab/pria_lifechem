@@ -38,7 +38,7 @@
   },
   "batch": {
     "is_use":true,
-    "epsilon":1e-6,
+    "epsilon":2e-5,
     "mode": 0,
     "axis":-1,
     "momentum":0.9,
