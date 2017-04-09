@@ -27,6 +27,7 @@ class KeckCallBackOnAUC(keras.callbacks.Callback):
         self.nb_epoch = self.params['nb_epoch']
         self.curr_roc = roc_auc_single(self.y_val, self.model.predict(self.X_val))
         self.best_roc = self.curr_roc
+        self.model.save_weights(self.file_path)
 
     def on_epoch_end(self, epoch, logs={}):
         self.curr_roc = roc_auc_single(self.y_val, self.model.predict(self.X_val))
@@ -82,6 +83,7 @@ class KeckCallBackOnPrecision(keras.callbacks.Callback):
         self.nb_epoch = self.params['nb_epoch']
         self.curr_pr = precision_auc_single(self.y_val, self.model.predict(self.X_val))
         self.best_pr = self.curr_pr
+        self.model.save_weights(self.file_path)
 
     def on_epoch_end(self, epoch, logs={}):
         self.curr_pr = precision_auc_single(self.y_val, self.model.predict(self.X_val))
