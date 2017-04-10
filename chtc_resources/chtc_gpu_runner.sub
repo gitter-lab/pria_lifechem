@@ -47,6 +47,6 @@ Request_Gpus = 1
 Environment = "cluster=$(Cluster) process=$(Process) runningon=$$(Name)"
 getenv = true
 
-Queue 2
+Queue 5
 
 #END
