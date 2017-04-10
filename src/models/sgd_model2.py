@@ -193,7 +193,7 @@ class SingleClassification:
             os.makedirs(metric_dir)   
             
         model = self.setup_model()
-        model.load_weights(file_path)
+        model.load_weights(PMTNN_weight_file)
         
         y_pred = model.predict(X)
         
