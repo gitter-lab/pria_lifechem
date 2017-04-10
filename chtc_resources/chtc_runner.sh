@@ -1,13 +1,19 @@
 #!/bin/bash
 mkdir job_results
+mkdir job_results/deep_chem
+mkdir job_results/irv
+mkdir job_results/light_chem
+mkdir job_results/neural_networks
+mkdir job_results/random_forest
 
-wget -q –retry-connrefused –waitretry=10 http://proxy.chtc.wisc.edu/SQUID/alnammi/Anaconda3-4.3.1-Linux-x86_64.sh #here I get the anaconda file from squid
+wget -q –retry-connrefused –waitretry=10 http://proxy.chtc.wisc.edu/SQUID/alnammi/Anaconda2-4.3.1-Linux-x86_64.sh #here I get the anaconda file from squid
+wget -r -nH --cut-dirs=2 -np -R index.html* -q –retry-connrefused –waitretry=10 http://proxy.chtc.wisc.edu/SQUID/alnammi/dataset/ #here I get the dataset 
 
 chmod 777 * #wget does strange things
 
 echo 'Done getting from squid'
 
-./Anaconda3-4.3.1-Linux-x86_64.sh -b -p ./anaconda > /dev/null #install anaconda, I also add an argument to the directory name
+./Anaconda2-4.3.1-Linux-x86_64.sh -b -p ./anaconda > /dev/null #install anaconda, I also add an argument to the directory name
 
 export PATH=$PWD/anaconda/bin:$PATH
 
@@ -18,10 +24,15 @@ chmod 777 *
 conda install --yes pyyaml > /dev/null
 conda install --yes HDF5 > /dev/null
 conda install --yes h5py > /dev/null
-conda install --yes libgpuarray > /dev/null
-conda install --yes -c trung pygpu > /dev/null
-conda install --yes -c conda-forge theano > /dev/null
-conda install --yes -c conda-forge keras > /dev/null
+conda install --yes -c rdonnelly libgpuarray > /dev/null
+conda install --yes -c rdonnelly pygpu > /dev/null
+conda install --yes -c rdonnelly theano > /dev/null
+conda install --yes -c RMG keras=1.1.1 > /dev/null
+conda install --yes pandas > /dev/null
+conda install --yes -c rdkit rdkit > /dev/null
+conda install --yes -c rdkit rdkit > /dev/null
+conda install --yes -c r rpy2 > /dev/null
+conda install --yes -c auto croc=1.0.63 > /dev/null
 
 echo 'Done installing libraries'
 
@@ -30,7 +41,11 @@ chmod 777 -R ./anaconda
 #get virtual-screening from github
 curl -H "Authorization: token 01f32242cdb9725726f581d93ef0c37e713311b7" -L https://api.github.com/repos/lscHacker/virtual-screening/zipball > virtual-screening-master.zip
 unzip virtual-screening-master.zip > /dev/null
+
 mv lsc* virtual-screening
+mv ./dataset/ ./virtual-screening/dataset
+export PYTHONPATH=${PYTHONPATH}:${_CONDOR_JOB_IWD}/virtual-screening:${_CONDOR_JOB_IWD}/virtual-screening/src:${_CONDOR_JOB_IWD}/virtual-screening/src/models
+
 cd virtual-screening
 
 #run python job
