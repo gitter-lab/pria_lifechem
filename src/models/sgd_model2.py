@@ -148,7 +148,7 @@ class SingleClassification:
                               X_val, y_val,
                               X_test, y_test,
                               PMTNN_weight_file):
-        model = setup_model()
+        model = self.setup_model()
         model.load_weights(PMTNN_weight_file)
 
         y_pred_on_train = model.predict(X_train)
@@ -173,7 +173,7 @@ class SingleClassification:
     def get_EF_score_with_existing_model(self,
                                          X_test, y_test,
                                          file_path, EF_ratio):
-        model = setup_model()
+        model = self.setup_model()
         model.load_weights(file_path)
         y_pred_on_test = model.predict(X_test)
         n_actives, ef, ef_max = enrichment_factor_single(y_test, y_pred_on_test, EF_ratio)
@@ -192,12 +192,14 @@ class SingleClassification:
         if not os.path.exists(metric_dir):
             os.makedirs(metric_dir)   
             
-        model = setup_model()
+        model = self.setup_model()
         model.load_weights(file_path)
         
         y_pred = model.predict(X)
         
         evaluate_model(y_true, y_pred, metric_dir, label_names)
+        
+        return
 
 
 if __name__ == '__main__':
