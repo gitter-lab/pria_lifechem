@@ -40,7 +40,7 @@ def roc_auc_multi(y_true, y_pred, eval_indices, eval_mean_or_median,
         auc_data = np.concatenate((auc,
                                    np.mean(auc).reshape(1,),
                                    np.median(auc).reshape(1,)))
-        auc_df = pd.DataFrame(data=auc_data,
+        auc_df = pd.DataFrame(data=auc_data.reshape(1,len(auc_data)),
                               index=['ROC AUC'],
                               columns=label_names+['Mean','Median'])
         auc_df.index.name='metric'
@@ -81,7 +81,7 @@ def bedroc_auc_multi(y_true, y_pred, eval_indices, eval_mean_or_median,
         auc_data = np.concatenate((auc,
                                    np.mean(auc).reshape(1,),
                                    np.median(auc).reshape(1,)))        
-        auc_df = pd.DataFrame(data=auc_data,
+        auc_df = pd.DataFrame(data=auc_data.reshape(1,len(auc_data)),
                               index=['BEDROC AUC'],
                               columns=label_names+['Mean','Median'])
         auc_df.index.name='metric'
@@ -130,7 +130,7 @@ def precision_auc_multi(y_true, y_pred, eval_indices, eval_mean_or_median,
         auc_data = np.concatenate((auc,
                                    np.mean(auc).reshape(1,),
                                    np.median(auc).reshape(1,))) 
-        auc_df = pd.DataFrame(data=auc_data,
+        auc_df = pd.DataFrame(data=auc_data.reshape(1,len(auc_data)),
                                   index=['PR ' + mode],
                                   columns=label_names+['Mean','Median'])
         auc_df.index.name='metric'
