@@ -96,15 +96,13 @@ can evaluate on mean or median of array
 called by
 precision_auc_multi(y_true, y_pred, [-1], np.mean)
 precision_auc_multi(y_true, y_pred, [0], np.median)
+
+we calculate each single AUC[PR] through a R package called PRROC or sklearn
+the mode can be either 'auc.integral', 'auc.davis.goadrich', or 'auc.sklearn'
 '''
-def precision_auc_multi(y_true, y_pred, eval_indices, eval_mean_or_median, mode='auc.integral',
-                     return_df=False, label_names=None):
-                         
-    pr_auc_function = { 'auc.integral' : prroc_precision_auc_single,
-                        'auc.davis.goadrich' : prroc_precision_auc_single,
-                        'auc.sklearn' : sklearn_precision_auc_single
-                        }
-    
+def precision_auc_multi(y_true, y_pred, eval_indices, eval_mean_or_median,
+                        mode='auc.integral',
+                        return_df=False, label_names=None):
     y_true = y_true[:, eval_indices]
     y_pred = y_pred[:, eval_indices]
     nb_classes = y_true.shape[1]
@@ -115,7 +113,7 @@ def precision_auc_multi(y_true, y_pred, eval_indices, eval_mean_or_median, mode=
         non_missing_indices = np.argwhere(y_true[:, i] != -1)[:, 0]
         actual = y_true[non_missing_indices, i]
         predicted = y_pred[non_missing_indices, i]
-        auc[i] = pr_auc_function[mode](actual, predicted, mode)
+        auc[i] = precision_auc_single(actual, predicted, mode)
     
     if return_df == True:
         if label_names == None:
@@ -130,22 +128,20 @@ def precision_auc_multi(y_true, y_pred, eval_indices, eval_mean_or_median, mode=
 
 '''
 the average_precision_score() function in sklearn has interpolation issue
-we call this through a R package called PRROC
-the mode can be either 'auc.integral' or 'auc.davis.goadrich'
+we call this through a R package called PRROC or sklearn
+the mode can be either 'auc.integral', 'auc.davis.goadrich', or 'auc.sklearn'
 '''
-def prroc_precision_auc_single(actual, predicted, mode='auc.integral'):
-    prroc = rpackages.importr('PRROC')
-    x = robjects.FloatVector(actual)
-    y = robjects.FloatVector(predicted)
-    pr = prroc.pr_curve(weights_class0=x, scores_class0=y, curve=False)
-    prec_auc = pr.rx2(mode)[0]
+def precision_auc_single(actual, predicted, mode='auc.integral'):
+    if mode == 'auc.sklearn':
+        prec_auc = average_precision_score(actual, predicted)
+    else:
+        prroc = rpackages.importr('PRROC')
+        x = robjects.FloatVector(actual)
+        y = robjects.FloatVector(predicted)
+        pr = prroc.pr_curve(weights_class0=x, scores_class0=y, curve=False)
+        prec_auc = pr.rx2(mode)[0]
     return prec_auc
 
-'''
-the average_precision_score() function in sklearn
-'''
-def sklearn_precision_auc_single(actual, predicted, mode='auc.sklearn'):
-    return average_precision_score(actual, predicted)
 
 '''
 Creates a plot for each label for
