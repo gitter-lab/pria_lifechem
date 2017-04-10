@@ -30,6 +30,9 @@ conda install --yes -c rdonnelly theano > /dev/null
 conda install --yes -c RMG keras=1.1.1 > /dev/null
 conda install --yes pandas > /dev/null
 conda install --yes -c rdkit rdkit > /dev/null
+conda install --yes -c rdkit rdkit > /dev/null
+conda install --yes -c r rpy2 > /dev/null
+conda install --yes -c auto croc=1.0.63 > /dev/null
 
 echo 'Done installing libraries'
 

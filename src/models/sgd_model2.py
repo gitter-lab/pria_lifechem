@@ -223,6 +223,7 @@ if __name__ == '__main__':
     # specify dataset
     directory = dataset_dir
     file_list = []
+    k=5
     for i in range(k):
         file_list.append('file_{}.csv'.format(i))
 
