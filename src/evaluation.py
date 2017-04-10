@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 from sklearn.metrics import auc
 from croc import BEDROC, ScoredData
 import os
+from rpy2.robjects.packages import importr
 
 
 '''
@@ -135,6 +136,10 @@ def precision_auc_single(actual, predicted, mode='auc.integral'):
     if mode == 'auc.sklearn':
         prec_auc = average_precision_score(actual, predicted)
     else:
+        utils = importr('utils')
+        utils.chooseCRANmirror(ind=1)
+        utils.install_packages('PRROC')
+        
         prroc = rpackages.importr('PRROC')
         x = robjects.FloatVector(actual)
         y = robjects.FloatVector(predicted)
