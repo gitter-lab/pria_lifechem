@@ -98,11 +98,14 @@ class SingleClassification:
                           PMTNN_weight_file):
         model = self.setup_model()
         if self.early_stopping_option == 'auc':
-            early_stopping = KeckCallBackOnAUC(X_train, y_train, X_val, y_val, patience=self.early_stopping_patience)
+            early_stopping = KeckCallBackOnAUC(X_train, y_train, X_val, y_val,
+                                               patience=self.early_stopping_patience,
+                                               file_path=PMTNN_weight_file)
             callbacks = [early_stopping]
         elif self.early_stopping_option == 'precision':
             early_stopping = KeckCallBackOnPrecision(X_train, y_train, X_val, y_val,
-                                                     patience=self.early_stopping_patience)
+                                                     patience=self.early_stopping_patience,
+                                                     file_path=PMTNN_weight_file)
             callbacks = [early_stopping]
         else:
             callbacks = []
@@ -114,7 +117,6 @@ class SingleClassification:
                   verbose=self.fit_verbose,
                   shuffle=True,
                   callbacks=callbacks)
-        model.save_weights(PMTNN_weight_file)
 
         if self.early_stopping_option == 'auc' or self.early_stopping_option == 'precision':
             model = early_stopping.get_best_model()
@@ -210,7 +212,7 @@ if __name__ == '__main__':
                   'Keck_RMI_cdd': np.float64}
     output_file_list = [directory + f_ for f_ in file_list]
     print output_file_list[0:4]
-    train_pd = read_merged_data(output_file_list[0:1])
+    train_pd = read_merged_data(output_file_list[0:4])
     print output_file_list[4]
     test_pd = read_merged_data([output_file_list[4]])
 
