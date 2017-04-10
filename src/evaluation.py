@@ -8,6 +8,7 @@ import rpy2.robjects.packages as rpackages
 import matplotlib.pyplot as plt
 from sklearn.metrics import auc
 from croc import BEDROC, ScoredData
+import os
 
 
 '''
@@ -547,8 +548,8 @@ def evaluate_model(y_true, y_pred, model_dir, label_names=None):
     would like to store. It will save it in model_dir.
     """
     nb_classes = 1    
-    if len(actual.shape) == 2:
-        nb_classes = actual.shape[1]
+    if len(y_true.shape) == 2:
+        nb_classes = y_true.shape[1]
         
     if label_names == None:
         label_names = ['label ' + str(i) for i in range(nb_classes)]
@@ -570,15 +571,15 @@ def evaluate_model(y_true, y_pred, model_dir, label_names=None):
     
     # dataframe metrics    
     roc_auc_df = roc_auc_multi(y_true, y_pred, y_true.shape[1], np.mean, 
-                               return_df=True, label_names)    
+                               True, label_names)    
     bedroc_auc_df = bedroc_auc_multi(y_true, y_pred, y_true.shape[1], np.mean, 
-                               return_df=True, label_names)    
-    sklearn_pr_auc_df = pr_auc_multi(y_true, y_pred, y_true.shape[1], np.mean, 
-                               mode='auc.sklearn',return_df=True, label_names)
-    integral_pr_auc_df = pr_auc_multi(y_true, y_pred, y_true.shape[1], np.mean, 
-                               mode='auc.integral',return_df=True, label_names)
-    dg_pr_auc_df = pr_auc_multi(y_true, y_pred, y_true.shape[1], np.mean, 
-                               mode='auc.davis.goadrich',return_df=True, label_names)
+                               True, label_names)    
+    sklearn_pr_auc_df = precision_auc_multi(y_true, y_pred, y_true.shape[1], np.mean, 
+                               'auc.sklearn', True, label_names)
+    integral_pr_auc_df = precision_auc_multi(y_true, y_pred, y_true.shape[1], np.mean, 
+                               'auc.integral', True, label_names)
+    dg_pr_auc_df = precision_auc_multi(y_true, y_pred, y_true.shape[1], np.mean, 
+                               'auc.davis.goadrich', True, label_names)
                                
     nef_pd, ef_pd, max_ef_pd = norm_enrichment_factor(y_true, y_pred, perc_vec, label_names)
     
@@ -591,7 +592,7 @@ def evaluate_model(y_true, y_pred, model_dir, label_names=None):
     
     #plots
     plot_names = ['pr', 'roc', 'efp_efm', 'nef']    
-    plot_curve_multi(y_true, y_pred, pr_dir, mode='pr', label_names)
-    plot_curve_multi(y_true, y_pred, roc_dir, mode='roc', label_names)
-    plot_curve_multi(y_true, y_pred, efp_efm_dir, mode='efp_efm', label_names, perc_vec_plots)
-    plot_curve_multi(y_true, y_pred, nef_dir, mode='nef', label_names, perc_vec_plots)
+    plot_curve_multi(y_true, y_pred, pr_dir, 'pr', label_names)
+    plot_curve_multi(y_true, y_pred, roc_dir, 'roc', label_names)
+    plot_curve_multi(y_true, y_pred, efp_efm_dir, 'efp_efm', label_names, perc_vec_plots)
+    plot_curve_multi(y_true, y_pred, nef_dir, 'nef', label_names, perc_vec_plots)

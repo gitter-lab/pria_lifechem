@@ -24,11 +24,12 @@ chmod 777 *
 conda install --yes pyyaml > /dev/null
 conda install --yes HDF5 > /dev/null
 conda install --yes h5py > /dev/null
-conda install --yes libgpuarray > /dev/null
-conda install --yes -c trung pygpu > /dev/null
-conda install --yes -c conda-forge theano > /dev/null
+conda install --yes -c rdonnelly libgpuarray > /dev/null
+conda install --yes -c rdonnelly pygpu > /dev/null
+conda install --yes -c rdonnelly theano > /dev/null
 conda install --yes -c RMG keras=1.1.1 > /dev/null
 conda install --yes pandas > /dev/null
+conda install --yes -c rdkit rdkit > /dev/null
 
 echo 'Done installing libraries'
 
