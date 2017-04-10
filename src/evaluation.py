@@ -287,7 +287,8 @@ def enrichment_factor_single_perc(y_true, y_pred, percentile):
     if len(y_true.shape) == 2:
         nb_classes = y_true.shape[1]
     else:
-        y_true = y_true.reshape((y_true.shape[0], 1)) 
+        y_true = y_true.reshape((y_true.shape[0], 1))
+        y_pred = y_pred.reshape((y_pred.shape[0], 1)) 
     
     non_missing_indices = np.argwhere(y_true!=-1)[:, 0]
     y_true = y_true[non_missing_indices,:]
@@ -321,7 +322,8 @@ def max_enrichment_factor_single_perc(y_true, y_pred, percentile):
     if len(y_true.shape) == 2:
         nb_classes = y_true.shape[1]
     else:
-        y_true = y_true.reshape((y_true.shape[0], 1)) 
+        y_true = y_true.reshape((y_true.shape[0], 1))
+        y_pred = y_pred.reshape((y_pred.shape[0], 1)) 
     
     non_missing_indices = np.argwhere(y_true!=-1)[:, 0]
     y_true = y_true[non_missing_indices,:]
@@ -565,6 +567,13 @@ def evaluate_model(y_true, y_pred, model_dir, label_names=None):
         if not os.path.exists(file_dir):
             os.makedirs(file_dir)
     
+    nb_classes = 1    
+    if len(y_true.shape) == 2:
+        nb_classes = y_true.shape[1]
+    else:
+        y_true = y_true.reshape((y_true.shape[0], 1))
+        y_pred = y_pred.reshape((y_pred.shape[0], 1)) 
+        
     # dataframe metrics    
     roc_auc_df = roc_auc_multi(y_true, y_pred, y_true.shape[1], np.mean, 
                                True, label_names)    

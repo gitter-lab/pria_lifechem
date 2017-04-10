@@ -6,8 +6,8 @@ mkdir job_results/light_chem
 mkdir job_results/neural_networks
 mkdir job_results/random_forest
 
-wget -q –retry-connrefused –waitretry=10 http://proxy.chtc.wisc.edu/SQUID/alnammi/Anaconda2-4.3.1-Linux-x86_64.sh #here I get the anaconda file from squid
-wget -r -nH --cut-dirs=2 -np -R index.html* -q –retry-connrefused –waitretry=10 http://proxy.chtc.wisc.edu/SQUID/alnammi/dataset/ #here I get the dataset 
+wget -q â€“retry-connrefused â€“waitretry=10 http://proxy.chtc.wisc.edu/SQUID/alnammi/Anaconda2-4.3.1-Linux-x86_64.sh #here I get the anaconda file from squid
+wget -r -nH --cut-dirs=2 -np -R index.html* -q â€“retry-connrefused â€“waitretry=10 http://proxy.chtc.wisc.edu/SQUID/alnammi/dataset/ #here I get the dataset 
 
 chmod 777 * #wget does strange things
 
@@ -42,12 +42,15 @@ chmod 777 -R ./anaconda
 #get virtual-screening from github
 curl -H "Authorization: token 01f32242cdb9725726f581d93ef0c37e713311b7" -L https://api.github.com/repos/lscHacker/virtual-screening/zipball > virtual-screening-master.zip
 unzip virtual-screening-master.zip > /dev/null
+rm -f virtual-screening-master.zip
 
 mv lsc* virtual-screening
-mv ./dataset/ ./virtual-screening/dataset
+rm -rf ./virtual-screening/dataset
+mv ./dataset/ ./virtual-screening/dataset/
 export PYTHONPATH=${PYTHONPATH}:${_CONDOR_JOB_IWD}/virtual-screening:${_CONDOR_JOB_IWD}/virtual-screening/src:${_CONDOR_JOB_IWD}/virtual-screening/src/models
 
 cd virtual-screening
+
 
 #run python job
 python_jobs_dir=$1
