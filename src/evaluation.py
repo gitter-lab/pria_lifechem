@@ -37,9 +37,13 @@ def roc_auc_multi(y_true, y_pred, eval_indices, eval_mean_or_median,
         if label_names == None:
             label_names = ['label ' + str(i) for i in range(nb_classes)]
         
-        auc_df = pd.DataFrame(data=np.concatenate((auc,[np.mean(auc)],[np.median(auc)])),
-                                  index=['ROC AUC'],
-                                  columns=['metric']+label_names+['Mean','Median'])
+        auc_data = np.concatenate((auc,
+                                   np.mean(auc).reshape(1,),
+                                   np.median(auc).reshape(1,)))
+        auc_df = pd.DataFrame(data=auc_data,
+                              index=['ROC AUC'],
+                              columns=label_names+['Mean','Median'])
+        auc_df.index.name='metric'
         return auc_df
     else:
         return eval_mean_or_median(auc)
@@ -74,9 +78,13 @@ def bedroc_auc_multi(y_true, y_pred, eval_indices, eval_mean_or_median,
         if label_names == None:
             label_names = ['label ' + str(i) for i in range(nb_classes)]
         
-        auc_df = pd.DataFrame(data=np.concatenate((auc,[np.mean(auc)],[np.median(auc)])),
+        auc_data = np.concatenate((auc,
+                                   np.mean(auc).reshape(1,),
+                                   np.median(auc).reshape(1,)))        
+        auc_df = pd.DataFrame(data=auc_data,
                               index=['BEDROC AUC'],
-                              columns=['metric']+label_names+['Mean','Median'])
+                              columns=label_names+['Mean','Median'])
+        auc_df.index.name='metric'
         return auc_df
     else:    
         return eval_mean_or_median(auc)
@@ -119,9 +127,13 @@ def precision_auc_multi(y_true, y_pred, eval_indices, eval_mean_or_median,
         if label_names == None:
             label_names = ['label ' + str(i) for i in range(nb_classes)]
         
-        auc_df = pd.DataFrame(data=np.concatenate((auc,[np.mean(auc)],[np.median(auc)])),
+        auc_data = np.concatenate((auc,
+                                   np.mean(auc).reshape(1,),
+                                   np.median(auc).reshape(1,))) 
+        auc_df = pd.DataFrame(data=auc_data,
                                   index=['PR ' + mode],
-                                  columns=['metric']+label_names+['Mean','Median'])
+                                  columns=label_names+['Mean','Median'])
+        auc_df.index.name='metric'
         return auc_df
     else:
         return eval_mean_or_median(auc)
@@ -368,7 +380,8 @@ def enrichment_factor(y_true, y_pred, perc_vec, label_names=None):
                                               np.mean(ef_mat,axis=1),
                                               np.median(ef_mat,axis=1))),
                          index=index_names,
-                         columns=['EF']+label_names+['Mean','Median'])
+                         columns=label_names+['Mean','Median'])
+    ef_pd.index.name = 'EF'
     return ef_pd
 
 
@@ -397,7 +410,8 @@ def max_enrichment_factor(y_true, y_pred, perc_vec, label_names=None):
                                               np.mean(max_ef_mat,axis=1),
                                               np.median(max_ef_mat,axis=1))),
                          index=index_names,
-                         columns=['Max_EF']+label_names+['Mean','Median'])
+                         columns=label_names+['Mean','Median'])
+    max_ef_pd.index.name = 'Max_EF'                     
     return max_ef_pd
     
 
@@ -418,7 +432,8 @@ def norm_enrichment_factor(y_true, y_pred, perc_vec, label_names=None):
                                               np.mean(nef_mat,axis=1),
                                               np.median(nef_mat,axis=1))),
                          index=index_names,
-                         columns=['NEF']+label_names+['Mean','Median'])
+                         columns=label_names+['Mean','Median'])
+    nef_pd.index.name = 'NEF' 
     return nef_pd, ef_pd, max_ef_pd
 
 
@@ -456,6 +471,7 @@ def nef_auc(y_true, y_pred, perc_vec, label_names=None):
     nef_auc_pd = pd.DataFrame(data=nef_auc / max(perc_vec),
                              index=index_names,
                              columns=label_names)
+    nef_auc_pd.index.name = 'NEF AUC' 
     return nef_auc_pd
     
 def plot_nef(y_true, y_pred, perc_vec, file_dir, label_names=None):
