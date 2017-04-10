@@ -575,15 +575,15 @@ def evaluate_model(y_true, y_pred, model_dir, label_names=None):
         y_pred = y_pred.reshape((y_pred.shape[0], 1)) 
         
     # dataframe metrics    
-    roc_auc_df = roc_auc_multi(y_true, y_pred, y_true.shape[1], np.mean, 
+    roc_auc_df = roc_auc_multi(y_true, y_pred, range(nb_classes), np.mean, 
                                True, label_names)    
-    bedroc_auc_df = bedroc_auc_multi(y_true, y_pred, y_true.shape[1], np.mean, 
+    bedroc_auc_df = bedroc_auc_multi(y_true, y_pred, range(nb_classes), np.mean, 
                                True, label_names)    
-    sklearn_pr_auc_df = precision_auc_multi(y_true, y_pred, y_true.shape[1], np.mean, 
+    sklearn_pr_auc_df = precision_auc_multi(y_true, y_pred, range(nb_classes), np.mean, 
                                'auc.sklearn', True, label_names)
-    integral_pr_auc_df = precision_auc_multi(y_true, y_pred, y_true.shape[1], np.mean, 
+    integral_pr_auc_df = precision_auc_multi(y_true, y_pred, range(nb_classes), np.mean, 
                                'auc.integral', True, label_names)
-    dg_pr_auc_df = precision_auc_multi(y_true, y_pred, y_true.shape[1], np.mean, 
+    dg_pr_auc_df = precision_auc_multi(y_true, y_pred, range(nb_classes), np.mean, 
                                'auc.davis.goadrich', True, label_names)
                                
     nef_pd, ef_pd, max_ef_pd = norm_enrichment_factor(y_true, y_pred, perc_vec, label_names)
