@@ -27,11 +27,12 @@ conda install --yes h5py > /dev/null
 conda install --yes -c rdonnelly libgpuarray > /dev/null
 conda install --yes -c rdonnelly pygpu > /dev/null
 conda install --yes -c rdonnelly theano > /dev/null
-conda install --yes -c RMG keras=1.1.1 > /dev/null
+conda install --yes -c conda-forge keras=1.2* > /dev/null
+conda install --yes scikit-learn=0.17* > /dev/null
 conda install --yes pandas > /dev/null
-conda install --yes -c rdkit rdkit > /dev/null
-conda install --yes -c rdkit rdkit > /dev/null
+conda install --yes -c rdkit rdkit-postgresql > /dev/null
 conda install --yes -c r rpy2 > /dev/null
+conda install --yes -c bioconda r-prroc=1.1 > /dev/null
 conda install --yes -c auto croc=1.0.63 > /dev/null
 
 echo 'Done installing libraries'
