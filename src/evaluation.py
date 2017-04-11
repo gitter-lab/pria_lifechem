@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 from sklearn.metrics import auc
 from croc import BEDROC, ScoredData
 import os
+matplotlib.use('Agg')
 
 """
 width and height of plots
