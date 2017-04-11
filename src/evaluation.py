@@ -5,11 +5,12 @@ import numpy as np
 from sklearn.metrics import roc_auc_score, average_precision_score, precision_recall_curve, roc_curve
 import rpy2.robjects as robjects
 import rpy2.robjects.packages as rpackages
-import matplotlib.pyplot as plt
 from sklearn.metrics import auc
 from croc import BEDROC, ScoredData
 import os
+import matplotlib
 matplotlib.use('Agg')
+import matplotlib.pyplot as plt
 
 """
 width and height of plots
