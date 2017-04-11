@@ -10,6 +10,10 @@ from sklearn.metrics import auc
 from croc import BEDROC, ScoredData
 import os
 
+"""
+width and height of plots
+"""
+w, h = 16, 10
 
 '''
 this if for multi-task evaluation
@@ -21,6 +25,7 @@ roc_auc_multi(y_true, y_pred, [0], np.median)
 '''
 def roc_auc_multi(y_true, y_pred, eval_indices, eval_mean_or_median,
                   return_df=False, label_names=None):
+    
     y_true = y_true[:, eval_indices]
     y_pred = y_pred[:, eval_indices]
     nb_classes = y_true.shape[1]
@@ -70,8 +75,8 @@ def bedroc_auc_multi(y_true, y_pred, eval_indices, eval_mean_or_median,
         # -1 represents missing value
         # and remove them when in evaluation
         non_missing_indices = np.argwhere(y_true[:, i] != -1)[:, 0]
-        actual = y_true[non_missing_indices, i]
-        predicted = y_pred[non_missing_indices, i]
+        actual = y_true[non_missing_indices, i:(i+1)]
+        predicted = y_pred[non_missing_indices, i:(i+1)]
         auc[i] = bedroc_auc_single(actual, predicted)
     
     if return_df == True:
@@ -167,8 +172,9 @@ def plot_curve_multi(actual, predicted, file_dir, mode='pr', label_names=None, p
                             }    
     
     file_dir = file_dir+mode
-    if (mode == 'efp_efm' or mode == 'nef') and perc_vec == None:
-        perc_vec = np.linspace(0.005, .2, 100)
+    if (mode == 'efp_efm' or mode == 'nef'):
+        if perc_vec == None:
+            perc_vec = np.linspace(0.005, .2, 100)
         plot_curve_function[mode](actual, predicted, perc_vec, file_dir, label_names)
     else:
         plot_curve_function[mode](actual, predicted, file_dir, label_names)
@@ -186,10 +192,10 @@ def plot_pr_curve(actual, predicted, file_dir, label_names=None):
     lw = 2
     mean_y, mean_x, _ = precision_recall_curve(actual.ravel(), 
                                                predicted.ravel())
-    mean_auc = precision_auc_multi(actual, predicted, range(len(nb_classes)), np.mean)
-    median_auc = precision_auc_multi(actual, predicted, range(len(nb_classes)), np.median)
+    mean_auc = precision_auc_multi(actual, predicted, range(nb_classes), np.mean)
+    median_auc = precision_auc_multi(actual, predicted, range(nb_classes), np.median)
     for i in range(nb_classes):       
-        plt.clf()
+        plt.figure(figsize=(w,h))
         y, x, _ = precision_recall_curve(actual[:,i], predicted[:,i])
         auc = average_precision_score(actual[:,i], predicted[:,i])
         plt.plot(x, y, lw=lw, label='label '+label_names[i] + 
@@ -198,7 +204,6 @@ def plot_pr_curve(actual, predicted, file_dir, label_names=None):
         x = robjects.FloatVector(actual)
         y = robjects.FloatVector(predicted)
         pr = prroc.pr_curve(x, y, curve=True)
-        prec_auc = pr.rx2(mode)[0]
         pr_curve = np.array(pr[3])
         plt.plot(pr_curve[:, 0], pr_curve[:, 1], lw=lw,
                  label='label '+label_names[i] + 
@@ -216,7 +221,8 @@ def plot_pr_curve(actual, predicted, file_dir, label_names=None):
         plt.ylabel('Precision')
         plt.title('PR Curve for label ' + label_names[i])
         plt.legend(loc="lower right")
-        plt.savefig(file_dir+'_curve_{}.png'.format(label_names[i]))
+        plt.savefig(file_dir+'_curve_{}.png'.format(label_names[i]),bbox_inches='tight')
+        plt.close()
 
 def plot_roc_curve(actual, predicted, file_dir, label_names=None):
     nb_classes = 1    
@@ -228,10 +234,10 @@ def plot_roc_curve(actual, predicted, file_dir, label_names=None):
         
     lw = 2
     mean_x, mean_y, _ = roc_curve(actual.ravel(), predicted.ravel())
-    mean_auc = roc_auc_multi(actual, predicted, range(len(nb_classes)), np.mean)
-    median_auc = roc_auc_multi(actual, predicted, range(len(nb_classes)), np.median)
+    mean_auc = roc_auc_multi(actual, predicted, range(nb_classes), np.mean)
+    median_auc = roc_auc_multi(actual, predicted, range(nb_classes), np.median)
     for i in range(nb_classes):
-        plt.clf()
+        plt.figure(figsize=(w,h))
         x, y, _ = roc_curve(actual[:,i], predicted[:,i])
         auc = roc_auc_score(actual[:,i], predicted[:,i])
         plt.plot(x, y, lw=lw, label='label '+label_names[i] + 
@@ -248,7 +254,8 @@ def plot_roc_curve(actual, predicted, file_dir, label_names=None):
         plt.ylabel('TPR')
         plt.title('ROC Curve for label ' + label_names[i])
         plt.legend(loc="lower right")
-        plt.savefig(file_dir+'_curve_{}.png'.format(label_names[i]))
+        plt.savefig(file_dir+'_curve_{}.png'.format(label_names[i]),bbox_inches='tight')
+        plt.close()
 
 def enrichment_factor_multi(actual, predicted, percentile):
     EF_list = []
@@ -377,8 +384,8 @@ def enrichment_factor(y_true, y_pred, perc_vec, label_names=None):
     """
     index_names = ['{:g}'.format(perc * 100) + ' %' for perc in perc_vec] 
     ef_pd = pd.DataFrame(data=np.concatenate((ef_mat,
-                                              np.mean(ef_mat,axis=1),
-                                              np.median(ef_mat,axis=1))),
+                                              np.mean(ef_mat,axis=1).reshape(len(perc_vec),1),
+                                              np.median(ef_mat,axis=1).reshape(len(perc_vec),1)),axis=1),
                          index=index_names,
                          columns=label_names+['Mean','Median'])
     ef_pd.index.name = 'EF'
@@ -407,8 +414,8 @@ def max_enrichment_factor(y_true, y_pred, perc_vec, label_names=None):
     
     index_names = ['{:g}'.format(perc * 100) + ' %' for perc in perc_vec]    
     max_ef_pd = pd.DataFrame(data=np.concatenate((max_ef_mat,
-                                              np.mean(max_ef_mat,axis=1),
-                                              np.median(max_ef_mat,axis=1))),
+                                              np.mean(max_ef_mat,axis=1).reshape(len(perc_vec),1),
+                                              np.median(max_ef_mat,axis=1).reshape(len(perc_vec),1)),axis=1),
                          index=index_names,
                          columns=label_names+['Mean','Median'])
     max_ef_pd.index.name = 'Max_EF'                     
@@ -428,9 +435,7 @@ def norm_enrichment_factor(y_true, y_pred, perc_vec, label_names=None):
     
     nef_mat = ef_pd.as_matrix() / max_ef_pd.as_matrix() 
     index_names = ['{:g}'.format(perc * 100) + ' %' for perc in perc_vec]    
-    nef_pd = pd.DataFrame(data=np.concatenate((nef_mat,
-                                              np.mean(nef_mat,axis=1),
-                                              np.median(nef_mat,axis=1))),
+    nef_pd = pd.DataFrame(data=nef_mat,
                          index=index_names,
                          columns=label_names+['Mean','Median'])
     nef_pd.index.name = 'NEF' 
@@ -454,24 +459,21 @@ def nef_auc(y_true, y_pred, perc_vec, label_names=None):
     if label_names == None:
         label_names = ['label ' + str(i) for i in range(nb_classes)]
         
-    lw = 2
-    nef_auc = np.zeros(nb_classes) 
+    nef_auc_arr = np.zeros(nb_classes) 
     for i in range(nb_classes):
-        nef_auc[i] = auc(perc_vec, nef_mat[:,i])
+        nef_auc_arr[i] = auc(perc_vec, nef_mat[:,i])
              
     mean_nef = nef_mat[:,-2]         
     
     random_mean_nef = 1 / ef_max_mat[:,-2]
     
-    nef_auc = np.concatenate((nef_auc, 
-                              auc(perc_vec, mean_nef), 
-                              auc(perc_vec, random_mean_nef)), axis=1)
+    nef_auc_arr = np.concatenate((nef_auc_arr, 
+                              auc(perc_vec, mean_nef).reshape(1,), 
+                              auc(perc_vec, random_mean_nef).reshape(1,)))
     
-    index_names = ['{:g}'.format(perc * 100) + ' %' for perc in perc_vec]
-    nef_auc_pd = pd.DataFrame(data=nef_auc / max(perc_vec),
-                             index=index_names,
-                             columns=label_names)
-    nef_auc_pd.index.name = 'NEF AUC' 
+    nef_auc_pd = pd.DataFrame(data=nef_auc_arr.reshape(1,len(nef_auc_arr)) / max(perc_vec),
+                             index=['NEF_AUC'],
+                             columns=label_names+['Mean', 'Random Mean'])
     return nef_auc_pd
     
 def plot_nef(y_true, y_pred, perc_vec, file_dir, label_names=None):
@@ -499,7 +501,7 @@ def plot_nef(y_true, y_pred, perc_vec, file_dir, label_names=None):
     random_mean_nef = 1 / ef_max_mat[:,-2] 
     mean_nef = nef_mat[:,-2]     
     for i in range(nb_classes):
-        plt.clf()
+        plt.figure(figsize=(w,h))
         nef_auc[i] = auc(perc_vec, nef_mat[:,i])
         plt.plot(perc_vec, nef_mat[:,i], lw=lw,
              label=label_names[i] + ' (area = %0.2f)' % 
@@ -519,7 +521,8 @@ def plot_nef(y_true, y_pred, perc_vec, file_dir, label_names=None):
         plt.ylabel('NEF')
         plt.title('Normalized EF Curve for label ' + label_names[i])
         plt.legend(loc="lower right")
-        plt.savefig(file_dir+'_curve_{}.png'.format(label_names[i]))
+        plt.savefig(file_dir+'_curve_{}.png'.format(label_names[i]),bbox_inches='tight')
+        plt.close()
     
     return np.mean(nef_auc) / max(perc_vec)
     
@@ -541,7 +544,7 @@ def plot_efp_efm(y_true, y_pred, perc_vec, file_dir, label_names=None):
         
     lw = 2
     for i in range(nb_classes):
-        plt.clf()
+        plt.figure(figsize=(w,h))
         plt.plot(perc_vec, ef_mat[:,i], lw=lw,
              label=label_names[i])
         plt.plot(perc_vec, max_ef_mat[:,i], lw=lw,
@@ -553,7 +556,8 @@ def plot_efp_efm(y_true, y_pred, perc_vec, file_dir, label_names=None):
         plt.ylabel('EF')
         plt.title('EF_perc and EF_max Curve for label ' + label_names[i])
         plt.legend(loc="lower right")
-        plt.savefig(file_dir+'_curve_{}.png'.format(label_names[i]))
+        plt.savefig(file_dir+'_curve_{}.png'.format(label_names[i]),bbox_inches='tight')
+        plt.close()
 
 
 def evaluate_model(y_true, y_pred, model_dir, label_names=None):
@@ -603,13 +607,19 @@ def evaluate_model(y_true, y_pred, model_dir, label_names=None):
                                'auc.davis.goadrich', True, label_names)
                                
     nef_pd, ef_pd, max_ef_pd = norm_enrichment_factor(y_true, y_pred, perc_vec, label_names)
+    nef_auc_df = nef_auc(y_true, y_pred, perc_vec, label_names) 
     
     pr_roc_frames = [roc_auc_df, bedroc_auc_df, sklearn_pr_auc_df, 
                      integral_pr_auc_df, dg_pr_auc_df]
     pr_roc_frames = pd.concat(pr_roc_frames)
     
-    pr_roc_frames.to_csv(metrics_dir)    
-    pd.concat([nef_pd, ef_pd, max_ef_pd]).to_csv(metrics_dir, mode='a')
+    pr_roc_frames.to_csv(metrics_dir)
+    with open(metrics_dir,'a') as f:  
+        f.write('\n')    
+    for pd_df in [nef_pd, ef_pd, max_ef_pd, nef_auc_df]:
+        pd_df.to_csv(metrics_dir, mode='a')
+        with open(metrics_dir,'a') as f:  
+            f.write('\n')  
     
     #plots
     plot_names = ['pr', 'roc', 'efp_efm', 'nef']    
