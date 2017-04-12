@@ -17,7 +17,7 @@ from evaluation import *
 from CallBacks import *
 
 
-class SingleClassification:
+class SingleRegression:
     def __init__(self, conf):
         self.conf = conf
         self.input_layer_dimension = 1024
@@ -185,6 +185,6 @@ if __name__ == '__main__':
 
     with open(config_json_file, 'r') as f:
         conf = json.load(f)
-    task = SingleClassification(conf=conf)
+    task = SingleRegression(conf=conf)
     task.train_and_predict(X_t, y_t, X_val, y_val, X_test, y_test, PMTNN_weight_file)
     store_data(transform_json_to_csv(config_json_file), config_csv_file)
