@@ -153,13 +153,15 @@ class VanillaLSTM:
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--config_json_file', action="store", dest="config_json_file", required=True)
-    parser.add_argument('--PMTNN_weight_file', action="store", dest="PMTNN_weight_file", required=True)
-    parser.add_argument('--config_csv_file', action="store", dest="config_csv_file", required=True)
+    parser.add_argument('--config_json_file', action='store', dest='config_json_file', required=True)
+    parser.add_argument('--PMTNN_weight_file', action='store', dest='PMTNN_weight_file', required=True)
+    parser.add_argument('--config_csv_file', action='store', dest='config_csv_file', required=True)
+    parser.add_argument('--SMILES_mapping_json_file', action='store', dest='SMILES_mapping_json_file', default= '../../json/SMILES_mapping.json')
     given_args = parser.parse_args()
     config_json_file = given_args.config_json_file
     PMTNN_weight_file = given_args.PMTNN_weight_file
     config_csv_file = given_args.config_csv_file
+    SMILES_mapping_json_file = given_args.SMILES_mapping_json_file
 
     with open(config_json_file, 'r') as f:
         conf = json.load(f)
@@ -189,10 +191,12 @@ if __name__ == '__main__':
     # extract data, and split training data into training and val
     X_train, y_train = extract_SMILES_and_label(train_pd,
                                                 feature_name='SMILES',
-                                                label_name_list=['Keck_Pria_AS_Retest'])
+                                                label_name_list=['Keck_Pria_AS_Retest'],
+                                                SMILES_mapping_json_file=SMILES_mapping_json_file)
     X_test, y_test = extract_SMILES_and_label(test_pd,
                                               feature_name='SMILES',
-                                              label_name_list=['Keck_Pria_AS_Retest'])
+                                              label_name_list=['Keck_Pria_AS_Retest'],
+                                              SMILES_mapping_json_file=SMILES_mapping_json_file)
 
     cross_validation_split = StratifiedShuffleSplit(y_train, 1, test_size=0.15, random_state=1)
     for t_index, val_index in cross_validation_split:

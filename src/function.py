@@ -5,7 +5,7 @@ import os
 import json
 import csv
 from sklearn.cross_validation import StratifiedKFold, KFold
-from data_preparation import *
+
 
 '''
 Analyze the original dataset
@@ -125,7 +125,6 @@ def greedy_multi_splitting(data, k, directory, file_list):
     return
 
 
-
 '''
 input_file is whole 
 output_file_list is the files that we will split data into
@@ -200,7 +199,8 @@ for use in RNN models, like LSTM
 '''
 def extract_SMILES_and_label(data_pd,
                              feature_name,
-                             label_name_list):
+                             label_name_list,
+                             SMILES_mapping_json_file):
     y_data = np.zeros(shape=(data_pd.shape[0], len(label_name_list)))
     X_data = []
     with open(SMILES_mapping_json_file, 'r') as f:
