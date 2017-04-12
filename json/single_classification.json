@@ -3,16 +3,16 @@
     {
       "hidden_units": 2000,
       "init": "glorot_normal",
-      "activation": "sigmoid",
+      "activation": "relu",
       "dropout": 0.25
     },{
       "hidden_units": 2000,
       "init": "glorot_normal",
-      "activation": "sigmoid",
+      "activation": "relu",
       "dropout": 0.25
     },{
       "init": "glorot_normal",
-      "activation": "linear"
+      "activation": "sigmoid"
     }
   ],
   "compile": {
