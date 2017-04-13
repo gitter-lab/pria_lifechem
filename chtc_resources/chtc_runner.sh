@@ -40,7 +40,7 @@ echo 'Done installing libraries'
 chmod 777 -R ./anaconda
 
 #get virtual-screening from github
-curl -H "Authorization: token 01f32242cdb9725726f581d93ef0c37e713311b7" -L https://api.github.com/repos/lscHacker/virtual-screening/zipball > virtual-screening-master.zip
+curl -H "Authorization: token 90ce823b4b9f465db73d7a2b0c830006b5a09b08" -L https://api.github.com/repos/chao1224/virtual-screening/zipball > virtual-screening-master.zip
 unzip virtual-screening-master.zip > /dev/null
 rm -f virtual-screening-master.zip
 
