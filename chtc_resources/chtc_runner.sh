@@ -6,7 +6,7 @@ mkdir job_results/light_chem
 mkdir job_results/neural_networks
 mkdir job_results/random_forest
 
-wget -q â€“retry-connrefused â€“waitretry=10 http://proxy.chtc.wisc.edu/SQUID/alnammi/Anaconda2-4.3.1-Linux-x86_64.sh #here I get the anaconda file from squid
+wget -q –retry-connrefused –waitretry=10 https://repo.continuum.io/archive/Anaconda2-4.3.1-Linux-x86_64.sh #here I get the anaconda file from squid
 wget -r -nH --cut-dirs=2 -np -R index.html* -q â€“retry-connrefused â€“waitretry=10 http://proxy.chtc.wisc.edu/SQUID/alnammi/dataset/ #here I get the dataset 
 
 chmod 777 * #wget does strange things
@@ -26,7 +26,7 @@ conda install --yes HDF5 > /dev/null
 conda install --yes h5py > /dev/null
 conda install --yes -c rdonnelly libgpuarray > /dev/null
 conda install --yes -c rdonnelly pygpu > /dev/null
-conda install --yes -c rdonnelly theano > /dev/null
+conda install --yes -c rdonnelly theano=0.8* > /dev/null
 conda install --yes -c conda-forge keras=1.2* > /dev/null
 conda install --yes scikit-learn=0.17* > /dev/null
 conda install --yes pandas > /dev/null
@@ -44,7 +44,7 @@ curl -H "Authorization: token 5879e760ce2f7b753aa80bda34811162ec7ababe" -L https
 unzip virtual-screening-master.zip > /dev/null
 rm -f virtual-screening-master.zip
 
-mv lsc* virtual-screening
+mv chao* virtual-screening
 rm -rf ./virtual-screening/dataset
 mv ./dataset/ ./virtual-screening/dataset/
 export PYTHONPATH=${PYTHONPATH}:${_CONDOR_JOB_IWD}/virtual-screening:${_CONDOR_JOB_IWD}/virtual-screening/src:${_CONDOR_JOB_IWD}/virtual-screening/src/models
@@ -54,7 +54,7 @@ cd virtual-screening
 
 #run python job
 python_jobs_dir=$1
-KERAS_BACKEND=theano THEANO_FLAGS="base_compiledir=./tmp,floatX=float32,device=cuda,gpuarray.preallocate=0.8" python src/chtc_distributor.py $python_jobs_dir
+KERAS_BACKEND=theano THEANO_FLAGS="base_compiledir=./tmp,floatX=float32,device=gpu,gpuarray.preallocate=0.8" python src/chtc_distributor.py $python_jobs_dir
 
 echo 'Done running job'
 
