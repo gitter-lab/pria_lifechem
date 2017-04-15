@@ -629,3 +629,22 @@ def evaluate_model(y_true, y_pred, model_dir, label_names=None):
     plot_curve_multi(y_true, y_pred, roc_dir, 'roc', label_names)
     plot_curve_multi(y_true, y_pred, efp_efm_dir, 'efp_efm', label_names, perc_vec_plots)
     plot_curve_multi(y_true, y_pred, nef_dir, 'nef', label_names, perc_vec_plots)
+
+
+def results_describe(true_label, pred_label):
+    TP = 0
+    TN = 0
+    FP = 0
+    FN = 0
+    true_pos_count = 0
+    pred_pos_count = 0
+    for (x, y) in zip(true_label, pred_label):
+        if x == y:
+            TP += (x == 1)
+            TN += (x == 0)
+        else:
+            FN += (x == 1)
+            FP += (x == 0)
+        true_pos_count += (x == 1)
+        pred_pos_count += (y == 1)
+    return TP, TN, FP, FN, true_pos_count, pred_pos_count
