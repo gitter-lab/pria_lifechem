@@ -8,7 +8,7 @@ from evaluation import *
 # define custom classes
 # following class is used for keras to compute the AUC each epoch
 # and do early stoppping based on that
-class KeckCallBackOnAUC(keras.callbacks.Callback):
+class KeckCallBackOnROC(keras.callbacks.Callback):
     def __init__(self, X_train, y_train, X_val, y_val,
                  patience=0,
                  file_path='best_model.weights'):

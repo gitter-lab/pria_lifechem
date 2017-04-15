@@ -109,7 +109,7 @@ class VanillaLSTM:
                           PMTNN_weight_file):
         model = self.setup_model()
         if self.early_stopping_option == 'auc':
-            early_stopping = KeckCallBackOnAUC(X_train, y_train, X_val, y_val,
+            early_stopping = KeckCallBackOnROC(X_train, y_train, X_val, y_val,
                                                patience=self.early_stopping_patience,
                                                file_path=PMTNN_weight_file)
             callbacks = [early_stopping]

@@ -92,23 +92,42 @@ class SingleRegression:
         return model
 
     def train_and_predict(self,
-                          X_train, y_train,
-                          X_val, y_val,
-                          X_test, y_test,
+                          X_train, y_train_regression, y_train_classification,
+                          X_val, y_val_regression, y_val_classification,
+                          X_test, y_test_regression, y_test_classification,
                           PMTNN_weight_file):
         model = self.setup_model()
 
         model.compile(loss=self.compile_loss, optimizer=self.compile_optimizer)
-        model.fit(x=X_train, y=y_train,
+        model.fit(x=X_train, y=y_train_regression,
                   nb_epoch=self.fit_nb_epoch,
                   batch_size=self.fit_batch_size,
                   verbose=self.fit_verbose,
+                  validation_data=[X_val, y_val_regression],
                   shuffle=True)
         model.save_weights(PMTNN_weight_file)
 
         y_pred_on_train = model.predict(X_train)
         y_pred_on_val = model.predict(X_val)
         y_pred_on_test = model.predict(X_test)
+
+        print
+        print('train precision: {}'.format(precision_auc_single(y_train_classification, y_pred_on_train)))
+        print('train roc: {}'.format(roc_auc_single(y_train_classification, y_pred_on_train)))
+        print('train bedroc: {}'.format(bedroc_auc_single(y_train_classification, y_pred_on_train)))
+        print
+        print('validation precision: {}'.format(precision_auc_single(y_val_classification, y_pred_on_val)))
+        print('validation roc: {}'.format(roc_auc_single(y_val_classification, y_pred_on_val)))
+        print('validation bedroc: {}'.format(bedroc_auc_single(y_val_classification, y_pred_on_val)))
+        print
+        print('test precision: {}'.format(precision_auc_single(y_test_classification, y_pred_on_test)))
+        print('test roc: {}'.format(roc_auc_single(y_test_classification, y_pred_on_test)))
+        print('test bedroc: {}'.format(bedroc_auc_single(y_test_classification, y_pred_on_test)))
+        print
+
+        for EF_ratio in self.EF_ratio_list:
+            n_actives, ef, ef_max = enrichment_factor_single(y_test_classification, y_pred_on_test, EF_ratio)
+            print('ratio: {}, EF: {},\tactive: {}'.format(EF_ratio, ef, n_actives))
 
         return
 
@@ -117,21 +136,40 @@ class SingleRegression:
                               X_val, y_val,
                               X_test, y_test,
                               PMTNN_weight_file):
-        model = setup_model()
+        model = self.setup_model()
         model.load_weights(PMTNN_weight_file)
 
         y_pred_on_train = model.predict(X_train)
         y_pred_on_val = model.predict(X_val)
         y_pred_on_test = model.predict(X_test)
 
+        print
+        print('train precision: {}'.format(precision_auc_single(y_train_classification, y_pred_on_train)))
+        print('train roc: {}'.format(roc_auc_single(y_train_classification, y_pred_on_train)))
+        print('train bedroc: {}'.format(bedroc_auc_single(y_train_classification, y_pred_on_train)))
+        print
+        print('validation precision: {}'.format(precision_auc_single(y_val_classification, y_pred_on_val)))
+        print('validation roc: {}'.format(roc_auc_single(y_val_classification, y_pred_on_val)))
+        print('validation bedroc: {}'.format(bedroc_auc_single(y_val_classification, y_pred_on_val)))
+        print
+        print('test precision: {}'.format(precision_auc_single(y_test_classification, y_pred_on_test)))
+        print('test roc: {}'.format(roc_auc_single(y_test_classification, y_pred_on_test)))
+        print('test bedroc: {}'.format(bedroc_auc_single(y_test_classification, y_pred_on_test)))
+        print
+
+        for EF_ratio in self.EF_ratio_list:
+            n_actives, ef, ef_max = enrichment_factor_single(y_test_classification, y_pred_on_test, EF_ratio)
+            print('ratio: {}, EF: {},\tactive: {}'.format(EF_ratio, ef, n_actives))
+
         return
 
     def get_EF_score_with_existing_model(self,
                                          X_test, y_test,
                                          file_path, EF_ratio):
-        model = setup_model()
+        model = self.setup_model()
         model.load_weights(file_path)
         y_pred_on_test = model.predict(X_test)
+        y_test = convert(y_test)
         n_actives, ef, ef_max = enrichment_factor_single(y_test, y_pred_on_test, EF_ratio)
         print('test auc: {}'.format(roc_auc_single(y_test, y_pred_on_test)))
         print('EF: {},\tactive: {}'.format(ef, n_actives))
@@ -173,18 +211,28 @@ if __name__ == '__main__':
     # extract data, and split training data into training and val
     X_train, y_train = extract_feature_and_label(train_pd,
                                                  feature_name='Fingerprints',
-                                                 label_name_list=['Keck_Pria_Continuous'])
+                                                 label_name_list=['Keck_Pria_AS_Retest', 'Keck_Pria_Continuous'])
     X_test, y_test = extract_feature_and_label(test_pd,
                                                feature_name='Fingerprints',
-                                               label_name_list=['Keck_Pria_Continuous'])
-    cross_validation_split = ShuffleSplit(y_train.shape[0], n_iter=1, test_size=0.15, random_state=1)
+                                               label_name_list=['Keck_Pria_AS_Retest', 'Keck_Pria_Continuous'])
+    y_train_classification = reshape_data_into_2_dim(y_train[:, 0])
+    y_train_regression = reshape_data_into_2_dim(y_train[:, 1])
+    y_test_classification = reshape_data_into_2_dim(y_test[:, 0])
+    y_test_regression = reshape_data_into_2_dim(y_test[:, 1])
+
+    cross_validation_split = StratifiedShuffleSplit(y_train_classification, 1, test_size=0.15, random_state=1)
+
     for t_index, val_index in cross_validation_split:
         X_t, X_val = X_train[t_index], X_train[val_index]
-        y_t, y_val = y_train[t_index], y_train[val_index]
+        y_t_classification, y_val_classification = y_train_classification[t_index], y_train_classification[val_index]
+        y_t_regression, y_val_regression = y_train_regression[t_index], y_train_regression[val_index]
     print 'done data preparation'
 
     with open(config_json_file, 'r') as f:
         conf = json.load(f)
     task = SingleRegression(conf=conf)
-    task.train_and_predict(X_t, y_t, X_val, y_val, X_test, y_test, PMTNN_weight_file)
+    task.train_and_predict(X_t, y_t_regression, y_t_classification,
+                           X_val, y_val_regression, y_val_classification,
+                           X_test, y_test_regression, y_test_classification,
+                           PMTNN_weight_file)
     store_data(transform_json_to_csv(config_json_file), config_csv_file)

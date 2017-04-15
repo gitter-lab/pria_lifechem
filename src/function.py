@@ -231,6 +231,16 @@ def extract_SMILES_and_label(data_pd,
 
 
 '''
+Reshape vector into 2-dimension matrix.
+'''
+def reshape_data_into_2_dim(data):
+    if data.ndim == 1:
+        n = data.shape[0]
+        data = data.reshape(n, 1)
+    return data
+
+
+'''
 Store result
 '''
 def store_data(data, file):
