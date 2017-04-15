@@ -9,7 +9,7 @@ from keras.models import Sequential
 from keras.layers import Dense, Dropout
 from keras.layers.normalization import BatchNormalization
 from keras.optimizers import SGD, Adam
-from sklearn.cross_validation import StratifiedShuffleSplit, ShuffleSplit
+from sklearn.cross_validation import StratifiedShuffleSplit
 sys.path.insert(0, '..')  # Add path from parent folder
 sys.path.insert(0, '.')  # Add path from current folder
 from function import *

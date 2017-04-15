@@ -9,7 +9,7 @@ from keras.models import Sequential
 from keras.layers import Dense, Dropout
 from keras.layers.normalization import BatchNormalization
 from keras.optimizers import SGD, Adam
-from sklearn.cross_validation import StratifiedShuffleSplit, ShuffleSplit
+from sklearn.cross_validation import StratifiedShuffleSplit
 from sklearn.grid_search import ParameterGrid
 sys.path.insert(0, '..')  # Add path from parent folder
 sys.path.insert(0, '.')  # Add path from current folder
@@ -95,7 +95,6 @@ def run_single_regression():
     for i in range(k):
         file_list.append('file_{}.csv'.format(i))
 
-    # merge training and test dataset
     output_file_list = [directory + f_ for f_ in file_list]
     print output_file_list[0:4]
     train_pd = read_merged_data(output_file_list[0:4])
@@ -105,14 +104,21 @@ def run_single_regression():
     # extract data, and split training data into training and val
     X_train, y_train = extract_feature_and_label(train_pd,
                                                  feature_name='Fingerprints',
-                                                 label_name_list=['Keck_Pria_Continuous'])
+                                                 label_name_list=['Keck_Pria_AS_Retest', 'Keck_Pria_Continuous'])
     X_test, y_test = extract_feature_and_label(test_pd,
                                                feature_name='Fingerprints',
-                                               label_name_list=['Keck_Pria_Continuous'])
-    cross_validation_split = ShuffleSplit(y_train.shape[0], n_iter=1, test_size=0.15, random_state=1)
+                                               label_name_list=['Keck_Pria_AS_Retest', 'Keck_Pria_Continuous'])
+    y_train_classification = reshape_data_into_2_dim(y_train[:, 0])
+    y_train_regression = reshape_data_into_2_dim(y_train[:, 1])
+    y_test_classification = reshape_data_into_2_dim(y_test[:, 0])
+    y_test_regression = reshape_data_into_2_dim(y_test[:, 1])
+
+    cross_validation_split = StratifiedShuffleSplit(y_train_classification, 1, test_size=0.15, random_state=1)
+
     for t_index, val_index in cross_validation_split:
         X_t, X_val = X_train[t_index], X_train[val_index]
-        y_t, y_val = y_train[t_index], y_train[val_index]
+        y_t_classification, y_val_classification = y_train_classification[t_index], y_train_classification[val_index]
+        y_t_regression, y_val_regression = y_train_regression[t_index], y_train_regression[val_index]
     print 'done data preparation'
 
     with open(config_json_file, 'r') as f:
@@ -147,8 +153,12 @@ def run_single_regression():
         break
 
     task = SingleRegression(conf=conf)
-    task.train_and_predict(X_t, y_t, X_val, y_val, X_test, y_test, PMTNN_weight_file)
+    task.train_and_predict(X_t, y_t_regression, y_t_classification,
+                           X_val, y_val_regression, y_val_classification,
+                           X_test, y_test_regression, y_test_classification,
+                           PMTNN_weight_file)
     store_data(transform_json_to_csv(config_json_file), config_csv_file)
+
     return
 
 
