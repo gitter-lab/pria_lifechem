@@ -32,17 +32,13 @@ class SKLearn_RandomForest:
             self.param = param
             self.n_estimators = params['n_estimators']
             self.max_features = params['max_features']
-            self.min_sample_leaf = params['min_sample_leaf']
+            self.min_samples_leaf = params['min_samples_leaf']
             self.class_weight = params['class_weight']
             print('Testing set:', param)            
             break
         
         if self.max_features == "None":
             self.max_features = None
-        if self.min_sample_leaf == "int":
-            self.min_sample_leaf = int
-        if self.min_sample_leaf == "float":
-            self.min_sample_leaf = float
         if self.class_weight == "None":
             self.class_weight = None
         
@@ -51,7 +47,7 @@ class SKLearn_RandomForest:
     def setup_model(self):
         model = RandomForestClassifier(n_estimators=self.n_estimators, 
                                        max_features=self.max_features, 
-                                       min_sample_leaf=self.min_sample_leaf, 
+                                       min_samples_leaf=self.min_samples_leaf, 
                                        n_jobs=-1, 
                                        class_weight=self.class_weight,
                                        random_state=rnd_state,
