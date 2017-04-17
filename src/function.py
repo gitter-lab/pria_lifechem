@@ -395,7 +395,7 @@ def split_pcba_into_folds(data_dir, k, dest_dir):
     pcba_df = pcba_df.sample(frac=1).reset_index(drop=True) #shuffle rows
     
     label_names = pcba_df.columns[3:]
-    total_compounds = pcba_df.index[-1]+1
+    total_compounds = pcba_df.shape[0]
     
     num_actives_list = list()
     for i in range(nb_classes):
@@ -412,29 +412,34 @@ def split_pcba_into_folds(data_dir, k, dest_dir):
         #actives
         active_indexes = np.where(curr_label==1)[0]
         kf = KFold(len(active_indexes), n_folds=k, shuffle=False)
-        for fi, (_, test_index) in zip(range(k), kf):        
+        for fi, (_, test_index) in zip(range(k), kf):
             fold_indexes[fi] = np.append(fold_indexes[fi], active_indexes[test_index])
         
         #inactives
         inactive_indexes = np.where(curr_label==0)[0]
         kf = KFold(len(inactive_indexes), n_folds=k, shuffle=False)
-        for fi, (_, test_index) in zip(range(k), kf):       
+        for fi, (_, test_index) in zip(range(k), kf):
             fold_indexes[fi] = np.append(fold_indexes[fi], inactive_indexes[test_index])
         
         #missing
+        # TODO: For PCBA_missing, it's fine. But what if no missing data?
         missing_indexes = np.where(curr_label==-1)[0]
         kf = KFold(len(missing_indexes), n_folds=k, shuffle=False)
-        for fi, (_, test_index) in zip(range(k), kf):       
+        for fi, (_, test_index) in zip(range(k), kf):
             fold_indexes[fi] = np.append(fold_indexes[fi], missing_indexes[test_index])
             
         #now uniquify the indexes in each fold
         for ki in range(k):
             fold_indexes[ki] = np.unique(fold_indexes[ki])
             
-        for ki in range(k):
-            for kj in range(ki+1,k):       
+        for ki in np.random.permutation(k):
+            for kj in np.random.permutation(k):
+                if ki == kj:
+                    continue
                 remove_indexes = np.where(np.in1d(fold_indexes[kj], fold_indexes[ki]))
+                print ki, ' ', kj, ' ', 'remove ', remove_indexes[0].shape
                 fold_indexes[kj] = np.delete(fold_indexes[kj], remove_indexes)
+        print
         
     #now uniquify the indexes in each fold
     for i in range(k):
