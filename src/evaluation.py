@@ -259,10 +259,14 @@ def plot_roc_curve(actual, predicted, file_dir, label_names=None):
         plt.savefig(file_dir+'_curve_{}.png'.format(label_names[i]),bbox_inches='tight')
         plt.close()
 
-def enrichment_factor_multi(actual, predicted, percentile):
+
+def enrichment_factor_multi(actual, predicted, percentile, eval_indices):
+    actual = actual[:, eval_indices]
+    predicted = predicted[:, eval_indices]
+    nb_classes = actual.shape[1]
     EF_list = []
-    for i in range(actual.shape[1]):
-        n_actives, ef = enrichment_factor_single(actual[:, i], predicted[:, i], percentile)
+    for i in range(nb_classes):
+        n_actives, ef, ef_max = enrichment_factor_single(actual[:, i], predicted[:, i], percentile)
         temp = [n_actives, ef]
         EF_list.append(temp)
     return EF_list

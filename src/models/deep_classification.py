@@ -195,7 +195,6 @@ class MultiClassification:
         self.early_stopping_option = conf['fitting']['early_stopping']['option']
 
         self.fit_nb_epoch = conf['fitting']['nb_epoch']
-        self.fit_nb_epoch = 2
         self.fit_batch_size = conf['fitting']['batch_size']
         self.fit_verbose = conf['fitting']['verbose']
 
@@ -431,6 +430,12 @@ class MultiClassification:
         print('test bedroc: {}'.format(get_model_bedroc_auc(y_test, y_pred_on_test)))
         print
 
+        for EF_ratio in self.EF_ratio_list:
+            # EF_list = enrichment_factor_multi(y_test, y_pred_on_test, EF_ratio, eval_indices=eval_indices)
+            EF_list = enrichment_factor_multi(y_test, y_pred_on_test, EF_ratio, eval_indices=eval_indices[:])
+            print EF_ratio, ' :'
+            print EF_list
+
         return
 
     def predict_with_existing(self,
@@ -480,6 +485,47 @@ class MultiClassification:
         print
 
         return
+
+    def get_EF_score_with_existing_model(self,
+                                         X_test, y_test,
+                                         file_path, EF_ratio,
+                                         eval_indices=[-1],
+                                         eval_mean_or_median=np.mean):
+        def get_model_roc_auc(true_label,
+                              predicted_label,
+                              eval_indices=eval_indices,
+                              eval_mean_or_median=eval_mean_or_median):
+            return roc_auc_multi(true_label, predicted_label, eval_indices, eval_mean_or_median)
+
+        def get_model_bedroc_auc(true_label,
+                                 predicted_label,
+                                 eval_indices=eval_indices,
+                                 eval_mean_or_median=eval_mean_or_median):
+            return bedroc_auc_multi(true_label, predicted_label, eval_indices, eval_mean_or_median)
+
+        def get_model_precision_auc(true_label,
+                                    predicted_label,
+                                    eval_indices=eval_indices,
+                                    eval_mean_or_median=eval_mean_or_median):
+            return precision_auc_multi(true_label, predicted_label, eval_indices, eval_mean_or_median)
+
+        model = self.setup_model()
+        model.load_weights(file_path)
+        y_test = y_test[:, eval_indices]
+        y_pred_on_test = model.predict(X_test)
+        y_pred = y_pred_on_test[:, eval_indices]
+        print 'test ', y_test.shape
+
+        print('test precision: {}'.format(get_model_precision_auc(y_test, y_pred)))
+        print('test roc: {}'.format(get_model_roc_auc(y_test, y_pred)))
+        print('test bedroc: {}'.format(get_model_bedroc_auc(y_test, y_pred)))
+
+        EF_list = []
+        for i in range(y_test.shape[1]):
+            n_actives, ef, ef_max = enrichment_factor_single(y_test[:, i], y_pred[:, i], EF_ratio)
+            temp = [n_actives, ef]
+            EF_list.append(temp)
+        return EF_list
 
 
 def demo_single_classification():
