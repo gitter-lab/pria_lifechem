@@ -37,6 +37,15 @@ class SKLearn_RandomForest:
             print('Testing set:', param)            
             break
         
+        if self.max_features == "None":
+            self.max_features = None
+        if self.min_sample_leaf == "int":
+            self.min_sample_leaf = int
+        if self.min_sample_leaf == "float":
+            self.min_sample_leaf = float
+        if self.class_weight == "None":
+            self.class_weight = None
+        
         return
 
     def setup_model(self):
