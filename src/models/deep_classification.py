@@ -156,6 +156,7 @@ class SingleClassification:
         y_pred_on_val = model.predict(X_val)
         y_pred_on_test = model.predict(X_test)
 
+        print
         print('train precision: {}'.format(get_model_precision_auc(y_train, y_pred_on_train)))
         print('train roc: {}'.format(get_model_roc_auc(y_train, y_pred_on_train)))
         print('train bedroc: {}'.format(get_model_bedroc_auc(y_train, y_pred_on_train)))
@@ -265,6 +266,7 @@ class MultiClassification:
                           X_val, y_val,
                           X_test, y_test,
                           PMTNN_weight_file,
+                          score_file,
                           eval_indices=[-1],
                           eval_mean_or_median=np.mean):
         def get_model_roc_auc(true_label,
@@ -430,11 +432,13 @@ class MultiClassification:
         print('test bedroc: {}'.format(get_model_bedroc_auc(y_test, y_pred_on_test)))
         print
 
+        out = open(score_file, 'w')
+        print >> out, "EF"
         for EF_ratio in self.EF_ratio_list:
-            # EF_list = enrichment_factor_multi(y_test, y_pred_on_test, EF_ratio, eval_indices=eval_indices)
-            EF_list = enrichment_factor_multi(y_test, y_pred_on_test, EF_ratio, eval_indices=eval_indices[:])
-            print EF_ratio, ' :'
-            print EF_list
+            print >> out, 'ratio:', EF_ratio
+            for i in range(y_test.shape[1]):
+                n_actives, ef, ef_max = enrichment_factor_single(y_test[:, i], y_pred_on_test[:, i], EF_ratio)
+                print >> out, 'EF:', ef, 'active:', n_actives
 
         return
 
@@ -471,6 +475,7 @@ class MultiClassification:
         y_pred_on_val = model.predict(X_val)
         y_pred_on_test = model.predict(X_test)
 
+        print
         print('train precision: {}'.format(get_model_precision_auc(y_train, y_pred_on_train)))
         print('train roc: {}'.format(get_model_roc_auc(y_train, y_pred_on_train)))
         print('train bedroc: {}'.format(get_model_bedroc_auc(y_train, y_pred_on_train)))
@@ -511,20 +516,16 @@ class MultiClassification:
 
         model = self.setup_model()
         model.load_weights(file_path)
-        y_test = y_test[:, eval_indices]
         y_pred_on_test = model.predict(X_test)
-        y_pred = y_pred_on_test[:, eval_indices]
-        print 'test ', y_test.shape
 
-        print('test precision: {}'.format(get_model_precision_auc(y_test, y_pred)))
-        print('test roc: {}'.format(get_model_roc_auc(y_test, y_pred)))
-        print('test bedroc: {}'.format(get_model_bedroc_auc(y_test, y_pred)))
+        print('test precision: {}'.format(get_model_precision_auc(y_test, y_pred_on_test)))
+        print('test roc: {}'.format(get_model_roc_auc(y_test, y_pred_on_test)))
+        print('test bedroc: {}'.format(get_model_bedroc_auc(y_test, y_pred_on_test)))
 
-        EF_list = []
-        for i in range(y_test.shape[1]):
-            n_actives, ef, ef_max = enrichment_factor_single(y_test[:, i], y_pred[:, i], EF_ratio)
-            temp = [n_actives, ef]
-            EF_list.append(temp)
+        EF_list = enrichment_factor_multi(y_test,
+                                          y_pred_on_test,
+                                          percentile=EF_ratio,
+                                          eval_indices=eval_indices)
         return EF_list
 
 
@@ -605,8 +606,19 @@ def demo_multi_classification():
     with open(config_json_file, 'r') as f:
         conf = json.load(f)
     task = MultiClassification(conf=conf)
-    task.train_and_predict(X_train, y_train, X_val, y_val, X_test, y_test, PMTNN_weight_file)
+    task.train_and_predict(X_train, y_train, X_val, y_val, X_test, y_test,
+                           PMTNN_weight_file=PMTNN_weight_file,
+                           score_file=score_file)
     store_data(transform_json_to_csv(config_json_file), config_csv_file)
+
+    whole_EF = []
+    for EF_ratio in task.EF_ratio_list:
+        EF_list = task.get_EF_score_with_existing_model(X_test, y_test, PMTNN_weight_file,EF_ratio)
+        whole_EF.append([EF_ratio])
+        whole_EF.append(EF_list)
+        print(EF_ratio, EF_list)
+        print
+    print whole_EF
 
     return
 
@@ -617,6 +629,7 @@ if __name__ == '__main__':
     parser.add_argument('--PMTNN_weight_file', action="store", dest="PMTNN_weight_file", required=True)
     parser.add_argument('--config_csv_file', action="store", dest="config_csv_file", required=True)
     parser.add_argument('--mode', action='store', dest='mode', required=True)
+    parser.add_argument('--score_file', action='store', dest='score_file', required=False)
     given_args = parser.parse_args()
     config_json_file = given_args.config_json_file
     PMTNN_weight_file = given_args.PMTNN_weight_file
@@ -626,4 +639,5 @@ if __name__ == '__main__':
     if mode == 'single_classification':
         demo_single_classification()
     elif mode == 'multi_classification':
+        score_file = given_args.score_file
         demo_multi_classification()
