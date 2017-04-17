@@ -30,10 +30,10 @@ class SKLearn_RandomForest:
                 continue
             
             self.param = param
-            self.n_estimators = params['n_estimators']
-            self.max_features = params['max_features']
-            self.min_samples_leaf = params['min_samples_leaf']
-            self.class_weight = params['class_weight']
+            self.n_estimators = param['n_estimators']
+            self.max_features = param['max_features']
+            self.min_samples_leaf = param['min_samples_leaf']
+            self.class_weight = param['class_weight']
             print('Testing set:', param)            
             break
         
