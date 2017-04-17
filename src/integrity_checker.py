@@ -19,13 +19,24 @@ import hashlib
 import re
 import os
 
+
+def generate_(fold_directory):
+    regex = re.compile('file_(.*).csv')
+    file_list = os.listdir(fold_directory)
+    file_list = [file_name for file_name in file_list if regex.search(file_name)]
+    file_list = sorted(file_list)
+    md5_hash_list = [(fname, hashlib.md5(open(fold_directory+fname, 'rb').read()).digest()) for fname in file_list]
+
+    return md5_hash_list
+
+
 def check_keck_fold_integrity(fold_directory, dataset_name='keck'):
     #Add to this dictionary to add more fold options    
     switch = {3 : fold_3_keys,
               4 : fold_4_keys,
               5 : fold_5_keys
-              } 
-    
+              }
+
     regex = re.compile('file_(.*).csv')
     file_list = os.listdir(fold_directory)
     file_list = [file_name for file_name in file_list if regex.search(file_name)]
@@ -38,16 +49,14 @@ def check_keck_fold_integrity(fold_directory, dataset_name='keck'):
     except KeyError:
         print("Number of folds is not supported. Check for repo updates.")
         return
-    
-    owd = os.getcwd()
-    os.chdir(fold_directory)
-    md5_hash_list = [(fname, hashlib.md5(open(fname, 'rb').read()).digest()) for fname in file_list]
-    os.chdir(owd)
+
+    md5_hash_list = generate_(fold_directory)
     
     no_errors = True
     for i in range(k):
         if key_hash_list[i] != md5_hash_list[i]:
             no_errors = False
+            break
           
     if no_errors:
         print("All files correct with no errors")
@@ -60,12 +69,12 @@ def fold_3_keys(dataset_name='keck'):
     'keck':[('file_0.csv', b'\xc2)4\x85\x8f\xf5\x17Wm\xcf\xbbG\x9a\x81\x03\xa6'),
              ('file_1.csv', b'\xdd<M\xf1\xf43+\xe5\xf7\xa6\xc3:\xf2X5\xca'),
              ('file_2.csv', b'\x93r\xa8\xd0\x8d\xecS\x058j\xc0\x05\x04<\xae\xba')],
-    'pcba':[('file_0.csv', b'\xec\x82jO\xfc\xf9\xda\xbcc\x07F\x88\xe3\xe8\xcf\xb6'),
-             ('file_1.csv', b'\xa2l\x8e\x9e\xc9\xdb\xe54+*\xc91\xc7j|\x91'),
-             ('file_2.csv', b'y:\xa6F\xafL\xf5\xe2q\x13\x14\xea7W\xa0\x9b')],
-    'keck_pcba':[('file_0.csv', b'3\x8b\xc9\xc5\xdd\xf0XH\x8b2!\x8d>\xbf\xea\xca'),
-                 ('file_1.csv', b'\x1a\xa8\xef\xe3\x11\x14\xcdO\xf9M>\xdc\x89\xaa\x84_'),
-                 ('file_2.csv', b'n\x87\xbc\xc3{\xe0\x0e;y=#\x82[t\x9a\xba')]
+    'pcba':[('file_0.csv', '\\2\xfd+\x1d<;\x82\xf6z\xf8h(\x98\x7f}'),
+            ('file_1.csv', '\x14\xeb\xa4\x91\x9b\xc1\x11\xd56\x15\x08r\xe1O\x15\xa9'),
+            ('file_2.csv', '\xac\xac\x86\x83\x17\x1a\xff\x10Q\xad\xef\xb72\xe1\xf0F')],
+    'keck_pcba':[('file_0.csv', '\\2\xfd+\x1d<;\x82\xf6z\xf8h(\x98\x7f}'),
+                 ('file_1.csv', '\x14\xeb\xa4\x91\x9b\xc1\x11\xd56\x15\x08r\xe1O\x15\xa9'),
+                 ('file_2.csv', '\xac\xac\x86\x83\x17\x1a\xff\x10Q\xad\xef\xb72\xe1\xf0F')]
     }
     return hash_dict[dataset_name]
     
@@ -75,14 +84,14 @@ def fold_4_keys(dataset_name='keck'):
              ('file_1.csv', b'\x9e\x04\xce\xca\x92\xc8\xc5J\x81\xb2m\xc6)\x16?\x9a'),
              ('file_2.csv', b'W\xd9\x1c\x16R\x06\xe8\xba\xe9$\xdew\xe3\x01\xe8E'),
              ('file_3.csv', b'q\x02\xee\xc7x,\xb4|"L\x10\x98EI\xd1\xfe')],
-    'pcba':[('file_0.csv', b'o\xba>Gi\xfc\xf4lJ\x9b\x1bx\xc10x+'),
-             ('file_1.csv', b'">\xe1\xce\xcc\xfa8*#}\x07T\x02b\x87\xc5'),
-             ('file_2.csv', b'\xce\xe6\xa3\x9e8Ar\x88c\xfd3\xfaK\xe0\xd1b'),
-             ('file_3.csv', b'|\xcc:t\xe4\xcb\x9a\xaf\xeb\xcf\x0e{\x06\xdb\xd8I')],
-    'keck_pcba':[('file_0.csv', b'`\xf5N\xce2\rz.\xab}\n\x81sr\x02\x10'),
-                 ('file_1.csv', b'\x1d\xfd\x95@\x87\x8c+\x9f\x00\x80\xc3-z<\xabl'),
-                 ('file_2.csv', b'u6\xb6\x1b\x7fs\x87}n\xd6h\x1d|g\xc8\x90'),
-                 ('file_3.csv', b'\x14\xc2\xb6\x84i\x98g\x98dx\x00\x88\xc3\x0emV')]
+    'pcba':[('file_0.csv', '\x00\xc8\x1a\xdc\xc1\x8e@\xb0\xb4w\xa7\xb2^8\xf1\xd5'),
+            ('file_1.csv', '=\x95\x92R\x95\x8b\xd6\xf3\xe7qb}T\xadU\x08'),
+            ('file_2.csv', 'f>\x99S.\xe0\xe2*Gb\xf9\x98\x97\xaf\x19\xd0'),
+            ('file_3.csv', '\xd0\xee\x18iB\xcdi\x85\x0eN\xf5F/\n\xfe\xb5')],
+    'keck_pcba':[('file_0.csv', '(\x1f<\xb7\xef\xd5\xd7\xa4m\tq\x0e\xae\x10\xe1\x80'),
+                 ('file_1.csv', 'x&\x80\x0c\xa7\xc8PI\xa6v\xd4\xe0/\xd2\xa1g'),
+                 ('file_2.csv', '\'Q\xd7;F\x1d\xf3\xa8V\xbc\x81\xa9#"\x0f<'),
+                 ('file_3.csv', '\xcff\xe3d5\xa29&v|\xbd\x0c\xb3#\xb0\xea')]
     }
     return hash_dict[dataset_name]
 
@@ -93,15 +102,15 @@ def fold_5_keys(dataset_name='keck'):
              ('file_2.csv', b'\x05\xfd\t^\x18_M\xcaJ\xc6\x81\xc8PE\xed\x06'),
              ('file_3.csv', b'\xaa0LG\xc3\xe0\xe1y\xf0\xe1G\x84\xc9uz\xed'),
              ('file_4.csv', b'\x94\xf1\xdfw\x81\x89/,\x94\x12\x9f\x9c\xc1\xc2.\xe8')],
-    'pcba':[('file_0.csv', b'wh\x81^:{\xcb\x11V\xa8\xfcf\xc0\xdf\x08\x8d'),
-             ('file_1.csv', b'p\x99\xcc\xe1D\xc2\xafA\x14\xa2\x00\xc6\xa2\x7f\xc6\xce'),
-             ('file_2.csv', b'\xe6\x9f\x8d\x0f\x88\xc6\xb0Fd\xb7\xa4\x92d\nwu'),
-             ('file_3.csv', b')\xf1\xd0@\x1f\t\xdd\xa5\x93\xc3\n\x9c&\x90\xe6E'),
-             ('file_4.csv', b'\xb8\x93\xe7\x851\xef5\xe9\xc3r`\x95\r\xf5\xc8\xa8')],
-    'keck_pcba':[('file_0.csv', b'}\xddy\x8c\xcc"J\\1\xbf\x1b1\x9d\xdf\x9c\x11'),
-                 ('file_1.csv', b'\x80\x9b)\x9fz3\x83\x02\r1,D\xadE"\x82'),
-                 ('file_2.csv', b'\xd1N\xf8\'\xec\xc6\xbe\x9a"\x7f\x7f$\xec\x12\xacs'),
-                 ('file_3.csv', b'\xe3\x1a\xd8\xf2\x9b?\xa1\xdfE\x1c?\x94F0\x8e\xab'),
-                 ('file_4.csv', b'\xebB\xaf\x17B\xe5xXp\x16\xf1kh\x82\xd9\x1b')]
+    'pcba':[('file_0.csv', '@\xb8\x1c\x0c\xce\xfa\tn\x91\x9a\xf6?S\x9e\x1b\x8d'),
+            ('file_1.csv', '!0\xe0>\xf2\xd3\xe8)T\xa9N\xacq\x94\xae\xec'),
+            ('file_2.csv', '\x0f\xbe\xce)2\xbf\xac\x03f$\xddK\xa0\x91\x88E'),
+            ('file_3.csv', '\x13W\x95K\x0cw\xfe4l~)\xbc\x16\x92\xf0\x91'),
+            ('file_4.csv', '\x1b\x19,0 C\xdbu\xb8/\x81l\xc5\n\x7f\x19')],
+    'keck_pcba':[('file_0.csv', "\xdd\x16<:Q'Wl7S\xbc\x8e\x83\xf4\xc0\xac"),
+                 ('file_1.csv', 'UJ7N\x19\x19\x8a\xc5\xca\xf8\x1c?\x13\xa2\x07\x83'),
+                 ('file_2.csv', '\x88um\x97\xef\xe4O\xb8d9\x1eL\xe1\x87[+'),
+                 ('file_3.csv', ' \xe6\xa9\x92I\xfe\xccR\x1d\xd7\x8cH\xcc\x99\xa6-'),
+                 ('file_4.csv', ')\xb9\x1e\xbdHY\xfe\x93\xdf\xde\xbfT\x13\xa2<e')]
     }
     return hash_dict[dataset_name]
