@@ -155,8 +155,8 @@ if __name__ == '__main__':
     output_file_list = [directory + f_ for f_ in file_list]
     
     train_pd = read_merged_data(output_file_list[0:2])
-    val_pd = read_merged_data(output_file_list[3])
     test_pd = read_merged_data([output_file_list[4]])
+    val_pd = read_merged_data([output_file_list[3]])
     
     labels = ['Keck_Pria_AS_Retest', 'Keck_Pria_FP_data', 'Keck_Pria_Continuous',
               'Keck_RMI_cdd', 'FP counts % inhibition']
