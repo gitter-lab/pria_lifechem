@@ -1,5 +1,1 @@
-python src/models/sgd_model2.py --config_json_file=./json/single_classification.json --model_dir=../job_results/neural_networks/single_task_${cluster}_${process}/ --dataset_dir=./dataset/keck/fold_5/
-python src/models/sgd_model2.py --config_json_file=./json/single_classification.json --model_dir=../job_results/neural_networks/single_task_${cluster}_${process}/ --dataset_dir=./dataset/keck/fold_5/
-python src/models/sgd_model2.py --config_json_file=./json/single_classification.json --model_dir=../job_results/irv/single_task_${cluster}_${process}/ --dataset_dir=./dataset/keck/fold_5/
-python src/models/sgd_model2.py --config_json_file=./json/single_classification.json --model_dir=../job_results/deep_chem/single_task_${cluster}_${process}/ --dataset_dir=./dataset/keck/fold_5/
-python src/models/sgd_model2.py --config_json_file=./json/single_classification.json --model_dir=../job_results/light_chem/single_task_${cluster}_${process}/ --dataset_dir=./dataset/keck/fold_5/
+python src/models/sklearn_randomforest.py --config_json_file=./json/sklearn_randomforest.json --model_dir=../job_results/random_forest/sklearn_rf_${cluster}_${process}/ --dataset_dir=./dataset/keck/fold_5/

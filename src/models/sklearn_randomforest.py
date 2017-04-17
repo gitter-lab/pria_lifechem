@@ -9,10 +9,7 @@ sys.path.insert(0, '.')  # Add path from current folder
 from function import *
 from evaluation import *
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.calibration import CalibratedClassifierCV
-from sklearn.cross_validation import StratifiedShuffleSplit
 from sklearn.externals import joblib
-from sklearn.model_selection import GridSearchCV
 from sklearn.grid_search import ParameterGrid
 
 rnd_state=1337
