@@ -63,6 +63,26 @@ def transform_data(output_file_name):
 
 
 '''
+Create sample weights, for weighted model
+'''
+def generate_sample_weights(target_dir, k, dest_dir):
+    if not os.path.exists(dest_dir):
+        os.makedirs(dest_dir)
+
+    for i in range(k):
+        data_pd = pd.read_csv(target_dir + 'file_{}.csv'.format(i))
+
+        # First three labels are Molecule, SMILES, and Finterprints
+        # The remaining ones are labels
+        labels = data_pd.columns.tolist()[3:]
+        data_pd.replace([0], 1)
+        data_pd.replace([np.NaN], 0)
+        data_pd.to_csv(dest_dir + 'sample_weight_{}.csv'.format(i), index=None)
+
+    return
+
+
+'''
 Get the mappings for SMILES
 Pre-train this for only once
 '''
