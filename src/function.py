@@ -548,12 +548,12 @@ def merge_keck_pcba(keck_dir, pcba_dir, k, dest_dir):
     label_stats_df = pd.DataFrame(data=np.zeros((k+2,len(label_stat_columns))), 
                                   columns=label_stat_columns, dtype=np.int64,
                                   index=index_names)
-    fold_sizes = list()
+    fold_sizes = [0 for _ in range(k)]
     for i in range(k):    
         curr_fold_df = pd.read_csv(dest_dir+'file_{}.csv'.format(i))
         for j, label in zip(range(len(label_names)), label_names):
             curr_label = np.array(curr_fold_df[label])
-            fold_sizes.append(curr_label.shape[0])
+            fold_sizes[i] = curr_label.shape[0]
             
             ind = 3*j
             label_stats_df.iloc[i][ind] = curr_label[curr_label==1].shape[0]
