@@ -21,7 +21,10 @@ class SKLearn_RandomForest:
         self.label_names = conf['label_names']
         self.EF_ratio_list = conf['enrichment_factor']['ratio_list']
         
-        self.process_id = os.environ.get('process')
+        self.process_id = os.environ.get('process')        
+        if self.process_id == None:
+            print('Error: No environemnt variable process exists.')
+            return    
         
         cnt = 0
         for param in ParameterGrid(conf['params']):
