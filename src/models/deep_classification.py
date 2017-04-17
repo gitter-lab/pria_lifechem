@@ -404,6 +404,10 @@ class MultiClassification:
                 if cross_validation_count == 1:
                     print zero_weight, one_weight
                 cw.append({-1:0.0, 0: zero_weight, 1: one_weight})
+        else:
+            cw = []
+            for i in range(self.output_layer_dimension):
+                cw.append({-1: 0.0, 0: 0.5, 1: 0.5})
 
         model.fit(X_train, y_train,
                   nb_epoch=self.fit_nb_epoch,
@@ -613,7 +617,7 @@ def demo_multi_classification():
 
     whole_EF = []
     for EF_ratio in task.EF_ratio_list:
-        EF_list = task.get_EF_score_with_existing_model(X_test, y_test, PMTNN_weight_file,EF_ratio)
+        EF_list = task.get_EF_score_with_existing_model(X_test, y_test, PMTNN_weight_file, EF_ratio)
         whole_EF.append([EF_ratio])
         whole_EF.append(EF_list)
         print(EF_ratio, EF_list)
@@ -628,8 +632,8 @@ if __name__ == '__main__':
     parser.add_argument('--config_json_file', action="store", dest="config_json_file", required=True)
     parser.add_argument('--PMTNN_weight_file', action="store", dest="PMTNN_weight_file", required=True)
     parser.add_argument('--config_csv_file', action="store", dest="config_csv_file", required=True)
-    parser.add_argument('--mode', action='store', dest='mode', required=True)
     parser.add_argument('--score_file', action='store', dest='score_file', required=False)
+    parser.add_argument('--mode', action='store', dest='mode', required=True)
     given_args = parser.parse_args()
     config_json_file = given_args.config_json_file
     PMTNN_weight_file = given_args.PMTNN_weight_file
