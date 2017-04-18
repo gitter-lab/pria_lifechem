@@ -4,8 +4,6 @@ matrix:
   include:
     - python: 2.7
       env: KERAS_BACKEND=theano
-    - python: 2.7
-      env: KERAS_BACKEND=tensorflow
 
 notifications:
   email: false
