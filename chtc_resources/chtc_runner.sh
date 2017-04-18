@@ -47,14 +47,14 @@ rm -f virtual-screening-master.zip
 mv chao* virtual-screening
 rm -rf ./virtual-screening/dataset
 mv ./dataset/ ./virtual-screening/dataset/
-export PYTHONPATH=${PYTHONPATH}:${_CONDOR_JOB_IWD}/virtual-screening:${_CONDOR_JOB_IWD}/virtual-screening/src:${_CONDOR_JOB_IWD}/virtual-screening/src/models
+export PYTHONPATH=${PYTHONPATH}:${_CONDOR_JOB_IWD}/virtual-screening:${_CONDOR_JOB_IWD}/virtual-screening/virtual_screening:${_CONDOR_JOB_IWD}/virtual-screening/virtual_screening/models
 
 cd virtual-screening
 
 
 #run python job
 python_jobs_dir=$1
-KERAS_BACKEND=theano THEANO_FLAGS="base_compiledir=./tmp,floatX=float32,device=gpu,gpuarray.preallocate=0.8" python src/chtc_distributor.py $python_jobs_dir
+KERAS_BACKEND=theano THEANO_FLAGS="base_compiledir=./tmp,floatX=float32,device=gpu,gpuarray.preallocate=0.8" python virtual_screening/chtc_distributor.py $python_jobs_dir
 
 echo 'Done running job'
 
