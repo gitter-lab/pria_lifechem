@@ -42,7 +42,7 @@
   "fitting": {
     "nb_epoch": 10,
     "batch_size": 2048,
-    "verbose": 1,
+    "verbose": 0,
     "early_stopping": {
       "option": "auc",
       "patience": 50
