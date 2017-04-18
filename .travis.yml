@@ -1,0 +1,23 @@
+language: python
+python:
+  - 2.7
+before_install:
+  - wget -q –retry-connrefused –waitretry=10 https://repo.continuum.io/archive/Anaconda2-4.3.1-Linux-x86_64.sh #here I get the anaconda file from squid
+  - chmod 777 *
+  - ./Anaconda2-4.3.1-Linux-x86_64.sh -b -p ./anaconda
+  - export PATH="$HOME/anaconda/bin:$PATH"
+  - conda install --yes pyyaml
+  - conda install --yes HDF5
+  - conda install --yes h5py
+  - conda install --yes -c rdonnelly libgpuarray
+  - conda install --yes -c rdonnelly pygpu
+  - conda install --yes -c rdonnelly theano
+  - conda install --yes -c conda-forge theano=0.8*
+  - conda install --yes -c conda-forge keras=1.2*
+  - conda install --yes scikit-learn=0.17*
+  - conda install --yes -c rdkit rdkit-postgresql
+  - conda install --yes -c r rpy2
+  - conda install --yes -c bioconda r-prroc=1.1
+  - conda install --yes -c auto croc
+install:
+  pip install --user -e .
