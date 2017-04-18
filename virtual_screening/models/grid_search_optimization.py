@@ -196,7 +196,7 @@ def run_vanilla_lstm():
     hyperparameter_sets = {'optimizer': ['rmsprop'],
                            'epoch size': [200],
                            'patience': [20],
-                           'early stopping': ['precision'],
+                           'early stopping': ['auc'],
                            'embedding_size': [30, 50, 100],
                            'layer_num': [1, 2],
                            'hidden_size': [
