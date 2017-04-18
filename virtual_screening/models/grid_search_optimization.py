@@ -218,7 +218,6 @@ def run_vanilla_lstm():
         conf['lstm']['layer_num'] = len(param['hidden_size'])
         conf['compile']['optimizer']['option'] = param['optimizer']
         conf['fitting']['nb_epoch'] = param['epoch size']
-        conf['fitting']['nb_epoch'] = 1
         conf['fitting']['early_stopping']['patience'] = param['patience']
         conf['fitting']['early_stopping']['option'] = param['early stopping']
         for i in range(conf['lstm']['layer_num']):
@@ -235,7 +234,7 @@ def run_vanilla_lstm():
 
     task.train_and_predict(X_t, y_t, X_val, y_val, X_test, y_test, PMTNN_weight_file)
     store_config(conf, config_csv_file)
-    
+
     return
 
 
