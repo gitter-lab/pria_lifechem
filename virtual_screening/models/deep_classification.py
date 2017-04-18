@@ -10,9 +10,11 @@ from keras.layers import Dense, Dropout
 from keras.layers.normalization import BatchNormalization
 from keras.optimizers import SGD, Adam
 from sklearn.cross_validation import StratifiedShuffleSplit
-from virtual_screening.function import *
-from virtual_screening.evaluation import *
-from virtual_screening.models.CallBacks import *
+from virtual_screening.function import read_merged_data, extract_feature_and_label, store_data, transform_json_to_csv
+from virtual_screening.evaluation import roc_auc_single, roc_auc_multi, bedroc_auc_multi, bedroc_auc_single, \
+    precision_auc_multi, precision_auc_single, enrichment_factor_multi, enrichment_factor_single
+from virtual_screening.models.CallBacks import KeckCallBackOnROC, KeckCallBackOnPrecision, \
+    MultiCallBackOnROC, MultiCallBackOnPR
 
 
 class SingleClassification:
@@ -123,17 +125,17 @@ class SingleClassification:
         y_pred_on_test = model.predict(X_test)
 
         print
-        print('train precision: {}'.format(get_model_precision_auc(y_train, y_pred_on_train)))
-        print('train roc: {}'.format(get_model_roc_auc(y_train, y_pred_on_train)))
-        print('train bedroc: {}'.format(get_model_bedroc_auc(y_train, y_pred_on_train)))
+        print('train precision: {}'.format(precision_auc_single(y_train, y_pred_on_train)))
+        print('train roc: {}'.format(roc_auc_single(y_train, y_pred_on_train)))
+        print('train bedroc: {}'.format(bedroc_auc_single(y_train, y_pred_on_train)))
         print
-        print('validation precision: {}'.format(get_model_precision_auc(y_val, y_pred_on_val)))
-        print('validation roc: {}'.format(get_model_roc_auc(y_val, y_pred_on_val)))
-        print('validation bedroc: {}'.format(get_model_bedroc_auc(y_val, y_pred_on_val)))
+        print('validation precision: {}'.format(precision_auc_single(y_val, y_pred_on_val)))
+        print('validation roc: {}'.format(roc_auc_single(y_val, y_pred_on_val)))
+        print('validation bedroc: {}'.format(bedroc_auc_single(y_val, y_pred_on_val)))
         print
-        print('test precision: {}'.format(get_model_precision_auc(y_test, y_pred_on_test)))
-        print('test roc: {}'.format(get_model_roc_auc(y_test, y_pred_on_test)))
-        print('test bedroc: {}'.format(get_model_bedroc_auc(y_test, y_pred_on_test)))
+        print('test precision: {}'.format(precision_auc_single(y_test, y_pred_on_test)))
+        print('test roc: {}'.format(roc_auc_single(y_test, y_pred_on_test)))
+        print('test bedroc: {}'.format(bedroc_auc_single(y_test, y_pred_on_test)))
         print
 
         for EF_ratio in self.EF_ratio_list:
@@ -155,17 +157,17 @@ class SingleClassification:
         y_pred_on_test = model.predict(X_test)
 
         print
-        print('train precision: {}'.format(get_model_precision_auc(y_train, y_pred_on_train)))
-        print('train roc: {}'.format(get_model_roc_auc(y_train, y_pred_on_train)))
-        print('train bedroc: {}'.format(get_model_bedroc_auc(y_train, y_pred_on_train)))
+        print('train precision: {}'.format(precision_auc_single(y_train, y_pred_on_train)))
+        print('train roc: {}'.format(roc_auc_single(y_train, y_pred_on_train)))
+        print('train bedroc: {}'.format(bedroc_auc_single(y_train, y_pred_on_train)))
         print
-        print('validation precision: {}'.format(get_model_precision_auc(y_val, y_pred_on_val)))
-        print('validation roc: {}'.format(get_model_roc_auc(y_val, y_pred_on_val)))
-        print('validation bedroc: {}'.format(get_model_bedroc_auc(y_val, y_pred_on_val)))
+        print('validation precision: {}'.format(precision_auc_single(y_val, y_pred_on_val)))
+        print('validation roc: {}'.format(roc_auc_single(y_val, y_pred_on_val)))
+        print('validation bedroc: {}'.format(bedroc_auc_single(y_val, y_pred_on_val)))
         print
-        print('test precision: {}'.format(get_model_precision_auc(y_test, y_pred_on_test)))
-        print('test roc: {}'.format(get_model_roc_auc(y_test, y_pred_on_test)))
-        print('test bedroc: {}'.format(get_model_bedroc_auc(y_test, y_pred_on_test)))
+        print('test precision: {}'.format(precision_auc_single(y_test, y_pred_on_test)))
+        print('test roc: {}'.format(roc_auc_single(y_test, y_pred_on_test)))
+        print('test bedroc: {}'.format(bedroc_auc_single(y_test, y_pred_on_test)))
         print
 
         return
@@ -570,7 +572,7 @@ def demo_single_classification():
         conf = json.load(f)
     task = SingleClassification(conf=conf)
     task.train_and_predict(X_train, y_train, X_val, y_val, X_test, y_test, PMTNN_weight_file)
-    task.store_data(transform_json_to_csv(config_json_file), config_csv_file)
+    store_data(transform_json_to_csv(config_json_file), config_csv_file)
 
     return
 

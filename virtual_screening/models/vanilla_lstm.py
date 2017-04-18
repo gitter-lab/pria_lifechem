@@ -13,11 +13,11 @@ from keras.layers.core import RepeatVector, TimeDistributedDense
 from keras.preprocessing import sequence
 from keras.layers.embeddings import Embedding
 from keras.optimizers import SGD, Adam
-from sklearn.metrics import roc_auc_score, accuracy_score, average_precision_score
 from sklearn.cross_validation import StratifiedShuffleSplit
-from virtual_screening.function import *
-from virtual_screening.evaluation import *
-from virtual_screening.models.CallBacks import *
+from virtual_screening.function import read_merged_data, extract_SMILES_and_label
+from virtual_screening.evaluation import roc_auc_single, bedroc_auc_single, \
+    precision_auc_single, enrichment_factor_single
+from virtual_screening.models.CallBacks import KeckCallBackOnROC, KeckCallBackOnPrecision
 
 
 class VanillaLSTM:
@@ -92,7 +92,7 @@ class VanillaLSTM:
                                dropout_W=dropout_W,
                                dropout_U=dropout_U,
                                return_sequences=False))
-            elif i == 1:
+            elif i == 0:
                 model.add(LSTM(hidden_size,
                                input_shape=(self.padding_length, self.embedding_size),
                                dropout_W=dropout_W,
@@ -117,7 +117,6 @@ class VanillaLSTM:
         #                dropout_W=0.2,
         #                dropout_U=0.2))
 
-        # model.add(Dropout(0.5))
         model.add(Dense(self.output_layer_dimension,
                         activation=self.activation))
         print(model.summary())

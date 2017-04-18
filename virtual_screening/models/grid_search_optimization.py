@@ -224,7 +224,7 @@ def run_vanilla_lstm():
             conf['layers'][i]['dropout_W'] = param['dropout']
         print 'Testing hyperparameter ', param
         break
-        
+
     task = VanillaLSTM(conf)
     X_t = sequence.pad_sequences(X_t, maxlen=task.padding_length)
     X_val = sequence.pad_sequences(X_val, maxlen=task.padding_length)
