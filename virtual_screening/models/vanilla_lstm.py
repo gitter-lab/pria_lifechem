@@ -15,12 +15,9 @@ from keras.layers.embeddings import Embedding
 from keras.optimizers import SGD, Adam
 from sklearn.metrics import roc_auc_score, accuracy_score, average_precision_score
 from sklearn.cross_validation import StratifiedShuffleSplit
-
-sys.path.insert(0, '..')  # Add path from parent folder
-sys.path.insert(0, '.')  # Add path from current folder
-from function import *
-from evaluation import *
-from CallBacks import *
+from virtual_screening.function import *
+from virtual_screening.evaluation import *
+from virtual_screening.models.CallBacks import *
 
 
 class VanillaLSTM:

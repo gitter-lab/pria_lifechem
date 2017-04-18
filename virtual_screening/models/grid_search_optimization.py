@@ -11,14 +11,12 @@ from keras.layers.normalization import BatchNormalization
 from keras.optimizers import SGD, Adam
 from sklearn.cross_validation import StratifiedShuffleSplit
 from sklearn.grid_search import ParameterGrid
-sys.path.insert(0, '..')  # Add path from parent folder
-sys.path.insert(0, '.')  # Add path from current folder
-from function import *
-from evaluation import *
-from CallBacks import *
-from deep_classification import *
-from single_regression import *
-from vanilla_lstm import *
+from virtual_screening.function import *
+from virtual_screening.evaluation import *
+from virtual_screening.models.CallBacks import *
+from virtual_screening.models.deep_classification import *
+from virtual_screening.models.single_regression import *
+from virtual_screening.models.vanilla_lstm import *
 
 
 def run_single_classification():

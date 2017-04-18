@@ -10,11 +10,9 @@ from keras.layers import Dense, Dropout
 from keras.layers.normalization import BatchNormalization
 from keras.optimizers import SGD, Adam
 from sklearn.cross_validation import StratifiedShuffleSplit
-sys.path.insert(0, '..')  # Add path from parent folder
-sys.path.insert(0, '.')  # Add path from current folder
-from function import *
-from evaluation import *
-from CallBacks import *
+from virtual_screening.function import *
+from virtual_screening.evaluation import *
+from virtual_screening.models.CallBacks import *
 
 
 class SingleRegression:
