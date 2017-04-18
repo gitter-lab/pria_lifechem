@@ -24,7 +24,9 @@ class SKLearn_RandomForest:
         self.process_id = os.environ.get('process')        
         if self.process_id == None:
             print('Error: No environemnt variable process exists.')
-            return    
+            return 
+        else:
+            print('process id:', self.process_id)
         
         cnt = 0
         for param in ParameterGrid(conf['params']):
