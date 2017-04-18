@@ -65,8 +65,7 @@ class SKLearn_RandomForest:
             self.model_dict[self.label_names[i]] = RandomForestRegressor(n_estimators=self.n_estimators, 
                                            max_features=self.max_features, 
                                            min_samples_leaf=self.min_samples_leaf, 
-                                           n_jobs=-1, 
-                                           class_weight=self.class_weight,
+                                           n_jobs=-1,
                                            random_state=rnd_state,
                                            oob_score=False, 
                                            verbose=1) 
