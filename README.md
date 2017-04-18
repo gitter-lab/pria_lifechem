@@ -19,3 +19,11 @@ function.py: all helper functions
 evaluation.py: all evaluation functions
 
 demo.ipynb gives some examples on how to use them.
+
+## setup
+
+`sudo pip install -e .`
+
+if permission denied, try
+
+`pip install --user -e .`
