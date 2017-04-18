@@ -13,14 +13,11 @@ from keras.layers.core import RepeatVector, TimeDistributedDense
 from keras.preprocessing import sequence
 from keras.layers.embeddings import Embedding
 from keras.optimizers import SGD, Adam
-from sklearn.metrics import roc_auc_score, accuracy_score, average_precision_score
 from sklearn.cross_validation import StratifiedShuffleSplit
-
-sys.path.insert(0, '..')  # Add path from parent folder
-sys.path.insert(0, '.')  # Add path from current folder
-from function import *
-from evaluation import *
-from CallBacks import *
+from virtual_screening.function import read_merged_data, extract_SMILES_and_label
+from virtual_screening.evaluation import roc_auc_single, bedroc_auc_single, \
+    precision_auc_single, enrichment_factor_single
+from virtual_screening.models.CallBacks import KeckCallBackOnROC, KeckCallBackOnPrecision
 
 
 class VanillaLSTM:
@@ -31,8 +28,8 @@ class VanillaLSTM:
         self.padding_length = conf['lstm']['padding_length']
         self.vocabulary_size = conf['lstm']['different_alphabets_num'] + 1
         self.embedding_size = conf['lstm']['embedding_size']
-        self.first_hidden_size = conf['lstm']['first_hidden_size']
-        self.second_hidden_size = conf['lstm']['second_hidden_size']
+        self.activation = conf['lstm']['activation']
+        self.layer_num = conf['lstm']['layer_num']
 
         self.output_layer_dimension = 1
 
@@ -83,6 +80,29 @@ class VanillaLSTM:
         model.add(Embedding(input_dim=self.vocabulary_size,
                             output_dim=self.embedding_size,
                             input_length=self.padding_length))
+        layers = self.conf['layers']
+        layer_num = self.layer_num
+
+        for i in range(layer_num):
+            hidden_size = layers[i]['hidden_size']
+            dropout_W = layers[i]['dropout_W']
+            dropout_U = layers[i]['dropout_U']
+            if i == layer_num - 1:
+                model.add(LSTM(hidden_size,
+                               dropout_W=dropout_W,
+                               dropout_U=dropout_U,
+                               return_sequences=False))
+            elif i == 0:
+                model.add(LSTM(hidden_size,
+                               input_shape=(self.padding_length, self.embedding_size),
+                               dropout_W=dropout_W,
+                               dropout_U=dropout_U,
+                               return_sequences=True))
+            else:
+                model.add(LSTM(hidden_size,
+                               dropout_W=dropout_W,
+                               dropout_U=dropout_U,
+                               return_sequences=True))
         # (batch_size,time_steps,embedding_size)
         # model.add(LSTM(self.first_hidden_size,
         #                input_shape=(self.padding_length, self.embedding_size),
@@ -93,12 +113,12 @@ class VanillaLSTM:
         #                dropout_W=0.2,
         #                dropout_U=0.2,
         #                return_sequences=True))
-        model.add(LSTM(self.second_hidden_size,
-                       dropout_W=0.2,
-                       dropout_U=0.2))
+        # model.add(LSTM(self.second_hidden_size,
+        #                dropout_W=0.2,
+        #                dropout_U=0.2))
 
-        # model.add(Dropout(0.5))
-        model.add(Dense(self.output_layer_dimension, activation='sigmoid'))
+        model.add(Dense(self.output_layer_dimension,
+                        activation=self.activation))
         print(model.summary())
         return model
 
@@ -209,3 +229,4 @@ if __name__ == '__main__':
     X_test = sequence.pad_sequences(X_test, maxlen=task.padding_length)
 
     task.train_and_predict(X_t, y_t, X_val, y_val, X_test, y_test, PMTNN_weight_file)
+    store_config(conf, config_csv_file)

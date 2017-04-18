@@ -55,7 +55,9 @@ cp -r dataset/* virtual-screening/dataset/
 
 echo
 #run python job
-cd virtual-screening/src/models
+cd virtual-screening
+pip install --user -e .
+cd virtual_screening/models
 echo "start"
 date
 KERAS_BACKEND=theano \

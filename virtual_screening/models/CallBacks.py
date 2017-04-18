@@ -1,8 +1,6 @@
 import keras
 import sys
-# Add path from parent folder
-sys.path.insert(0, '..')
-from evaluation import *
+from virtual_screening.evaluation import *
 
 
 # define custom classes

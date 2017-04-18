@@ -250,6 +250,12 @@ def store_data(data, file):
             writer.writerow([d])
     return
 
+
+def store_config(conf, file_):
+    with open(file_, 'w') as f:
+        json.dump(conf, f)
+    return
+
 '''
 Store json file to csv
 '''
@@ -510,10 +516,8 @@ def split_pcba_into_folds(data_dir, k, dest_dir):
     merges keck folds with pcba folds in a straightforward manner.
 """
 def merge_keck_pcba(keck_dir, pcba_dir, k, dest_dir):
-    nb_classes = 5+128
-    
     if not os.path.exists(dest_dir):
-        os.makedirs(dest_dir) 
+        os.makedirs(dest_dir)
     #now perform merging of folds
     overlap_counts = list()
     for i in range(k):
