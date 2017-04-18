@@ -250,6 +250,12 @@ def store_data(data, file):
             writer.writerow([d])
     return
 
+
+def store_config(conf, file_):
+    with open(file_, 'w') as f:
+        json.dump(conf, f)
+    return
+
 '''
 Store json file to csv
 '''

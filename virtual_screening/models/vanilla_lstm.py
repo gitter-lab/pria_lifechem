@@ -229,3 +229,4 @@ if __name__ == '__main__':
     X_test = sequence.pad_sequences(X_test, maxlen=task.padding_length)
 
     task.train_and_predict(X_t, y_t, X_val, y_val, X_test, y_test, PMTNN_weight_file)
+    store_config(conf, config_csv_file)

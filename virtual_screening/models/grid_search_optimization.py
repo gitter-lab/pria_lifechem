@@ -200,6 +200,8 @@ def run_vanilla_lstm():
                            'embedding_size': [30, 50, 100],
                            'layer_num': [1, 2],
                            'hidden_size': [
+                               [50],
+                               [100],
                                [100, 10],
                                [100, 50],
                                [50, 10]
@@ -213,12 +215,13 @@ def run_vanilla_lstm():
             cnt += 1
             continue
         conf['lstm']['embedding_size'] = param['embedding_size']
-        conf['lstm']['layer_num'] = param['layer_num']
+        conf['lstm']['layer_num'] = len(param['hidden_size'])
         conf['compile']['optimizer']['option'] = param['optimizer']
         conf['fitting']['nb_epoch'] = param['epoch size']
+        conf['fitting']['nb_epoch'] = 1
         conf['fitting']['early_stopping']['patience'] = param['patience']
         conf['fitting']['early_stopping']['option'] = param['early stopping']
-        for i in range(len(conf['layers'])):
+        for i in range(conf['lstm']['layer_num']):
             conf['layers'][i]['hidden_size'] = param['hidden_size'][i]
             conf['layers'][i]['dropout_U'] = param['dropout']
             conf['layers'][i]['dropout_W'] = param['dropout']
@@ -229,8 +232,10 @@ def run_vanilla_lstm():
     X_t = sequence.pad_sequences(X_t, maxlen=task.padding_length)
     X_val = sequence.pad_sequences(X_val, maxlen=task.padding_length)
     X_test = sequence.pad_sequences(X_test, maxlen=task.padding_length)
+
     task.train_and_predict(X_t, y_t, X_val, y_val, X_test, y_test, PMTNN_weight_file)
-    store_data(transform_json_to_csv(config_json_file), config_csv_file)
+    store_config(conf, config_csv_file)
+    
     return
 
 
