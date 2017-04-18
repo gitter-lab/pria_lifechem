@@ -118,7 +118,7 @@ class SKLearn_RandomForest:
         y_test[:,2] = y_test[:,0]
         y_test[:,4] = y_test[:,3]
         
-        for i, label in (range(len(self.label_names)), self.label_names):     
+        for i, label in zip(range(len(self.label_names)), self.label_names):     
             model = joblib.load(model_file+'_'+label+'.pkl')
             
             y_pred_on_train[:,i] =  model.predict_proba(X_train)[:,1].reshape(X_train.shape[0],1)
@@ -168,7 +168,7 @@ class SKLearn_RandomForest:
         y_true[:,2] = y_true[:,0]
         y_true[:,4] = y_true[:,3]
         
-        for i, label in (range(len(self.label_names)), self.label_names):     
+        for i, label in zip(range(len(self.label_names)), self.label_names):     
             model = joblib.load(model_file+'_'+label+'.pkl')
             
             y_pred[:,i] =  model.predict_proba(X)[:,1].reshape(X.shape[0],1)
