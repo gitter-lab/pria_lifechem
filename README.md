@@ -1,5 +1,7 @@
 # virtual-screening
 
+[![Build Status](https://travis-ci.com/chao1224/virtual-screening.svg?token=65bvwEHMjNzkwWsY5dLk&branch=master)](https://travis-ci.com/chao1224/virtual-screening)
+
 ## dataset
 
 Some datasets that too big to put it here, but I upload a copy of them on the google drive, and here is the [link](https://drive.google.com/drive/folders/0B7r_bc_dhXLYLVctbC0zRnY4ZWM?usp=sharing)
