@@ -31,8 +31,8 @@ class VanillaLSTM:
         self.padding_length = conf['lstm']['padding_length']
         self.vocabulary_size = conf['lstm']['different_alphabets_num'] + 1
         self.embedding_size = conf['lstm']['embedding_size']
-        self.first_hidden_size = conf['lstm']['first_hidden_size']
-        self.second_hidden_size = conf['lstm']['second_hidden_size']
+        self.activation = conf['lstm']['activation']
+        self.layer_num = conf['lstm']['layer_num']
 
         self.output_layer_dimension = 1
 
@@ -83,6 +83,29 @@ class VanillaLSTM:
         model.add(Embedding(input_dim=self.vocabulary_size,
                             output_dim=self.embedding_size,
                             input_length=self.padding_length))
+        layers = self.conf['layers']
+        layer_num = self.layer_num
+
+        for i in range(layer_num):
+            hidden_size = layers[i]['hidden_size']
+            dropout_W = layers[i]['dropout_W']
+            dropout_U = layers[i]['dropout_U']
+            if i == layer_num - 1:
+                model.add(LSTM(hidden_size,
+                               dropout_W=dropout_W,
+                               dropout_U=dropout_U,
+                               return_sequences=False))
+            elif i == 1:
+                model.add(LSTM(hidden_size,
+                               input_shape=(self.padding_length, self.embedding_size),
+                               dropout_W=dropout_W,
+                               dropout_U=dropout_U,
+                               return_sequences=True))
+            else:
+                model.add(LSTM(hidden_size,
+                               dropout_W=dropout_W,
+                               dropout_U=dropout_U,
+                               return_sequences=True))
         # (batch_size,time_steps,embedding_size)
         # model.add(LSTM(self.first_hidden_size,
         #                input_shape=(self.padding_length, self.embedding_size),
@@ -93,12 +116,13 @@ class VanillaLSTM:
         #                dropout_W=0.2,
         #                dropout_U=0.2,
         #                return_sequences=True))
-        model.add(LSTM(self.second_hidden_size,
-                       dropout_W=0.2,
-                       dropout_U=0.2))
+        # model.add(LSTM(self.second_hidden_size,
+        #                dropout_W=0.2,
+        #                dropout_U=0.2))
 
         # model.add(Dropout(0.5))
-        model.add(Dense(self.output_layer_dimension, activation='sigmoid'))
+        model.add(Dense(self.output_layer_dimension,
+                        activation=self.activation))
         print(model.summary())
         return model
 

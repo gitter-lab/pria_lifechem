@@ -3,9 +3,21 @@
     "padding_length": 91,
     "different_alphabets_num": 35,
     "embedding_size": 30,
-    "first_hidden_size": 100,
-    "second_hidden_size": 10
+    "activation": "sigmoid",
+    "layer_num": 2
   },
+  "layers":[
+    {
+      "hidden_size": 100,
+      "dropout_W":0.2,
+      "dropout_U":0.2
+    },
+    {
+      "hidden_size": 10,
+      "dropout_W":0.2,
+      "dropout_U":0.2
+    }
+  ],
   "compile": {
     "loss": "binary_crossentropy",
     "optimizer": {
