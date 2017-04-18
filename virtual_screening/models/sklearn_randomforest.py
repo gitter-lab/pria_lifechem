@@ -185,7 +185,7 @@ class SKLearn_RandomForest:
         evaluate_model(y_true, y_pred, metric_dir, label_list)        
         return
         
-    def save_model_info(self, config_csv_file):
+    def save_model_params(self, config_csv_file):
         
         if not os.path.exists(config_csv_file):
             os.makedirs(config_csv_file)   
