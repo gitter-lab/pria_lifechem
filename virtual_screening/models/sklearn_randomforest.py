@@ -90,7 +90,7 @@ class SKLearn_RandomForest:
         X_test = X_test[p,:]
         y_test = y_test[p,:]
         
-        for i, label in (range(len(self.label_names)), self.label_names):
+        for i, label in zip(range(len(self.label_names)), self.label_names):
             y = y_train[:,i]
             indexes = np.where(np.isnan(y))[0]
                 
