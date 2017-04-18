@@ -21,3 +21,5 @@ before_install:
   - conda install --yes -c auto croc
 install:
   pip install --user -e .
+script:
+  python ../test/test_gpu.py
