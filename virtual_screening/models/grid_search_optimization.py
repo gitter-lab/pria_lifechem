@@ -193,7 +193,7 @@ def run_vanilla_lstm():
     with open(config_json_file, 'r') as f:
         conf = json.load(f)
 
-    hyperparameter_sets = {'optimizer': ['adam', 'rmsprop'],
+    hyperparameter_sets = {'optimizer': ['rmsprop'],
                            'epoch size': [200],
                            'patience': [20],
                            'early stopping': ['precision'],
@@ -206,7 +206,7 @@ def run_vanilla_lstm():
                                [100, 50],
                                [50, 10]
                            ],
-                           'dropout': [0, 0.2, 0.5]}
+                           'dropout': [0.2]}
     hyperparameters = ParameterGrid(hyperparameter_sets)
 
     cnt = 0
