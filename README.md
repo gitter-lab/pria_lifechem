@@ -2,30 +2,75 @@
 
 [![Build Status](https://travis-ci.com/chao1224/virtual-screening.svg?token=65bvwEHMjNzkwWsY5dLk&branch=master)](https://travis-ci.com/chao1224/virtual-screening)
 
+## Installation
+
+| Package | cmd|
+| --- | --- |
+| Anaconda | `wget https://repo.continuum.io/archive/Anaconda2-4.3.0-Linux-x86_64.sh -O anaconda.sh` <br> `chmod 777 *` <br> `bash anaconda.sh -b -p $HOME/anaconda` <br> `export PATH="$HOME/anaconda/bin:$PATH"` |
+| pyyaml | `conda install --yes pyyaml` |
+| HDF5 | `conda install --yes HDF5` |
+| h5py | `conda install --yes h5py` |
+| gpu | `conda install --yes -c rdonnelly libgpuarray`<br> `conda install --yes -c rdonnelly pygpu`
+| theano | `install --yes -c conda-forge theano=0.8*` |
+| keras | `conda install --yes -c conda-forge keras=1.2*` |
+| sklearn |`conda install --yes scikit-learn=0.17*`|
+| rdkit | `conda install --yes -c rdkit rdkit-postgresql` |
+| rpy2 | `conda install --yes -c r rpy2` |
+| PRROC | `conda install --yes -c bioconda r-prroc=1.1` |
+| CROC | `conda install --yes -c auto croc` |
+
+All of the above are prerequisites. Then clone this git repo, go to home repository and setup.
+
+```
+git clone https://github.com/chao1224/virtual-screening.git
+cd virtual-screening
+pip install -e .
+```
+
+If a permission denied exception comes up, try to do the installment only for current user.
+
+```
+pip install --user -e .
+```
+
 ## dataset
 
 Some datasets that too big to put it here, but I upload a copy of them on the google drive, and here is the [link](https://drive.google.com/drive/folders/0B7r_bc_dhXLYLVctbC0zRnY4ZWM?usp=sharing)
 
 keck_updated_complete.csv: contains complete data for Keck_Pria
 
-'5_fold_split_data', '10_fold_split_data': two directories for fixed data split for training and testing. Please refer to src/demo.ipynb for more details.
+We have a pre-fixed split dataset for Keck_Pria, PCBA, and Keck_PCBA combined.
 
-lc123_keckdata.sdf: used for data preparation
+## virtual-screening
 
-## src
+- models : (optional models)
+  
+  - SingleClassification
+  
+  - SingleRegression
+  
+  - MultiClassification
+  
+  - VanillaLSTM
+  
+  - RandomForest
+  
+  - GridSearchOptimization
 
-data_preparation.py: fixed-data inside, combine all the updated data into one csv file
+- data_preparation.py
 
-function.py: all helper functions
+- function.py
 
-evaluation.py: all evaluation functions
+- evaluation.py
 
-demo.ipynb gives some examples on how to use them.
+- integrity_checker.py
 
-## setup
+- demo.ipynb
 
-`sudo pip install -e .`
+## json
 
-if permission denied, try
+json config files.
 
-`pip install --user -e .`
+## test
+
+test scripts.
