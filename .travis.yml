@@ -29,4 +29,4 @@ install:
   - pip install --user -e .
 
 script:
-  - python test/test_gpu.py
+  - KERAS_BACKEND=theano python test/test_gpu.py
