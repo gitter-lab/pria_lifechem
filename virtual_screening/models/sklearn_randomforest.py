@@ -163,7 +163,7 @@ class SKLearn_RandomForest:
         if not os.path.exists(metric_dir):
             os.makedirs(metric_dir)   
         
-        y_pred = np.zeros(shape=y.shape)
+        y_pred = np.zeros(shape=y_true.shape)
         
         y_true[:,2] = y_true[:,0]
         y_true[:,4] = y_true[:,3]
