@@ -171,7 +171,7 @@ class SKLearn_RandomForest:
         for i, label in zip(range(len(self.label_names)), self.label_names):     
             model = joblib.load(model_file+'_'+label+'.pkl')
             
-            y_pred[:,i] =  model.predict_proba(X)[:,1].reshape(X.shape[0],1)
+            y_pred[:,i] =  model.predict_proba(X)[:,1]
             
             if i in [0,1,3]:
                 y_true[np.where(np.isnan(y_true[:,i]))[0],i] = -1
@@ -189,8 +189,7 @@ class SKLearn_RandomForest:
         data = str(self.param)
         with open(config_csv_file, 'w') as csvfile:
             writer = csv.writer(csvfile, delimiter=',', quoting=csv.QUOTE_MINIMAL)
-            for d in data:
-                writer.writerow([d])
+            writer.writerow(data)
         return
 
 
