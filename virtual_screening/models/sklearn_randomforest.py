@@ -178,8 +178,6 @@ class SKLearn_RandomForest:
                 y_pred[:,i] =  model.predict_proba(X)[:,1]
             else:
                 y_pred[:,i] =  model.predict(X)
-            
-            if i in [0,1,3]:
         
         y_true = np.insert(y_true, 3, y_true[:,1], axis=1)
         y_pred = np.insert(y_pred, 3, y_pred[:,2], axis=1)
