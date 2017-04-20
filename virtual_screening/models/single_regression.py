@@ -131,10 +131,10 @@ class SingleRegression:
         return
 
     def predict_with_existing(self,
-                              X_train, y_train,
-                              X_val, y_val,
-                              X_test, y_test,
-                              PMTNN_weight_file):
+                          X_train, y_train_regression, y_train_classification,
+                          X_val, y_val_regression, y_val_classification,
+                          X_test, y_test_regression, y_test_classification,
+                          PMTNN_weight_file):
         model = self.setup_model()
         model.load_weights(PMTNN_weight_file)
 
@@ -163,14 +163,17 @@ class SingleRegression:
         return
 
     def get_EF_score_with_existing_model(self,
-                                         X_test, y_test,
+                                         X_test, y_test, y_test_classification,
                                          file_path, EF_ratio):
         model = self.setup_model()
         model.load_weights(file_path)
         y_pred_on_test = model.predict(X_test)
-        y_test = convert(y_test)
-        n_actives, ef, ef_max = enrichment_factor_single(y_test, y_pred_on_test, EF_ratio)
-        print('test auc: {}'.format(roc_auc_single(y_test, y_pred_on_test)))
+        print('test precision: {}'.format(precision_auc_single(y_test_classification, y_pred_on_test)))
+        print('test roc: {}'.format(roc_auc_single(y_test_classification, y_pred_on_test)))
+        print('test bedroc: {}'.format(bedroc_auc_single(y_test_classification, y_pred_on_test)))
+        print
+
+        n_actives, ef, ef_max = enrichment_factor_single(y_test_classification, y_pred_on_test, EF_ratio)
         print('EF: {},\tactive: {}'.format(ef, n_actives))
 
         return
@@ -234,4 +237,9 @@ if __name__ == '__main__':
                            X_val, y_val_regression, y_val_classification,
                            X_test, y_test_regression, y_test_classification,
                            PMTNN_weight_file)
+    task.predict_with_existing(X_t, y_t_regression, y_t_classification,
+                               X_val, y_val_regression, y_val_classification,
+                               X_test, y_test_regression, y_test_classification,
+                               PMTNN_weight_file)
+    task.get_EF_score_with_existing_model(X_test, y_test, y_test_classification,PMTNN_weight_file, 0.01)
     store_data(transform_json_to_csv(config_json_file), config_csv_file)
