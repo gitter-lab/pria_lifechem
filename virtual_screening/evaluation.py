@@ -192,19 +192,29 @@ def plot_pr_curve(actual, predicted, file_dir, label_names=None):
         label_names = ['label ' + str(i) for i in range(nb_classes)]
         
     lw = 2
-    mean_y, mean_x, _ = precision_recall_curve(actual.ravel(), 
-                                               predicted.ravel())
+    mean_y, mean_x = np.array([]), np.array([])
+    for i in range(nb_classes):  
+        non_missing_indices = np.argwhere(actual[:, i] != -1)[:, 0]
+        y, x, _ = precision_recall_curve(actual[non_missing_indices,i], predicted[non_missing_indices,i])
+        mean_x = np.concatenate((mean_x, x))
+        mean_y = np.concatenate((mean_y, y))
+    
+    ind = np.argsort(mean_x)
+    mean_x = mean_x[ind]
+    mean_y = mean_y[ind]
+    
     mean_auc = precision_auc_multi(actual, predicted, range(nb_classes), np.mean)
     median_auc = precision_auc_multi(actual, predicted, range(nb_classes), np.median)
-    for i in range(nb_classes):       
+    for i in range(nb_classes):  
+        non_missing_indices = np.argwhere(actual[:, i] != -1)[:, 0]
         plt.figure(figsize=(w,h))
-        y, x, _ = precision_recall_curve(actual[:,i], predicted[:,i])
-        auc = average_precision_score(actual[:,i], predicted[:,i])
+        y, x, _ = precision_recall_curve(actual[non_missing_indices,i], predicted[non_missing_indices,i])
+        auc = average_precision_score(actual[non_missing_indices,i], predicted[non_missing_indices,i])
         plt.plot(x, y, lw=lw, label='label '+label_names[i] + 
         '(sklearn = %0.5f)' % (auc))
         
-        x = robjects.FloatVector(actual)
-        y = robjects.FloatVector(predicted)
+        x = robjects.FloatVector(actual[non_missing_indices,i])
+        y = robjects.FloatVector(predicted[non_missing_indices,i])
         pr = prroc.pr_curve(x, y, curve=True)
         pr_curve = np.array(pr[3])
         plt.plot(pr_curve[:, 0], pr_curve[:, 1], lw=lw,
@@ -235,13 +245,24 @@ def plot_roc_curve(actual, predicted, file_dir, label_names=None):
         label_names = ['label ' + str(i) for i in range(nb_classes)]
         
     lw = 2
-    mean_x, mean_y, _ = roc_curve(actual.ravel(), predicted.ravel())
+    mean_x, mean_y = np.array([]), np.array([])
+    for i in range(nb_classes):
+        non_missing_indices = np.argwhere(actual[:, i] != -1)[:, 0]
+        x, y, _ = roc_curve(actual[non_missing_indices,i], predicted[non_missing_indices,i])
+        mean_x = np.concatenate((mean_x, x))
+        mean_y = np.concatenate((mean_y, y))
+    
+    ind = np.argsort(mean_x)
+    mean_x = mean_x[ind]
+    mean_y = mean_y[ind]
+    
     mean_auc = roc_auc_multi(actual, predicted, range(nb_classes), np.mean)
     median_auc = roc_auc_multi(actual, predicted, range(nb_classes), np.median)
     for i in range(nb_classes):
+        non_missing_indices = np.argwhere(actual[:, i] != -1)[:, 0]
         plt.figure(figsize=(w,h))
-        x, y, _ = roc_curve(actual[:,i], predicted[:,i])
-        auc = roc_auc_score(actual[:,i], predicted[:,i])
+        x, y, _ = roc_curve(actual[non_missing_indices,i], predicted[non_missing_indices,i])
+        auc = roc_auc_score(actual[non_missing_indices,i], predicted[non_missing_indices,i])
         plt.plot(x, y, lw=lw, label='label '+label_names[i] + 
         '(sklearn = %0.5f)' % (auc))
     
