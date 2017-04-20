@@ -121,9 +121,12 @@ class SKLearn_RandomForest:
         for i, label in zip(range(len(self.label_names)), self.label_names):     
             model = joblib.load(model_file+'_'+label+'.pkl')
             
-            y_pred_on_train[:,i] =  model.predict_proba(X_train)[:,1].reshape(X_train.shape[0],1)
-            
-            y_pred_on_test[:,i] = model.predict_proba(X_test)[:,1].reshape(X_test.shape[0],1)
+            if i in [0,1,3]:  
+                y_pred_on_train[:,i] =  model.predict_proba(X_train)[:,1]
+                y_pred_on_test[:,i] = model.predict_proba(X_test)[:,1]
+            else:
+                y_pred_on_train[:,i] =  model.predict(X_train)
+                y_pred_on_test[:,i] = model.predict(X_test)
             
             if i in [0,1,3]:
                 y_train[np.where(np.isnan(y_train[:,i]))[0],i] = -1
@@ -170,11 +173,13 @@ class SKLearn_RandomForest:
         
         for i, label in zip(range(len(self.label_names)), self.label_names):     
             model = joblib.load(model_file+'_'+label+'.pkl')
-            
-            y_pred[:,i] =  model.predict_proba(X)[:,1]
+            if i in [0,1,3]:                
+                y_true[np.where(np.isnan(y_true[:,i]))[0],i] = -1
+                y_pred[:,i] =  model.predict_proba(X)[:,1]
+            else:
+                y_pred[:,i] =  model.predict(X)
             
             if i in [0,1,3]:
-                y_true[np.where(np.isnan(y_true[:,i]))[0],i] = -1
         
         y_true = np.insert(y_true, 3, y_true[:,1], axis=1)
         y_pred = np.insert(y_pred, 3, y_pred[:,2], axis=1)
