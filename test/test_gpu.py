@@ -9,7 +9,7 @@ import virtual_screening.function
 import virtual_screening.evaluation
 import virtual_screening.models.CallBacks
 import virtual_screening.models.deep_classification
-import virtual_screening.models.single_regression
+import virtual_screening.models.deep_regression
 import virtual_screening.models.vanilla_lstm
 
 

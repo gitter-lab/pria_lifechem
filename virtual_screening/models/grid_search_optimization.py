@@ -15,7 +15,7 @@ from virtual_screening.function import *
 from virtual_screening.evaluation import *
 from virtual_screening.models.CallBacks import *
 from virtual_screening.models.deep_classification import *
-from virtual_screening.models.single_regression import *
+from virtual_screening.models.deep_regression import *
 from virtual_screening.models.vanilla_lstm import *
 
 
