@@ -195,13 +195,11 @@ def plot_pr_curve(actual, predicted, file_dir, label_names=None):
     mean_y, mean_x = np.array([]), np.array([])
     for i in range(nb_classes):  
         non_missing_indices = np.argwhere(actual[:, i] != -1)[:, 0]
-        y, x, _ = precision_recall_curve(actual[non_missing_indices,i], predicted[non_missing_indices,i])
-        mean_x = np.concatenate((mean_x, x))
-        mean_y = np.concatenate((mean_y, y))
+        mean_x = np.concatenate((mean_x, actual[non_missing_indices,i]))
+        mean_y = np.concatenate((mean_y, predicted[non_missing_indices,i]))
     
-    ind = np.argsort(mean_x)
-    mean_x = mean_x[ind]
-    mean_y = mean_y[ind]
+    mean_x, mean_y, _ = precision_recall_curve(mean_x.ravel(), 
+                                               mean_y.ravel())
     
     mean_auc = precision_auc_multi(actual, predicted, range(nb_classes), np.mean)
     median_auc = precision_auc_multi(actual, predicted, range(nb_classes), np.median)
@@ -248,13 +246,11 @@ def plot_roc_curve(actual, predicted, file_dir, label_names=None):
     mean_x, mean_y = np.array([]), np.array([])
     for i in range(nb_classes):
         non_missing_indices = np.argwhere(actual[:, i] != -1)[:, 0]
-        x, y, _ = roc_curve(actual[non_missing_indices,i], predicted[non_missing_indices,i])
-        mean_x = np.concatenate((mean_x, x))
-        mean_y = np.concatenate((mean_y, y))
+        mean_x = np.concatenate((mean_x, actual[non_missing_indices,i]))
+        mean_y = np.concatenate((mean_y, predicted[non_missing_indices,i]))
     
-    ind = np.argsort(mean_x)
-    mean_x = mean_x[ind]
-    mean_y = mean_y[ind]
+    mean_x, mean_y, _ = roc_curve(mean_x.ravel(), 
+                                  mean_y.ravel())
     
     mean_auc = roc_auc_multi(actual, predicted, range(nb_classes), np.mean)
     median_auc = roc_auc_multi(actual, predicted, range(nb_classes), np.median)
