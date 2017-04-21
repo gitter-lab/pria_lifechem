@@ -52,7 +52,6 @@ mv lsc* virtual-screening
 cp -r dataset/* virtual-screening/dataset/
 
 echo
-#run python job
 cd virtual-screening
 pip install --user -e .
 cd virtual_screening/models
@@ -65,7 +64,8 @@ python grid_search_optimization.py \
 --PMTNN_weight_file=$_CONDOR_JOB_IWD/$transfer_output_files/$process.weight \
 --config_csv_file=$_CONDOR_JOB_IWD/$transfer_output_files/$process.out.csv \
 --SMILES_mapping_json_file=../../json/SMILES_mapping.json \
---process_num=$process --model=single_classification
+--process_num=$process \
+--model=single_classification
 
 echo 'Done running job'
 date
