@@ -27,21 +27,18 @@ def count_occurance(key_list, target_list):
 def get_class_weight(task, y_data):
     if task.weight_schema == 'no_weight':
         cw = []
-        for i in range(self.output_layer_dimension):
+        for i in range(task.output_layer_dimension):
             cw.append({0: 0.5, 1: 0.5})
     elif task.weight_schema == 'weighted_sample':
         cw = []
-        for i in range(self.output_layer_dimension):
+        for i in range(task.output_layer_dimension):
             w = count_occurance([0, 1], y_data[:, i])
             zero_weight = 1.0
             one_weight = 1.0 * w[0] / w[1]
-            if cross_validation_count == 1:
-                print zero_weight, one_weight
             cw.append({0: zero_weight, 1: one_weight})
     else:
-        cw = []
-        for i in range(self.output_layer_dimension):
-            cw.append({0: 0.5, 1: 0.5})
+        raise ValueError('Weight schema not included. Should be among [{}, {}].'.
+                         format('no_weight', 'weighted_sample'))
 
     return cw
 
