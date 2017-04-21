@@ -41,7 +41,7 @@ def run_single_classification():
     X_test, y_test = extract_feature_and_label(test_pd,
                                                feature_name='Fingerprints',
                                                label_name_list=['Keck_Pria_AS_Retest'])
-    cross_validation_split = StratifiedShuffleSplit(y_train, 1, test_size=0.15, random_state=1)
+    cross_validation_split = StratifiedShuffleSplit(y_train, 1, test_size=test_ratio, random_state=1)
     for t_index, val_index in cross_validation_split:
         X_t, X_val = X_train[t_index], X_train[val_index]
         y_t, y_val = y_train[t_index], y_train[val_index]
@@ -111,7 +111,7 @@ def run_single_regression():
     y_test_classification = reshape_data_into_2_dim(y_test[:, 0])
     y_test_regression = reshape_data_into_2_dim(y_test[:, 1])
 
-    cross_validation_split = StratifiedShuffleSplit(y_train_classification, 1, test_size=0.15, random_state=1)
+    cross_validation_split = StratifiedShuffleSplit(y_train_classification, 1, test_size=test_ratio, random_state=1)
 
     for t_index, val_index in cross_validation_split:
         X_t, X_val = X_train[t_index], X_train[val_index]
@@ -124,12 +124,12 @@ def run_single_regression():
 
     hyperparameter_sets = {'optimizer': ['adam'],
                            'learning rate': [0.00003, 0.0001, 0.003],
-                           'weighted schema': ['no-weight'],
-                           'epoch size': [200, 1000],
-                           'patience': [20, 200],
-                           'early stopping': ['precision'],
-                           'activations': [{0:'sigmoid', 1:'sigmoid', 2:'linear'},
-                                           {0:'relu', 1:'sigmoid', 2:'sigmoid'}]}
+                           'weighted schema': ['no_weight', 'weighted_sample'],
+                           'epoch patience': [{'epoch_size': 200, 'patience': 50},
+                                              {'epoch_size': 1000, 'patience': 200}],
+                           'early stopping': ['auc', 'precision'],
+                           'activations': [{0: 'sigmoid', 1: 'sigmoid', 2: 'linear'},
+                                           {0: 'relu', 1: 'sigmoid', 2: 'sigmoid'}]}
     hyperparameters = ParameterGrid(hyperparameter_sets)
 
     cnt = 0
@@ -140,8 +140,9 @@ def run_single_regression():
         conf['compile']['optimizer']['option'] = param['optimizer']
         conf['compile']['optimizer'][param['optimizer']]['lr'] = param['learning rate']
         conf['class_weight_option'] = param['weighted schema']
-        conf['fitting']['nb_epoch'] = param['epoch size']
-        conf['fitting']['early_stopping']['patience'] = param['patience']
+        epoch_patience = param['epoch patience']
+        conf['fitting']['nb_epoch'] = epoch_patience['epoch_size']
+        conf['fitting']['early_stopping']['patience'] = epoch_patience['patience']
         conf['fitting']['early_stopping']['option'] = param['early stopping']
         activations = param['activations']
         conf['layers'][0]['activation'] = activations[0]
@@ -184,7 +185,7 @@ def run_vanilla_lstm():
                                               label_name_list=['Keck_Pria_AS_Retest'],
                                               SMILES_mapping_json_file=SMILES_mapping_json_file)
 
-    cross_validation_split = StratifiedShuffleSplit(y_train, 1, test_size=0.15, random_state=1)
+    cross_validation_split = StratifiedShuffleSplit(y_train, 1, test_size=test_ratio, random_state=1)
     for t_index, val_index in cross_validation_split:
         X_t, X_val = X_train[t_index], X_train[val_index]
         y_t, y_val = y_train[t_index], y_train[val_index]
@@ -334,6 +335,8 @@ if __name__ == '__main__':
     config_csv_file = given_args.config_csv_file
     process_num = int(given_args.process_num)
     model = given_args.model
+
+    test_ratio = 0.2
 
     if model == 'single_classification':
         run_single_classification()

@@ -17,6 +17,35 @@ from virtual_screening.models.CallBacks import KeckCallBackOnROC, KeckCallBackOn
     MultiCallBackOnROC, MultiCallBackOnPR
 
 
+def count_occurance(key_list, target_list):
+    weight = {i: 0 for i in key_list}
+    for x in target_list:
+        weight[x] += 1
+    return weight
+
+
+def get_class_weight(task, y_data):
+    if task.weight_schema == 'no_weight':
+        cw = []
+        for i in range(self.output_layer_dimension):
+            cw.append({0: 0.5, 1: 0.5})
+    elif task.weight_schema == 'weighted_sample':
+        cw = []
+        for i in range(self.output_layer_dimension):
+            w = count_occurance([0, 1], y_data[:, i])
+            zero_weight = 1.0
+            one_weight = 1.0 * w[0] / w[1]
+            if cross_validation_count == 1:
+                print zero_weight, one_weight
+            cw.append({0: zero_weight, 1: one_weight})
+    else:
+        cw = []
+        for i in range(self.output_layer_dimension):
+            cw.append({0: 0.5, 1: 0.5})
+
+    return cw
+
+
 class SingleClassification:
     def __init__(self, conf):
         self.conf = conf
@@ -62,6 +91,7 @@ class SingleClassification:
                                                        beta_init=batch_normalizer_beta_init,
                                                        gamma_init=batch_normalizer_gamma_init)
         self.EF_ratio_list = conf['enrichment_factor']['ratio_list']
+        self.weight_schema = conf['class_weight_option']
 
         return
 
@@ -110,11 +140,15 @@ class SingleClassification:
         else:
             callbacks = []
 
+        cw = get_class_weight(self, y_train)
+        print 'cw ', cw
+
         model.compile(loss=self.compile_loss, optimizer=self.compile_optimizer)
         model.fit(X_train, y_train,
                   nb_epoch=self.fit_nb_epoch,
                   batch_size=self.fit_batch_size,
                   verbose=self.fit_verbose,
+                  class_weight=cw,
                   shuffle=True,
                   callbacks=callbacks)
 
@@ -231,6 +265,7 @@ class MultiClassification:
                                                        beta_init=batch_normalizer_beta_init,
                                                        gamma_init=batch_normalizer_gamma_init)
         self.EF_ratio_list = conf['enrichment_factor']['ratio_list']
+        self.weight_schema = conf['class_weight_option']
 
         return
 
@@ -307,11 +342,11 @@ class MultiClassification:
 
         model.compile(loss=self.compile_loss, optimizer=self.compile_optimizer)
 
-        if self.conf['class_weight_option'] == 'no_weight':
+        if self.weight_schema == 'no_weight':
             cw = []
             for i in range(self.output_layer_dimension):
                 cw.append({-1: 0.0, 0: 0.5, 1: 0.5})
-        elif self.conf['class_weight_option'] == 'weighted_label':
+        elif self.weight_schema == 'weighted_label':
             cw = []
             for i in range(self.output_layer_dimension):
                 w = count_occurance([-1, 0, 1], y_train[:, i])
@@ -320,7 +355,7 @@ class MultiClassification:
                 if cross_validation_count == 1:
                     print zero_weight, one_weight
                 cw.append({-1: 0.0, 0: zero_weight, 1: one_weight})
-        elif self.conf['class_weight_option'] == 'weighted_task':
+        elif self.weight_schema == 'weighted_task':
             cw = []
             ones_sum = 0
             w_list = []
@@ -339,7 +374,7 @@ class MultiClassification:
                 if cross_validation_count == 1:
                     print zero_weight, one_weight
                 cw.append({-1: 0.0, 0: zero_weight, 1: one_weight})
-        elif self.conf['class_weight_option'] == 'weighted_task_reference':
+        elif self.weight_schema == 'weighted_task_reference':
             reference_pd = pd.read_csv('reference.csv')
             cw = []
             ones_sum = 0
@@ -359,7 +394,7 @@ class MultiClassification:
                 if cross_validation_count == 1:
                     print zero_weight, one_weight
                 cw.append({-1:0.0, 0: zero_weight, 1: one_weight})
-        elif self.conf['class_weight_option'] == 'scaled_weighted_task':
+        elif self.weight_schema == 'scaled_weighted_task':
             cw = []
             ones_sum = 0
             w_list = []
@@ -381,7 +416,7 @@ class MultiClassification:
                 if cross_validation_count == 1:
                     print zero_weight, one_weight
                 cw.append({-1: 0.0, 0: zero_weight, 1: one_weight})
-        elif self.conf['class_weight_option'] == 'weighted_task_scaled_reference':
+        elif self.weight_schema == 'weighted_task_scaled_reference':
             reference_pd = pd.read_csv('reference.csv')
             cw = []
             ones_sum = 0
