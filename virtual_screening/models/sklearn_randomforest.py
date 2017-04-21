@@ -191,8 +191,7 @@ class SKLearn_RandomForest:
     def save_model_params(self, config_csv_file):      
         data = str(self.param)
         with open(config_csv_file, 'w') as csvfile:
-            writer = csv.writer(csvfile, delimiter=',', quoting=csv.QUOTE_MINIMAL)
-            writer.writerow(data)
+            csvfile.write(data)
         return
 
 
