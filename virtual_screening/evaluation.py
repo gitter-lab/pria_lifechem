@@ -198,7 +198,7 @@ def plot_pr_curve(actual, predicted, file_dir, label_names=None):
         mean_x = np.concatenate((mean_x, actual[non_missing_indices,i]))
         mean_y = np.concatenate((mean_y, predicted[non_missing_indices,i]))
     
-    mean_x, mean_y, _ = precision_recall_curve(mean_x.ravel(), 
+    mean_y, mean_x, _ = precision_recall_curve(mean_x.ravel(), 
                                                mean_y.ravel())
     
     mean_auc = precision_auc_multi(actual, predicted, range(nb_classes), np.mean)
