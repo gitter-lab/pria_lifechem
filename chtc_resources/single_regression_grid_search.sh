@@ -1,6 +1,5 @@
 #!/bin/bash
 
-
 echo Cluster $cluster
 echo Process $process
 echo RunningOn $runningon
@@ -38,18 +37,9 @@ conda install --yes -c auto croc > /dev/null
 echo 'Done installing libraries'
 chmod 777 -R ./anaconda
 
-echo "first"
-KERAS_BACKEND=theano \
-THEANO_FLAGS=mode="FAST_RUN" floatX="float32" device="gpu" python test_gpu.py
-
-echo
-echo "second"
-python test_gpu.py
-
 #get virtual-screening from github
 curl -H "Authorization: token 90ce823b4b9f465db73d7a2b0c830006b5a09b08" -L https://api.github.com/repos/chao1224/virtual-screening/zipball > virtual-screening-master.zip
 unzip virtual-screening-master.zip > /dev/null
-ls
 mv chao* virtual-screening
 cp -r dataset/* virtual-screening/dataset/
 
@@ -61,13 +51,13 @@ cd virtual_screening/models
 echo "start"
 date
 KERAS_BACKEND=theano \
-THEANO_FLAGS="base_compiledir=./tmp,device=gpu,floatX=float32,gpuarray.preallocate=0.8" \
+THEANO_FLAGS="base_compiledir=./tmp,floatX=float32,gpuarray.preallocate=0.8" \
 python grid_search_optimization.py \
 --config_json_file=../../json/single_classification.json \
 --PMTNN_weight_file=$_CONDOR_JOB_IWD/$transfer_output_files/$process.weight \
 --config_csv_file=$_CONDOR_JOB_IWD/$transfer_output_files/$process.result.csv \
 --SMILES_mapping_json_file=../../json/SMILES_mapping.json \
---process_num=$process --model=single_classification >> $_CONDOR_JOB_IWD/$transfer_output_files/$process.out
-
+--process_num=$process \
+--model=single_regression >> $_CONDOR_JOB_IWD/$transfer_output_files/$process.out
 echo 'Done running job'
 date

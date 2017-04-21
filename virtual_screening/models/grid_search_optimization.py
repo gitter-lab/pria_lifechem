@@ -52,12 +52,12 @@ def run_single_classification():
 
     hyperparameter_sets = {'optimizer': ['adam'],
                            'learning rate': [0.00003, 0.0001, 0.003],
-                           'weighted schema': ['no-weight'],
-                           'epoch size': [200, 1000],
-                           'patience': [20, 200],
-                           'early stopping': ['precision'],
-                           'activations': [{0:'relu', 1:'sigmoid', 2:'sigmoid'},
-                                           {0:'relu', 1:'relu', 2:'sigmoid'}]}
+                           'weighted schema': ['no_weight', 'weighted_sample'],
+                           'epoch patience': [{'epoch_size': 200, 'patience': 50},
+                                              {'epoch_size': 1000, 'patience': 200}],
+                           'early stopping': ['auc', 'precision'],
+                           'activations': [{0: 'relu', 1: 'sigmoid', 2: 'sigmoid'},
+                                           {0: 'relu', 1: 'relu', 2: 'sigmoid'}]}
     hyperparameters = ParameterGrid(hyperparameter_sets)
 
     cnt = 0
@@ -68,8 +68,9 @@ def run_single_classification():
         conf['compile']['optimizer']['option'] = param['optimizer']
         conf['compile']['optimizer'][param['optimizer']]['lr'] = param['learning rate']
         conf['class_weight_option'] = param['weighted schema']
-        conf['fitting']['nb_epoch'] = param['epoch size']
-        conf['fitting']['early_stopping']['patience'] = param['patience']
+        epoch_patience = param['epoch patience']
+        conf['fitting']['nb_epoch'] = epoch_patience['epoch_size']
+        conf['fitting']['early_stopping']['patience'] = epoch_patience['patience']
         conf['fitting']['early_stopping']['option'] = param['early stopping']
         activations = param['activations']
         conf['layers'][0]['activation'] = activations[0]

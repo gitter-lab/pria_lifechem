@@ -35,6 +35,6 @@ Request_disk = 6GB
 Environment = "cluster=$(Cluster) process=$(Process) runningon=$$(Name) transfer_output_files=$(transfer_output_files)"
 getenv = true
 
-Queue 96
+Queue 48
 
 #END
