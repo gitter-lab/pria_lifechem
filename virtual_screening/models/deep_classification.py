@@ -594,7 +594,7 @@ def demo_single_classification():
     X_test, y_test = extract_feature_and_label(test_pd,
                                                feature_name='Fingerprints',
                                                label_name_list=['Keck_Pria_AS_Retest'])
-    cross_validation_split = StratifiedShuffleSplit(y_train, 1, test_size=0.15, random_state=1)
+    cross_validation_split = StratifiedShuffleSplit(y_train, 1, test_size=0.2, random_state=1)
     for t_index, val_index in cross_validation_split:
         X_t, X_val = X_train[t_index], X_train[val_index]
         y_t, y_val = y_train[t_index], y_train[val_index]

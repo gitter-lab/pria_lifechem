@@ -222,7 +222,7 @@ if __name__ == '__main__':
     y_test_classification = reshape_data_into_2_dim(y_test[:, 0])
     y_test_regression = reshape_data_into_2_dim(y_test[:, 1])
 
-    cross_validation_split = StratifiedShuffleSplit(y_train_classification, 1, test_size=0.15, random_state=1)
+    cross_validation_split = StratifiedShuffleSplit(y_train_classification, 1, test_size=0.2, random_state=1)
 
     for t_index, val_index in cross_validation_split:
         X_t, X_val = X_train[t_index], X_train[val_index]
