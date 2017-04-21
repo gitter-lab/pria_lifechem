@@ -79,6 +79,9 @@ def run_single_classification():
         print 'Testing hyperparameter ', param
         break
 
+    if cnt > process_num:
+        raise ValueError('Process number out of limit. At most {}.'.format(cnt))
+
     task = SingleClassification(conf=conf)
     task.train_and_predict(X_t, y_t, X_val, y_val, X_test, y_test, PMTNN_weight_file)
     store_data(transform_json_to_csv(config_json_file), config_csv_file)
@@ -125,7 +128,7 @@ def run_single_regression():
 
     hyperparameter_sets = {'optimizer': ['adam'],
                            'learning rate': [0.00003, 0.0001, 0.003],
-                           'weighted schema': ['no_weight', 'weighted_sample'],
+                           'weighted schema': ['no_weight'],
                            'epoch patience': [{'epoch_size': 200, 'patience': 50},
                                               {'epoch_size': 1000, 'patience': 200}],
                            'early stopping': ['auc', 'precision'],
@@ -151,6 +154,9 @@ def run_single_regression():
         conf['layers'][2]['activation'] = activations[2]
         print 'Testing hyperparameter ', param
         break
+
+    if cnt > process_num:
+        raise ValueError('Process number out of limit. At most {}.'.format(cnt))
 
     task = SingleRegression(conf=conf)
     task.train_and_predict(X_t, y_t_regression, y_t_classification,
@@ -229,6 +235,9 @@ def run_vanilla_lstm():
         print 'Testing hyperparameter ', param
         break
 
+    if cnt > process_num:
+        raise ValueError('Process number out of limit. At most {}.'.format(cnt))
+
     task = VanillaLSTM(conf)
     X_t = sequence.pad_sequences(X_t, maxlen=task.padding_length)
     X_val = sequence.pad_sequences(X_val, maxlen=task.padding_length)
@@ -301,6 +310,9 @@ def run_multiple_classification():
         conf['layers'][2]['activation'] = activations[2]
         print 'Testing hyperparameter ', param
         break
+
+    if cnt > process_num:
+        raise ValueError('Process number out of limit. At most {}.'.format(cnt))
 
     task = MultiClassification(conf=conf)
     task.train_and_predict(X_train, y_train, X_val, y_val, X_test, y_test,
