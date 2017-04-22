@@ -41,6 +41,7 @@ chmod 777 -R ./anaconda
 curl -H "Authorization: token 90ce823b4b9f465db73d7a2b0c830006b5a09b08" -L https://api.github.com/repos/chao1224/virtual-screening/zipball > virtual-screening-master.zip
 unzip virtual-screening-master.zip > /dev/null
 mv chao* virtual-screening
+chmod 777 *
 cp -r dataset/* virtual-screening/dataset/
 
 echo
