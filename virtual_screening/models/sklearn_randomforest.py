@@ -1,3 +1,4 @@
+from evaluation import *
 import argparse
 import pandas as pd
 import csv
@@ -7,7 +8,6 @@ import sys
 sys.path.insert(0, '..')  # Add path from parent folder
 sys.path.insert(0, '.')  # Add path from current folder
 from function import *
-from evaluation import *
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.externals import joblib
 from sklearn.grid_search import ParameterGrid
