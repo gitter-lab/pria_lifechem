@@ -26,9 +26,10 @@ before_install:
   - conda install --yes -c r rpy2
   - conda install --yes -c bioconda r-prroc=1.1
   - conda install --yes -c auto croc
+  - conda install --yes pip
 
 install:
-  - python setup.py install --user
+  - pip install -e .
 
 script:
   - python -c "import keras.backend"
