@@ -230,40 +230,44 @@ if __name__ == '__main__':
                   'Keck_RMI_cdd': np.float64}
     output_file_list = [directory + f_ for f_ in file_list]
     
-    train_pd = read_merged_data(output_file_list[0:2])
-    test_pd = read_merged_data([output_file_list[4]])
-    val_pd = read_merged_data([output_file_list[3]])
+    for i in range(k):    
+        csv_file_list = output_file_list[:]
+        test_pd = read_merged_data([csv_file_list[i]])
+        csv_file_list.pop(i)
+        val_pd = read_merged_data([csv_file_list[i%len(csv_file_list)]])
+        csv_file_list.pop(i%len(csv_file_list))
+        train_pd = read_merged_data(csv_file_list)
+        
+        labels = ['Keck_Pria_AS_Retest', 'Keck_Pria_FP_data', 'Keck_Pria_Continuous',
+                  'Keck_RMI_cdd', 'FP counts % inhibition']
     
-    labels = ['Keck_Pria_AS_Retest', 'Keck_Pria_FP_data', 'Keck_Pria_Continuous',
-              'Keck_RMI_cdd', 'FP counts % inhibition']
-
-    # extract data, and split training data into training and val
-    X_train, y_train = extract_feature_and_label(train_pd,
+        # extract data, and split training data into training and val
+        X_train, y_train = extract_feature_and_label(train_pd,
+                                                     feature_name='Fingerprints',
+                                                     label_name_list=labels)
+        
+        X_val, y_val = extract_feature_and_label(val_pd,
                                                  feature_name='Fingerprints',
                                                  label_name_list=labels)
+                                                   
+        X_test, y_test = extract_feature_and_label(test_pd,
+                                                   feature_name='Fingerprints',
+                                                   label_name_list=labels)
+        print('done data preparation')
+        
+        
     
-    X_val, y_val = extract_feature_and_label(val_pd,
-                                             feature_name='Fingerprints',
-                                             label_name_list=labels)
-                                               
-    X_test, y_test = extract_feature_and_label(test_pd,
-                                               feature_name='Fingerprints',
-                                               label_name_list=labels)
-    print('done data preparation')
-    
-    
-
-    with open(config_json_file, 'r') as f:
-        conf = json.load(f)
-    task = SKLearn_RandomForest(conf=conf)
-    task.train_and_predict(X_train, y_train, X_val, y_val, X_test, y_test, model_file)
-    task.save_model_params(config_csv_file)
-    
-    #####
-    task.save_model_evaluation_metrics(np.concatenate((X_train, X_val)), 
-                                       np.concatenate((y_train, y_val)), model_file,
-                                      model_dir+'train_metrics/',
-                                      label_names=labels)
-    task.save_model_evaluation_metrics(X_test, y_test, model_file,
-                                      model_dir+'test_metrics/',
-                                      label_names=labels)
+        with open(config_json_file, 'r') as f:
+            conf = json.load(f)
+        task = SKLearn_RandomForest(conf=conf)
+        task.train_and_predict(X_train, y_train, X_val, y_val, X_test, y_test, model_file)
+        task.save_model_params(config_csv_file)
+        
+        #####
+        task.save_model_evaluation_metrics(np.concatenate((X_train, X_val)), 
+                                           np.concatenate((y_train, y_val)), model_file,
+                                          model_dir+'fold_'+str(i)+'/train_metrics/',
+                                          label_names=labels)
+        task.save_model_evaluation_metrics(X_test, y_test, model_file,
+                                          model_dir+'fold_'+str(i)+'/test_metrics/',
+                                          label_names=labels)
