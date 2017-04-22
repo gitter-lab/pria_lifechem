@@ -17,6 +17,10 @@ from virtual_screening.models.CallBacks import KeckCallBackOnROC, KeckCallBackOn
     MultiCallBackOnROC, MultiCallBackOnPR
 
 
+# this is for customized loss function
+epsilon = 1.0e-9
+
+
 def count_occurance(key_list, target_list):
     weight = {i: 0 for i in key_list}
     for x in target_list:
@@ -24,7 +28,7 @@ def count_occurance(key_list, target_list):
     return weight
 
 
-def get_class_weight(task, y_data):
+def get_class_weight(task, y_data, reference=None):
     if task.weight_schema == 'no_weight':
         cw = []
         for i in range(task.output_layer_dimension):
@@ -36,9 +40,29 @@ def get_class_weight(task, y_data):
             zero_weight = 1.0
             one_weight = 1.0 * w[0] / w[1]
             cw.append({0: zero_weight, 1: one_weight})
+    elif task.weight_schema == 'weighted_task':
+        cw = []
+        ones_sum = 0
+        w_list = []
+        for i in range(task.output_layer_dimension):
+            w = reference[i]
+            w_list.append(w)
+            ones_sum += w['1']
+        for i in range(task.output_layer_dimension):
+            w = w_list[i]
+            share = 0.01 * ones_sum / w['1']
+            zero_weight = 1.0 * share
+            one_weight = zero_weight * w['0'] / w['1'] * share
+            ones_sum += w['1']
+            # this corresponds to Keck Pria
+            if i + 1 == task.output_layer_dimension:
+                # TODO: generalize this part
+                zero_weight *= task.conf['weight_scaled_param']
+                ones_sum *= task.conf['weight_scaled_param']
+            cw.append({-1: 0.0, 0: zero_weight, 1: one_weight})
     else:
-        raise ValueError('Weight schema not included. Should be among [{}, {}].'.
-                         format('no_weight', 'weighted_sample'))
+        raise ValueError('Weight schema not included. Should be among [{}, {}, {}].'.
+                         format('no_weight', 'weighted_sample', 'weighted_task'))
 
     return cw
 
@@ -299,6 +323,7 @@ class MultiClassification:
                           X_test, y_test,
                           PMTNN_weight_file,
                           score_file,
+                          sample_weight,
                           eval_indices=[-1],
                           eval_mean_or_median=np.mean):
         def get_model_roc_auc(true_label,
@@ -337,117 +362,53 @@ class MultiClassification:
         else:
             callbacks = []
 
-        model.compile(loss=self.compile_loss, optimizer=self.compile_optimizer)
 
         if self.weight_schema == 'no_weight':
-            cw = []
-            for i in range(self.output_layer_dimension):
-                cw.append({-1: 0.0, 0: 0.5, 1: 0.5})
-        elif self.weight_schema == 'weighted_label':
-            cw = []
-            for i in range(self.output_layer_dimension):
-                w = count_occurance([-1, 0, 1], y_train[:, i])
-                zero_weight = 1.0
-                one_weight = 1.0 * w[0] / w[1]
-                if cross_validation_count == 1:
-                    print zero_weight, one_weight
-                cw.append({-1: 0.0, 0: zero_weight, 1: one_weight})
-        elif self.weight_schema == 'weighted_task':
-            cw = []
-            ones_sum = 0
-            w_list = []
-            for i in range(self.output_layer_dimension):
-                w = count_occurance([-1, 0, 1], y_train[:, i])
-                w_list.append(w)
-                ones_sum += w[1]
-            if cross_validation_count == 1:
-                print ones_sum
-            for i in range(self.output_layer_dimension):
-                w = w_list[i]
-                share = 0.01 * ones_sum / w[1]
-                zero_weight = 1.0 * share
-                one_weight = zero_weight * w[0] / w[1] * share
-                ones_sum += w[1]
-                if cross_validation_count == 1:
-                    print zero_weight, one_weight
-                cw.append({-1: 0.0, 0: zero_weight, 1: one_weight})
-        elif self.weight_schema == 'weighted_task_reference':
-            reference_pd = pd.read_csv('reference.csv')
-            cw = []
-            ones_sum = 0
-            w_list = []
-            for i in range(output_layer_dimension):
-                w = reference_pd.loc[i]
-                w_list.append(w)
-                ones_sum += w['1']
-            if cross_validation_count == 1:
-                print ones_sum
-            for i in range(output_layer_dimension):
-                w = w_list[i]
-                share = 0.01 * ones_sum / w['1']
-                zero_weight = 1.0 * share
-                one_weight = zero_weight * w['0'] / w['1'] * share
-                ones_sum += w['1']
-                if cross_validation_count == 1:
-                    print zero_weight, one_weight
-                cw.append({-1:0.0, 0: zero_weight, 1: one_weight})
-        elif self.weight_schema == 'scaled_weighted_task':
-            cw = []
-            ones_sum = 0
-            w_list = []
-            for i in range(self.output_layer_dimension):
-                w = count_occurance([-1, 0, 1], y_train[:, i])
-                w_list.append(w)
-                ones_sum += w[1]
-            if cross_validation_count == 1:
-                print ones_sum
-            for i in range(self.output_layer_dimension):
-                w = w_list[i]
-                share = 0.01 * ones_sum / w[1]
-                zero_weight = 1.0 * share
-                one_weight = zero_weight * w[0] / w[1] * share
-                ones_sum += w[1]
-                if i+1 == output_layer_dimension:
-                    zero_weight *= conf['weight_scaled_param']
-                    ones_sum *= conf['weight_scaled_param']
-                if cross_validation_count == 1:
-                    print zero_weight, one_weight
-                cw.append({-1: 0.0, 0: zero_weight, 1: one_weight})
-        elif self.weight_schema == 'weighted_task_scaled_reference':
-            reference_pd = pd.read_csv('reference.csv')
-            cw = []
-            ones_sum = 0
-            w_list = []
-            for i in range(self.output_layer_dimension):
-                w = reference_pd.loc[i]
-                w_list.append(w)
-                ones_sum += w['1']
-            if cross_validation_count == 1:
-                print ones_sum
-            for i in range(self.output_layer_dimension):
-                w = w_list[i]
-                share = 0.01 * ones_sum / w['1']
-                zero_weight = 1.0 * share
-                one_weight = zero_weight * w['0'] / w['1'] * share
-                ones_sum += w['1']
-                if i+1 == output_layer_dimension:
-                    zero_weight *= conf['weight_scaled_param']
-                    ones_sum *= conf['weight_scaled_param']
-                if cross_validation_count == 1:
-                    print zero_weight, one_weight
-                cw.append({-1:0.0, 0: zero_weight, 1: one_weight})
+            cw = get_class_weight(self, y_train)
+            print 'cw ', cw
+            model.compile(loss=self.compile_loss, optimizer=self.compile_optimizer)
+            model.fit(X_train, y_train,
+                      nb_epoch=self.fit_nb_epoch,
+                      batch_size=self.fit_batch_size,
+                      verbose=self.fit_verbose,
+                      # validation_data=(X_val, y_val),
+                      class_weight=cw,
+                      shuffle=True,
+                      callbacks=callbacks)
         else:
-            cw = []
+            reference = []
+            total_num = X_train.shape[0]
             for i in range(self.output_layer_dimension):
-                cw.append({-1: 0.0, 0: 0.5, 1: 0.5})
+                active = sum(y_train[:, i])
+                active_and_inactive = sum(sample_weight[:, i])
+                inactive = active_and_inactive - active
+                missing = total_num - active_and_inactive
+                reference.append({'-1': missing, '0': inactive, '1': active})
 
-        model.fit(X_train, y_train,
-                  nb_epoch=self.fit_nb_epoch,
-                  batch_size=self.fit_batch_size,
-                  verbose=self.fit_verbose,
-                  validation_data=(X_val, y_val),
-                  class_weight=cw,
-                  callbacks=callbacks)
+            cw = get_class_weight(self, y_train, reference=reference)
+            print 'cw ', cw
+
+            # TODO: customize loss function
+            def customized_loss(y_true, y_pred):
+                import theano.tensor as T
+                y_pred = T.clip(y_pred, epsilon, 1.0 - epsilon)
+                sum_ = 0
+                print y_true.shape
+                # T.nnet.binary_crossentropy(x_recons, x).mean()
+                bce = T.nnet.binary_crossentropy(y_pred, y_true).mean(axis=-1)
+                return bce
+
+            # model.compile(loss=self.compile_loss, optimizer=self.compile_optimizer, sample_weight_mode="temporal")
+            model.compile(loss=self.compile_loss, optimizer=self.compile_optimizer)
+            model.fit(X_train, y_train,
+                      nb_epoch=self.fit_nb_epoch,
+                      batch_size=self.fit_batch_size,
+                      verbose=self.fit_verbose,
+                      # validation_data=(X_val, y_val),
+                      class_weight=cw,
+                      shuffle=True,
+                      callbacks=callbacks)
+
 
         if self.early_stopping_option == 'auc' or self.early_stopping_option == 'precision':
             model = early_stopping.get_best_model()
@@ -471,10 +432,9 @@ class MultiClassification:
         out = open(score_file, 'w')
         print >> out, "EF"
         for EF_ratio in self.EF_ratio_list:
-            print >> out, 'ratio:', EF_ratio
             for i in range(y_test.shape[1]):
                 n_actives, ef, ef_max = enrichment_factor_single(y_test[:, i], y_pred_on_test[:, i], EF_ratio)
-                print >> out, 'EF:', ef, 'active:', n_actives
+                print >> out, 'ratio:', EF_ratio, 'EF:', ef, 'active:', n_actives
 
         return
 
@@ -495,7 +455,6 @@ class MultiClassification:
                                  predicted_label,
                                  eval_indices=eval_indices,
                                  eval_mean_or_median=eval_mean_or_median):
-            print 'output ', true_label[:, eval_indices].shape
             return bedroc_auc_multi(true_label, predicted_label, eval_indices, eval_mean_or_median)
 
         def get_model_precision_auc(true_label,
@@ -637,12 +596,23 @@ def demo_multi_classification():
     X_test, y_test = extract_feature_and_label(test_pd,
                                                feature_name='Fingerprints',
                                                label_name_list=labels_list)
+
+    sample_weight_dir = '../../dataset/sample_weights/keck_pcba/fold_5/'
+    file_list = []
+    for i in range(k):
+        file_list.append('sample_weight_{}.csv'.format(i))
+    sample_weight_file = [sample_weight_dir + f_ for f_ in file_list]
+    sample_weight_pd = read_merged_data(sample_weight_file[0:3])
+    _, sample_weight = extract_feature_and_label(sample_weight_pd,
+                                                 feature_name='Fingerprints',
+                                                 label_name_list=labels_list)
     print 'done data preparation'
 
     with open(config_json_file, 'r') as f:
         conf = json.load(f)
     task = MultiClassification(conf=conf)
     task.train_and_predict(X_train, y_train, X_val, y_val, X_test, y_test,
+                           sample_weight=sample_weight,
                            PMTNN_weight_file=PMTNN_weight_file,
                            score_file=score_file)
     store_data(transform_json_to_csv(config_json_file), config_csv_file)

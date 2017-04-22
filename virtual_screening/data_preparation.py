@@ -4,6 +4,7 @@ from rdkit.Chem import AllChem
 from rdkit import Chem
 import operator
 import json
+import os
 
 
 '''
@@ -75,8 +76,8 @@ def generate_sample_weights(target_dir, k, dest_dir):
         # First three labels are Molecule, SMILES, and Finterprints
         # The remaining ones are labels
         labels = data_pd.columns.tolist()[3:]
-        data_pd.replace([0], 1)
-        data_pd.replace([np.NaN], 0)
+        data_pd = data_pd.replace([0], 1)
+        data_pd = data_pd.replace([np.NaN], 0)
         data_pd.to_csv(dest_dir + 'sample_weight_{}.csv'.format(i), index=None)
 
     return

@@ -278,6 +278,16 @@ def run_multiple_classification():
     X_test, y_test = extract_feature_and_label(test_pd,
                                                feature_name='Fingerprints',
                                                label_name_list=labels_list)
+
+    sample_weight_dir = '../../dataset/sample_weights/keck_pcba/fold_5/'
+    file_list = []
+    for i in range(k):
+        file_list.append('sample_weight_{}.csv'.format(i))
+    sample_weight_file = [sample_weight_dir + f_ for f_ in file_list]
+    sample_weight_pd = read_merged_data(sample_weight_file[0:3])
+    _, sample_weight = extract_feature_and_label(sample_weight_pd,
+                                                 feature_name='Fingerprints',
+                                                 label_name_list=labels_list)
     print 'done data preparation'
 
     with open(config_json_file, 'r') as f:
@@ -285,12 +295,12 @@ def run_multiple_classification():
 
     hyperparameter_sets = {'optimizer': ['adam'],
                            'learning rate': [0.00003, 0.0001, 0.003],
-                           'weighted schema': ['no_weight'],
-                           'epoch size': [200, 1000],
-                           'patience': [20, 200],
+                           'weighted schema': ['no_weight', 'weighted_sample'],
+                           'epoch patience': [{'epoch_size': 200, 'patience': 50},
+                                              {'epoch_size': 1000, 'patience': 200}],
                            'early stopping': ['precision'],
-                           'activations': [{0:'relu', 1:'sigmoid', 2:'sigmoid'},
-                                           {0:'relu', 1:'relu', 2:'sigmoid'}]}
+                           'activations': [{0: 'relu', 1: 'sigmoid', 2: 'sigmoid'},
+                                           {0: 'relu', 1: 'relu', 2: 'sigmoid'}]}
     hyperparameters = ParameterGrid(hyperparameter_sets)
 
     cnt = 0
@@ -301,8 +311,9 @@ def run_multiple_classification():
         conf['compile']['optimizer']['option'] = param['optimizer']
         conf['compile']['optimizer'][param['optimizer']]['lr'] = param['learning rate']
         conf['class_weight_option'] = param['weighted schema']
-        conf['fitting']['nb_epoch'] = param['epoch size']
-        conf['fitting']['early_stopping']['patience'] = param['patience']
+        epoch_schema = param['epoch patience']
+        conf['fitting']['nb_epoch'] = epoch_schema['epoch_size']
+        conf['fitting']['early_stopping']['patience'] = epoch_schema['patience']
         conf['fitting']['early_stopping']['option'] = param['early stopping']
         activations = param['activations']
         conf['layers'][0]['activation'] = activations[0]
@@ -316,18 +327,10 @@ def run_multiple_classification():
 
     task = MultiClassification(conf=conf)
     task.train_and_predict(X_train, y_train, X_val, y_val, X_test, y_test,
+                           sample_weight=sample_weight,
                            PMTNN_weight_file=PMTNN_weight_file,
                            score_file=score_file)
     store_data(transform_json_to_csv(config_json_file), config_csv_file)
-
-    whole_EF = []
-    for EF_ratio in task.EF_ratio_list:
-        EF_list = task.get_EF_score_with_existing_model(X_test, y_test, PMTNN_weight_file,EF_ratio)
-        whole_EF.append([EF_ratio])
-        whole_EF.append(EF_list)
-        print(EF_ratio, EF_list)
-        print
-    print whole_EF
 
     return
 
