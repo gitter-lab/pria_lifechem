@@ -28,7 +28,7 @@ before_install:
   - conda install --yes -c auto croc
 
 install:
-  - pip install --user -e .
+  - python setup.py install --user
 
 script:
   - python -c "import keras.backend"
