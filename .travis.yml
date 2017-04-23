@@ -41,4 +41,4 @@ script:
 
 after_script:
   - source deactivate
-  - conda remove -n temp -all
+  - conda remove -n temp --all

@@ -8,14 +8,14 @@
 ############################################################################
 
 # should mkdir this output dir first
-transfer_output_files = single_regression
+transfer_output_files = ../output/single_regression
 
 Executable = single_regression_grid_search.sh
 Universe = vanilla
 
-Log = single_regression/chtc_cpu_job.$(Cluster)_$(Process).log
-Output = single_regression/chtc_cpu_job.$(Cluster)_$(Process).out
-Error = single_regression/chtc_cpu_job.$(Cluster)_$(Process).err
+Log = $(transfer_output_files)/chtc_cpu_job.$(Cluster)_$(Process).log
+Output = $(transfer_output_files)/chtc_cpu_job.$(Cluster)_$(Process).out
+Error = $(transfer_output_files)/chtc_cpu_job.$(Cluster)_$(Process).err
 
 Should_transfer_files = YES
 When_to_transfer_output = ON_EXIT
