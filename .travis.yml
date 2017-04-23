@@ -13,22 +13,20 @@ before_install:
   - chmod 777 *
   - bash anaconda.sh -b -p $HOME/anaconda
   - export PATH="$HOME/anaconda/bin:$PATH"
-  - conda create -y -n temp python=2.7 anaconda
-  - source activate temp
-  - conda install --yes -n temp pyyaml
-  - conda install --yes -n temp HDF5
-  - conda install --yes -n temp h5py
-  - conda install --yes -n temp -c rdonnelly libgpuarray
-  - conda install --yes -n temp -c rdonnelly pygpu
-  - conda install --yes -n temp -c rdonnelly theano
-  - conda install --yes -n temp -c conda-forge theano=0.8*
-  - conda install --yes -n temp -c conda-forge keras=1.2*
-  - conda install --yes -n temp scikit-learn=0.17*
-  - conda install --yes -n temp -c rdkit rdkit-postgresql
-  - conda install --yes -n temp -c r rpy2
-  - conda install --yes -n temp -c bioconda r-prroc=1.1
-  - conda install --yes -n temp -c auto croc
-  - conda install --yes -n temp pip
+  - conda install --yes pyyaml
+  - conda install --yes HDF5
+  - conda install --yes h5py
+  - conda install --yes -c rdonnelly libgpuarray
+  - conda install --yes -c rdonnelly pygpu
+  - conda install --yes -c rdonnelly theano
+  - conda install --yes -c conda-forge theano=0.8*
+  - conda install --yes -c conda-forge keras=1.2*
+  - conda install --yes scikit-learn=0.17*
+  - conda install --yes -c rdkit rdkit-postgresql
+  - conda install --yes -c r rpy2
+  - conda install --yes -c bioconda r-prroc=1.1
+  - conda install --yes -c auto croc
+  - conda install --yes pip
 
 install:
   - pip install -e .
@@ -38,7 +36,3 @@ script:
   - sed -i -e 's/"backend":[[:space:]]*"[^"]*/"backend":\ "'$KERAS_BACKEND'/g' ~/.keras/keras.json;
   - echo -e "Running tests with the following config:\n$(cat ~/.keras/keras.json)"
   - python test/test_gpu.py
-
-after_script:
-  - source deactivate
-  - conda remove -n temp --all
