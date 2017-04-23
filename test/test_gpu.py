@@ -5,6 +5,7 @@ import rpy2.robjects
 import rpy2.robjects.packages
 from croc import BEDROC, ScoredData
 import virtual_screening
+import virtual_screening.data_preparation
 import virtual_screening.function
 import virtual_screening.evaluation
 import virtual_screening.models.CallBacks
