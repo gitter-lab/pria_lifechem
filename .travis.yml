@@ -31,7 +31,7 @@ before_install:
   - conda install --yes -n temp pip
 
 install:
-  - $HOME/anaconda/bin/pip install -e .
+  - pip install -e .
 
 script:
   - python -c "import keras.backend"

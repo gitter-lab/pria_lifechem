@@ -38,7 +38,7 @@ echo 'Done installing libraries'
 chmod 777 -R ./anaconda
 
 #get virtual-screening from github
-curl -H "Authorization: token 90ce823b4b9f465db73d7a2b0c830006b5a09b08" -L https://api.github.com/repos/chao1224/virtual-screening/zipball > virtual-screening-master.zip
+curl -H "Authorization: token 25d5fb3e326a17924154242220d07713a6600259" -L https://api.github.com/repos/chao1224/virtual-screening/zipball > virtual-screening-master.zip
 unzip virtual-screening-master.zip > /dev/null
 mv chao* virtual-screening
 chmod 777 *
@@ -46,9 +46,7 @@ cp -r dataset/* virtual-screening/dataset/
 
 echo
 #run python job
-cd virtual-screening
-pip install --user -e .
-cd virtual_screening/models
+cd virtual-screening/virtual_screening
 echo "start"
 date
 KERAS_BACKEND=theano \

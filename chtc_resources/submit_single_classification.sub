@@ -24,7 +24,7 @@ transfer_input_files = ../dataset
 # Specify the resources required
 Request_cpus = 1
 Request_memory = 3GB
-Request_disk = 6GB
+Request_disk = 9GB
 
 # uncomment following three lines in case of using GPU
 #Request_Gpus = 1
