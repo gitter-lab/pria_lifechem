@@ -18,6 +18,7 @@ before_install:
   - conda install --yes -n temp pyyaml
   - conda install --yes -n temp HDF5
   - conda install --yes -n temp h5py
+  - conda install --yes -n temp pandas=0.18*
   - conda install --yes -n temp -c rdonnelly libgpuarray
   - conda install --yes -n temp -c rdonnelly pygpu
   - conda install --yes -n temp -c rdonnelly theano
