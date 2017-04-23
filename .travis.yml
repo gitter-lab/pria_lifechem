@@ -13,12 +13,11 @@ before_install:
   - chmod 777 *
   - bash anaconda.sh -b -p $HOME/anaconda
   - export PATH="$HOME/anaconda/bin:$PATH"
-  - conda create -y -n temp
+  - conda create -y -n temp python=2.7 anaconda
   - source activate temp
   - conda install --yes -n temp pyyaml
   - conda install --yes -n temp HDF5
   - conda install --yes -n temp h5py
-  - conda install --yes -n temp pandas=0.18*
   - conda install --yes -n temp -c rdonnelly libgpuarray
   - conda install --yes -n temp -c rdonnelly pygpu
   - conda install --yes -n temp -c rdonnelly theano
