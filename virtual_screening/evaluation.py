@@ -9,7 +9,6 @@ from sklearn.metrics import auc
 from croc import BEDROC, ScoredData
 import os
 import matplotlib
-matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
 """

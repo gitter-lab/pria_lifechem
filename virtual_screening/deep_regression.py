@@ -10,9 +10,9 @@ from keras.layers import Dense, Dropout
 from keras.layers.normalization import BatchNormalization
 from keras.optimizers import SGD, Adam
 from sklearn.cross_validation import StratifiedShuffleSplit
-from virtual_screening.function import read_merged_data, extract_feature_and_label, \
+from function import read_merged_data, extract_feature_and_label, \
     reshape_data_into_2_dim, store_data, transform_json_to_csv
-from virtual_screening.evaluation import roc_auc_single, bedroc_auc_single, \
+from evaluation import roc_auc_single, bedroc_auc_single, \
     precision_auc_single, enrichment_factor_single
 
 

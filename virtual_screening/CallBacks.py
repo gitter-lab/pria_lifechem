@@ -1,6 +1,6 @@
 import keras
 import sys
-from virtual_screening.evaluation import *
+from evaluation import *
 
 
 # define custom classes
