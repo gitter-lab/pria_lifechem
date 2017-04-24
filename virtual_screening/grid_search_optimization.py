@@ -202,11 +202,9 @@ def run_vanilla_lstm():
         conf = json.load(f)
 
     hyperparameter_sets = {'optimizer': ['rmsprop'],
-                           'epoch size': [200],
-                           'patience': [20],
+                           'epoch patience': [{'epoch_size': 200, 'patience': 50}],
                            'early stopping': ['auc'],
                            'embedding_size': [30, 50, 100],
-                           'layer_num': [1, 2],
                            'hidden_size': [
                                [50],
                                [100],
@@ -214,7 +212,7 @@ def run_vanilla_lstm():
                                [100, 50],
                                [50, 10]
                            ],
-                           'dropout': [0.2]}
+                           'dropout': [0.2, 0.5]}
     hyperparameters = ParameterGrid(hyperparameter_sets)
 
     cnt = 0
@@ -225,8 +223,9 @@ def run_vanilla_lstm():
         conf['lstm']['embedding_size'] = param['embedding_size']
         conf['lstm']['layer_num'] = len(param['hidden_size'])
         conf['compile']['optimizer']['option'] = param['optimizer']
-        conf['fitting']['nb_epoch'] = param['epoch size']
-        conf['fitting']['early_stopping']['patience'] = param['patience']
+        epoch_patience = param['epoch patience']
+        conf['fitting']['nb_epoch'] = epoch_patience['epoch size']
+        conf['fitting']['early_stopping']['patience'] = epoch_patience['patience']
         conf['fitting']['early_stopping']['option'] = param['early stopping']
         for i in range(conf['lstm']['layer_num']):
             conf['layers'][i]['hidden_size'] = param['hidden_size'][i]
