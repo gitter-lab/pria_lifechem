@@ -2,7 +2,7 @@
   "label_names":["Keck_Pria_AS_Retest", "Keck_Pria_FP_data", "Keck_Pria_Continuous",
               "Keck_RMI_cdd", "FP counts % inhibition"],
   "params": {
-    "n_estimators": [1000, 2000, 4000, 8000],
+    "n_estimators": [1000, 2000, 4000, 8000, 16000],
     "max_features": ["None", "sqrt", "log2"],
     "min_samples_leaf": [1, 100, 1000],
     "class_weight": ["None", "balanced_subsample","balanced"]
