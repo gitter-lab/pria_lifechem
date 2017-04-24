@@ -224,7 +224,7 @@ def run_vanilla_lstm():
         conf['lstm']['layer_num'] = len(param['hidden_size'])
         conf['compile']['optimizer']['option'] = param['optimizer']
         epoch_patience = param['epoch patience']
-        conf['fitting']['nb_epoch'] = epoch_patience['epoch size']
+        conf['fitting']['nb_epoch'] = epoch_patience['epoch_size']
         conf['fitting']['early_stopping']['patience'] = epoch_patience['patience']
         conf['fitting']['early_stopping']['option'] = param['early stopping']
         for i in range(conf['lstm']['layer_num']):

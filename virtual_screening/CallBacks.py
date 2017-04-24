@@ -40,15 +40,19 @@ class KeckCallBackOnROC(keras.callbacks.Callback):
             self.model.save_weights(self.file_path)
 
         train_roc = roc_auc_single(self.y_train, self.model.predict(self.X_train))
-        train_bedroc = bedroc_auc_single(self.y_train, self.model.predict(self.X_train))
+        # train_bedroc = bedroc_auc_single(self.y_train, self.model.predict(self.X_train))
         train_pr = precision_auc_single(self.y_train, self.model.predict(self.X_train))
-        curr_bedroc = bedroc_auc_single(self.y_val, self.model.predict(self.X_val))
+        # curr_bedroc = bedroc_auc_single(self.y_val, self.model.predict(self.X_val))
         curr_pr = precision_auc_single(self.y_val, self.model.predict(self.X_val))
         print('Epoch %d/%d' % (epoch + 1, self.nb_epoch))
-        print 'Train\tAUC[ROC]: %.6f\tAUC[BEDROC]: %.6f\tAUC[PR]: %.6f' % \
-              (train_roc, train_bedroc, train_pr)
-        print 'Val\tAUC[ROC]: %.6f\tAUC[BEDROC]: %.6f\tAUC[PR]: %.6f' % \
-              (self.curr_roc, curr_bedroc, curr_pr)
+        # print 'Train\tAUC[ROC]: %.6f\tAUC[BEDROC]: %.6f\tAUC[PR]: %.6f' % \
+        #       (train_roc, train_bedroc, train_pr)
+        # print 'Val\tAUC[ROC]: %.6f\tAUC[BEDROC]: %.6f\tAUC[PR]: %.6f' % \
+        #       (self.curr_roc, curr_bedroc, curr_pr)
+        print 'Train\tAUC[ROC]: %.6f\tAUC[PR]: %.6f' % \
+              (train_roc, train_pr)
+        print 'Val\tAUC[ROC]: %.6f\tAUC[PR]: %.6f' % \
+              (self.curr_roc, curr_pr)
         print
 
     def get_best_model(self):
@@ -96,15 +100,19 @@ class KeckCallBackOnPrecision(keras.callbacks.Callback):
             self.model.save_weights(self.file_path)
 
         train_roc = roc_auc_single(self.y_train, self.model.predict(self.X_train))
-        train_bedroc = bedroc_auc_single(self.y_train, self.model.predict(self.X_train))
+        # train_bedroc = bedroc_auc_single(self.y_train, self.model.predict(self.X_train))
         train_pr = precision_auc_single(self.y_train, self.model.predict(self.X_train))
         curr_roc = roc_auc_single(self.y_val, self.model.predict(self.X_val))
-        curr_bedroc = bedroc_auc_single(self.y_val, self.model.predict(self.X_val))
+        # curr_bedroc = bedroc_auc_single(self.y_val, self.model.predict(self.X_val))
         print('Epoch %d/%d' % (epoch + 1, self.nb_epoch))
-        print 'Train\tAUC[ROC]: %.6f\tAUC[BEDROC]: %.6f\tAUC[PR]: %.6f' % \
-              (train_roc, train_bedroc, train_pr)
-        print 'Val\tAUC[ROC]: %.6f\tAUC[BEDROC]: %.6f\tAUC[PR]: %.6f' % \
-              (curr_roc, curr_bedroc, self.curr_pr)
+        # print 'Train\tAUC[ROC]: %.6f\tAUC[BEDROC]: %.6f\tAUC[PR]: %.6f' % \
+        #       (train_roc, train_bedroc, train_pr)
+        # print 'Val\tAUC[ROC]: %.6f\tAUC[BEDROC]: %.6f\tAUC[PR]: %.6f' % \
+        #       (curr_roc, curr_bedroc, self.curr_pr)
+        print 'Train\tAUC[ROC]: %.6f\tAUC[PR]: %.6f' % \
+              (train_roc, train_pr)
+        print 'Val\tAUC[ROC]: %.6f\tAUC[PR]: %.6f' % \
+              (curr_roc, self.curr_pr)
         print
 
     def get_best_model(self):
@@ -155,15 +163,19 @@ class MultiCallBackOnROC(keras.callbacks.Callback):
             self.model.save_weights(self.file_path)
 
         curr_pr = self.get_model_precision_auc(self.y_val, y_pred_val)
-        curr_bedroc = self.get_model_bedroc_auc(self.y_val, y_pred_val)
+        # curr_bedroc = self.get_model_bedroc_auc(self.y_val, y_pred_val)
         train_roc = self.get_model_roc_auc(self.y_train, y_pred_train)
-        train_bedroc = self.get_model_bedroc_auc(self.y_train, y_pred_train)
+        # train_bedroc = self.get_model_bedroc_auc(self.y_train, y_pred_train)
         train_pr = self.get_model_precision_auc(self.y_train, y_pred_train)
         print('Epoch {}/{}'.format(epoch + 1, self.nb_epoch))
-        print 'Train\tAUC[ROC]: %.6f\tAUC[BEDROC]: %.6f\tAUC[PR]: %.6f' % \
-              (train_roc, train_bedroc, train_pr)
-        print 'Val\tAUC[ROC]: %.6f\tAUC[BEDROC]: %.6f\tAUC[PR]: %.6f' % \
-              (self.curr_roc, curr_bedroc, curr_pr)
+        # print 'Train\tAUC[ROC]: %.6f\tAUC[BEDROC]: %.6f\tAUC[PR]: %.6f' % \
+        #       (train_roc, train_bedroc, train_pr)
+        # print 'Val\tAUC[ROC]: %.6f\tAUC[BEDROC]: %.6f\tAUC[PR]: %.6f' % \
+        #       (self.curr_roc, curr_bedroc, curr_pr)
+        print 'Train\tAUC[ROC]: %.6f\tAUC[PR]: %.6f' % \
+              (train_roc, train_pr)
+        print 'Val\tAUC[ROC]: %.6f\tAUC[PR]: %.6f' % \
+              (self.curr_roc, curr_pr)
 
     def get_best_model(self):
         self.model.load_weights(self.file_path)
@@ -224,16 +236,20 @@ class MultiCallBackOnPR(keras.callbacks.Callback):
             self.model.save_weights(self.file_path)
 
         curr_roc = self.get_model_roc_auc(self.y_val, y_pred_val)
-        curr_bedroc = self.get_model_bedroc_auc(self.y_val, y_pred_val)
+        # curr_bedroc = self.get_model_bedroc_auc(self.y_val, y_pred_val)
         train_roc = self.get_model_roc_auc(self.y_train, y_pred_train)
-        train_bedroc = self.get_model_bedroc_auc(self.y_train, y_pred_train)
+        # train_bedroc = self.get_model_bedroc_auc(self.y_train, y_pred_train)
         train_pr = self.get_model_precision_auc(self.y_train, y_pred_train)
 
         print('Epoch {}/{}'.format(epoch + 1, self.nb_epoch))
-        print 'Train\tAUC[ROC]: %.6f\tAUC[BEDROC]: %.6f\tAUC[PR]: %.6f' % \
-              (train_roc, train_bedroc, train_pr)
-        print 'Val\tAUC[ROC]: %.6f\tAUC[BEDROC]: %.6f\tAUC[PR]: %.6f' % \
-              (curr_roc, curr_bedroc, self.curr_pr)
+        # print 'Train\tAUC[ROC]: %.6f\tAUC[BEDROC]: %.6f\tAUC[PR]: %.6f' % \
+        #       (train_roc, train_bedroc, train_pr)
+        # print 'Val\tAUC[ROC]: %.6f\tAUC[BEDROC]: %.6f\tAUC[PR]: %.6f' % \
+        #       (curr_roc, curr_bedroc, self.curr_pr)
+        print 'Train\tAUC[ROC]: %.6f\tAUC[PR]: %.6f' % \
+              (train_roc, train_pr)
+        print 'Val\tAUC[ROC]: %.6f\tAUC[PR]: %.6f' % \
+              (curr_roc, self.curr_pr)
 
     def get_best_model(self):
         self.model.load_weights(self.file_path)
