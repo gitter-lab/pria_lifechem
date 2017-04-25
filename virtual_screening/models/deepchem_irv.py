@@ -8,14 +8,17 @@ import sys
 sys.path.insert(0, '..')  # Add path from parent folder
 sys.path.insert(0, '.')  # Add path from current folder
 from function import *
-from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
+import os
+import shutil
+import deepchem as dc
 from sklearn.externals import joblib
 from sklearn.grid_search import ParameterGrid
+from deepchem.trans import undo_transforms
 
 rnd_state=1337
 np.random.seed(seed=rnd_state)
 
-class SKLearn_RandomForest:
+class Deepchem_IRV:
     def __init__(self, conf):
         self.conf = conf
         self.input_layer_dimension = 1024
@@ -36,111 +39,94 @@ class SKLearn_RandomForest:
                 continue
             
             self.param = param
-            self.n_estimators = param['n_estimators']
-            self.max_features = param['max_features']
-            self.min_samples_leaf = param['min_samples_leaf']
-            self.class_weight = param['class_weight']
-            print('Testing set:', param)            
+            self.K = param['K']
+            print('param set:', param)            
             break
         
-        if self.max_features == "None":
-            self.max_features = None
-        if self.class_weight == "None":
-            self.class_weight = None
-        
         self.model_dict = {}
+        self.model = None
+        
+        self.nb_epochs=10
         return
 
-    def setup_model(self):
-        for i in [0,1,3]:
-            self.model_dict[self.label_names[i]] = RandomForestClassifier(n_estimators=self.n_estimators, 
-                                           max_features=self.max_features, 
-                                           min_samples_leaf=self.min_samples_leaf, 
-                                           n_jobs=-1, 
-                                           class_weight=self.class_weight,
-                                           random_state=rnd_state,
-                                           oob_score=False, 
-                                           verbose=1) 
-        for i in [2,4]:
-            self.model_dict[self.label_names[i]] = RandomForestRegressor(n_estimators=self.n_estimators, 
-                                           max_features=self.max_features, 
-                                           min_samples_leaf=self.min_samples_leaf, 
-                                           n_jobs=-1,
-                                           random_state=rnd_state,
-                                           oob_score=False, 
-                                           verbose=1) 
+    def setup_model(self, model_file):
+        self.model = dc.models.TensorflowMultiTaskIRVClassifier(
+                                                   len(self.label_names),
+                                                   K=self.K,
+                                                   learning_rate=0.001,
+                                                   penalty=0.05,
+                                                   batch_size=32,
+                                                   fit_transformers=[],
+                                                   logdir=model_file)        
         return
         
         
     def train_and_predict(self,
-                          X_train, y_train,
-                          X_val, y_val,
-                          X_test, y_test,
+                          train_data,
+                          val_data,
+                          test_data,
                           model_file):
                               
-        self.setup_model()
+        self.setup_model(model_file)
+        self.model.fit(train_data, nb_epoch=self.nb_epochs)
+        self.model.save()     
         
-        X_train = np.concatenate((X_train, X_val))
-        y_train = np.concatenate((y_train, y_val))
-        
-        p = np.random.permutation(len(X_train))
-        X_train = X_train[p,:]
-        y_train = y_train[p,:]
-        p = np.random.permutation(len(X_test))
-        X_test = X_test[p,:]
-        y_test = y_test[p,:]
-        
-        for i, label in zip(range(len(self.label_names)), self.label_names):
-            y = y_train[:,i]
-            indexes = np.where(np.isnan(y))[0]
-                
-            y = np.delete(y, indexes, axis=0)
-            X = np.delete(X_train, indexes, axis=0)
-            self.model_dict[label].fit(X, y)
-            
-            joblib.dump(self.model_dict[label], model_file+'_'+label+'.pkl', compress = 1)
+        self.predict_with_existing(train_data, 
+                                   val_data, 
+                                   test_data)
         return
 
     def predict_with_existing(self,
-                              X_train, y_train,
-                              X_val, y_val,
-                              X_test, y_test,
-                              model_file):  
-                                  
-        X_train = np.concatenate((X_train, X_val))
-        y_train = np.concatenate((y_train, y_val))
+                              train_data,
+                              val_data,
+                              test_data):  
         
-        y_pred_on_train = np.zeros(shape=y_train.shape)
-        y_pred_on_test = np.zeros(shape=y_test.shape)
+        y_pred_on_train = self.model.predict_proba(train_data)
+        y_pred_on_val = self.model.predict_proba(val_data)
+        y_pred_on_test = self.model.predict_proba(test_data)    
+        
+        y_train = train_data.y()
+        y_val = val_data.y()
+        y_test = test_data.y()
+        w_train = train_data.w()
+        w_val = val_data.w()
+        w_test = test_data.w()
         
         y_train[:,2] = y_train[:,0]
         y_train[:,4] = y_train[:,3]
+        y_val[:,2] = y_val[:,0]
+        y_val[:,4] = y_val[:,3]
         y_test[:,2] = y_test[:,0]
         y_test[:,4] = y_test[:,3]
         
+        w_train[:,2] = w_train[:,0]
+        w_train[:,4] = w_train[:,3]
+        w_val[:,2] = w_val[:,0]
+        w_val[:,4] = w_val[:,3]
+        w_test[:,2] = w_test[:,0]
+        w_test[:,4] = w_test[:,3]
+        
         for i, label in zip(range(len(self.label_names)), self.label_names):     
-            model = joblib.load(model_file+'_'+label+'.pkl')
-            
-            if i in [0,1,3]:  
-                y_pred_on_train[:,i] =  model.predict_proba(X_train)[:,1]
-                y_pred_on_test[:,i] = model.predict_proba(X_test)[:,1]
-            else:
-                y_pred_on_train[:,i] =  model.predict(X_train)
-                y_pred_on_test[:,i] = model.predict(X_test)
-            
-            y_train[np.where(np.isnan(y_train[:,i]))[0],i] = -1
-            y_test[np.where(np.isnan(y_test[:,i]))[0],i] = -1
+            y_train[np.where(w_train[:,i] == 0)[0],i] = -1
+            y_val[np.where(w_val[:,i] == 0)[0],i] = -1
+            y_test[np.where(w_test[:,i] == 0)[0],i] = -1
          
         y_train = np.insert(y_train, 3, y_train[:,1], axis=1)
+        y_val = np.insert(y_val, 3, y_val[:,1], axis=1)
         y_test = np.insert(y_test, 3, y_test[:,1], axis=1)
         
         y_pred_on_train = np.insert(y_pred_on_train, 3, y_pred_on_train[:,2], axis=1)
+        y_pred_on_val = np.insert(y_pred_on_val, 3, y_pred_on_val[:,2], axis=1)
         y_pred_on_test = np.insert(y_pred_on_test, 3, y_pred_on_test[:,2], axis=1)
         
         print
         print('train precision: {}'.format(precision_auc_multi(y_train, y_pred_on_train, range(y_train.shape[1]), np.mean)))
         print('train roc: {}'.format(roc_auc_multi(y_train, y_pred_on_train, range(y_train.shape[1]), np.mean)))
         print('train bedroc: {}'.format(bedroc_auc_multi(y_train, y_pred_on_train, range(y_train.shape[1]), np.mean)))
+        print
+        print('val precision: {}'.format(precision_auc_multi(y_val, y_pred_on_val, range(y_val.shape[1]), np.mean)))
+        print('val roc: {}'.format(roc_auc_multi(y_val, y_pred_on_val, range(y_val.shape[1]), np.mean)))
+        print('val bedroc: {}'.format(bedroc_auc_multi(y_val, y_pred_on_val, range(y_val.shape[1]), np.mean)))
         print
         print('test precision: {}'.format(precision_auc_multi(y_test, y_pred_on_test, range(y_test.shape[1]), np.mean)))
         print('test roc: {}'.format(roc_auc_multi(y_test, y_pred_on_test, range(y_test.shape[1]), np.mean)))
@@ -152,12 +138,14 @@ class SKLearn_RandomForest:
                       'Keck_RMI_cdd', 'FP counts % inhibition']
         nef_auc_mean = np.mean(np.array(nef_auc(y_train, y_pred_on_train, self.EF_ratio_list, label_list))) 
         print('train nef auc: {}'.format(nef_auc_mean))
+        nef_auc_mean = np.mean(np.array(nef_auc(y_val, y_pred_on_val, self.EF_ratio_list, label_list))) 
+        print('val nef auc: {}'.format(nef_auc_mean))
         nef_auc_mean = np.mean(np.array(nef_auc(y_test, y_pred_on_test, self.EF_ratio_list, label_list))) 
         print('test nef auc: {}'.format(nef_auc_mean))
         return
 
     def save_model_evaluation_metrics(self,
-                              X, y_true,
+                              data,
                               model_file,
                               metric_dir,
                               label_names=None):
@@ -165,19 +153,18 @@ class SKLearn_RandomForest:
         if not os.path.exists(metric_dir):
             os.makedirs(metric_dir)   
         
-        y_pred = np.zeros(shape=y_true.shape)
+        y_pred = self.model.predict_proba(data)
+        
+        y_true = data.y()
+        w_true = data.w()
         
         y_true[:,2] = y_true[:,0]
         y_true[:,4] = y_true[:,3]
+        w_true[:,2] = w_true[:,0]
+        w_true[:,4] = w_true[:,3]
         
-        for i, label in zip(range(len(self.label_names)), self.label_names):     
-            model = joblib.load(model_file+'_'+label+'.pkl')
-            
-            y_true[np.where(np.isnan(y_true[:,i]))[0],i] = -1
-            if i in [0,1,3]:                
-                y_pred[:,i] =  model.predict_proba(X)[:,1]
-            else:
-                y_pred[:,i] =  model.predict(X)
+        for i, label in zip(range(len(self.label_names)), self.label_names): 
+            y_true[np.where(w_true[:,i] == 0)[0],i] = -1
         
         y_true = np.insert(y_true, 3, y_true[:,1], axis=1)
         y_pred = np.insert(y_pred, 3, y_pred[:,2], axis=1)
@@ -194,6 +181,8 @@ class SKLearn_RandomForest:
             csvfile.write(data)
         return
 
+    def getK():
+        return self.K;
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -206,7 +195,7 @@ if __name__ == '__main__':
     model_dir = given_args.model_dir
     dataset_dir = given_args.dataset_dir
     #####
-    model_file = model_dir+'rf_clf'
+    model_file = model_dir
     config_csv_file = model_dir+'model_config.csv'
     #####
     scratch_dir = os.environ.get('_CONDOR_JOB_IWD')
@@ -241,33 +230,53 @@ if __name__ == '__main__':
         labels = ['Keck_Pria_AS_Retest', 'Keck_Pria_FP_data', 'Keck_Pria_Continuous',
                   'Keck_RMI_cdd', 'FP counts % inhibition']
     
+        featurizer='ECFP'
+        if featurizer == 'ECFP':
+            featurizer_func = dc.feat.CircularFingerprint(size=1024)
+        elif featurizer == 'GraphConv':
+            featurizer_func = dc.feat.ConvMolFeaturizer()
+            
+        loader = dc.data.CSVLoader(tasks=labels, 
+                                   smiles_field="SMILES", 
+                                   featurizer=featurizer_func)
+        
         # extract data, and split training data into training and val
-        X_train, y_train = extract_feature_and_label(train_pd,
-                                                     feature_name='Fingerprints',
-                                                     label_name_list=labels)
+        train_data = loader.featurize(train_files, shard_size=2**15)
+        val_data = loader.featurize(val_files, shard_size=2**15)
+        test_data = loader.featurize(test_files, shard_size=2**15)
         
-        X_val, y_val = extract_feature_and_label(val_pd,
-                                                 feature_name='Fingerprints',
-                                                 label_name_list=labels)
-                                                   
-        X_test, y_test = extract_feature_and_label(test_pd,
-                                                   feature_name='Fingerprints',
-                                                   label_name_list=labels)
-        print('done data preparation')
+        train_data = transformer.transform(dc.trans.BalancingTransformer(transform_w=True, dataset=train_data))
+        val_data = transformer.transform(dc.trans.BalancingTransformer(transform_w=True, dataset=val_data))
+        test_data = transformer.transform(dc.trans.BalancingTransformer(transform_w=True, dataset=test_data))
+           
         
-        
-    
         with open(config_json_file, 'r') as f:
             conf = json.load(f)
-        task = SKLearn_RandomForest(conf=conf)
-        task.train_and_predict(X_train, y_train, X_val, y_val, X_test, y_test, model_file)
+        task = Deepchem_IRV(conf=conf)
+        K = task.getK()
+        transformers = [dc.trans.IRVTransformer(K, len(labels), train_data)]
+        for transformer in transformers:
+            train_data = transformer.transform(train_data)
+            val_data = transformer.transform(val_data)
+            test_data = transformer.transform(test_data)        
+        
+        train_data = undo_transforms(train_data, [dc.trans.BalancingTransformer(transform_w=True, dataset=train_data),
+                                                  dc.trans.IRVTransformer(K, len(labels), train_data)])
+        val_data = undo_transforms(val_data, [dc.trans.BalancingTransformer(transform_w=True, dataset=val_data),
+                                                  dc.trans.IRVTransformer(K, len(labels), train_data)])
+        test_data = undo_transforms(test_data, [dc.trans.BalancingTransformer(transform_w=True, dataset=test_data),
+                                                  dc.trans.IRVTransformer(K, len(labels), train_data)])
+                                                  
+        task.train_and_predict(train_data, val_data, test_data, model_file)
         task.save_model_params(config_csv_file)
         
-        #####
-        task.save_model_evaluation_metrics(np.concatenate((X_train, X_val)), 
-                                           np.concatenate((y_train, y_val)), model_file,
+        #####        
+        task.save_model_evaluation_metrics(train_data, model_file,
                                           model_dir+'fold_'+str(i)+'/train_metrics/',
                                           label_names=labels)
-        task.save_model_evaluation_metrics(X_test, y_test, model_file,
+        task.save_model_evaluation_metrics(val_data, model_file,
+                                          model_dir+'fold_'+str(i)+'/val_metrics/',
+                                          label_names=labels)
+        task.save_model_evaluation_metrics(test_data, model_file,
                                           model_dir+'fold_'+str(i)+'/test_metrics/',
                                           label_names=labels)

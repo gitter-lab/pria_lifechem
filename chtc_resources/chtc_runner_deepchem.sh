@@ -6,7 +6,7 @@ mkdir job_results/light_chem
 mkdir job_results/neural_networks
 mkdir job_results/random_forest
 
-wget -q â€“retry-connrefused â€“waitretry=10 http://proxy.chtc.wisc.edu/SQUID/alnammi/Anaconda2-4.3.1-Linux-x86_64.sh #here I get the anaconda file from squid
+wget –q –retry–connrefused –waitretry=10 http://proxy.chtc.wisc.edu/SQUID/alnammi/Anaconda2-4.3.1-Linux-x86_64.sh #here I get the anaconda file from squid
 wget -r -nH --cut-dirs=2 -np -R index.html* -q â€“retry-connrefused â€“waitretry=10 http://proxy.chtc.wisc.edu/SQUID/alnammi/dataset/ #here I get the dataset 
 
 chmod 777 * #wget does strange things
@@ -20,20 +20,36 @@ export PATH=$PWD/anaconda/bin:$PATH
 echo 'Done installing anaconda'
 chmod 777 *
 
-#keras stuff
-conda install --yes pyyaml > /dev/null
-conda install --yes HDF5 > /dev/null
-conda install --yes h5py > /dev/null
-conda install --yes -c rdonnelly libgpuarray > /dev/null
-conda install --yes -c rdonnelly pygpu > /dev/null
-conda install --yes -c rdonnelly theano > /dev/null
-conda install --yes -c conda-forge keras=1.2* > /dev/null
-conda install --yes scikit-learn=0.17* > /dev/null
-conda install --yes pandas > /dev/null
-conda install --yes -c rdkit rdkit-postgresql > /dev/null
-conda install --yes -c r rpy2 > /dev/null
-conda install --yes -c bioconda r-prroc=1.1 > /dev/null
-conda install --yes -c auto croc=1.0.63 > /dev/null
+#deepchem stuff
+git clone https://github.com/deepchem/deepchem.git
+
+conda install -y -c omnia openbabel=2.4.0 > /dev/null
+conda install -y -c omnia pdbfixer=1.4 > /dev/null
+conda install -y -c rdkit rdkit > /dev/null
+conda install -y joblib > /dev/null
+conda install -y -c omnia mdtraj > /dev/null
+conda install -y scikit-learn > /dev/null
+conda install -y setuptools > /dev/null
+conda install -y -c conda-forge keras=1.2.2 > /dev/null
+conda install -y -c conda-forge protobuf=3.1.0 > /dev/null
+conda install -y -c anaconda networkx=1.11 > /dev/null
+conda install -y -c bioconda xgboost=0.6a2 > /dev/null
+conda install -y -c conda-forge six=1.10.0 > /dev/null
+conda install -y -c conda-forge nose=1.3.7 > /dev/null
+conda install --yes -c conda-forge tensorflow=1.0.0 > /dev/null
+conda install --yes -c jjhelmus tensorflow-gpu=1.0.1 > /dev/null
+conda install --yes mkl-service > /dev/null
+
+#wget -q –retry-connrefused –waitretry=10 http://github.com/deepchem/deepchem/archive/master.zip > /dev/null
+#unzip master.zip > /dev/null
+#rm -f master.zip
+#mv deepchem-master* deepchem
+
+cd deepchem
+python setup.py install
+nosetests -v deepchem --nologcapture
+source activate deepchem
+cd ..
 
 echo 'Done installing libraries'
 
@@ -70,6 +86,7 @@ cd ..
 #clean up everything I don't want transfered back
 rm -f Anaconda*
 rm -R -f virtual-screening*
+rm -R -f deepchem*
 rm -rf ./anaconda*
 
 
