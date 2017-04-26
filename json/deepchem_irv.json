@@ -1,0 +1,13 @@
+{
+  "label_names":["Keck_Pria_AS_Retest", "Keck_Pria_FP_data", "Keck_Pria_Continuous",
+              "Keck_RMI_cdd", "FP counts % inhibition"],
+  "params": {
+    "K": [5, 10, 20, 40, 80, 160]
+  },
+  "fitting": {
+    "nb_epochs": 100
+  },
+  "enrichment_factor": {
+    "ratio_list": [0.005, 0.01, 0.02, 0.05, 0.1, 0.2]
+  }
+}

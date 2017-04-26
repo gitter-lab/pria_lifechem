@@ -46,7 +46,7 @@ class Deepchem_IRV:
         self.model_dict = {}
         self.model = None
         
-        self.nb_epochs=10
+        self.nb_epochs=conf['fitting']['nb_epochs']
         return
 
     def setup_model(self, model_file):
@@ -195,7 +195,7 @@ if __name__ == '__main__':
     model_dir = given_args.model_dir
     dataset_dir = given_args.dataset_dir
     #####
-    model_file = model_dir
+    model_file = model_dir+'tf_checkpoints/'
     config_csv_file = model_dir+'model_config.csv'
     #####
     scratch_dir = os.environ.get('_CONDOR_JOB_IWD')
@@ -253,24 +253,24 @@ if __name__ == '__main__':
         with open(config_json_file, 'r') as f:
             conf = json.load(f)
         task = Deepchem_IRV(conf=conf)
-        K = task.getK()
-        transformers = [dc.trans.IRVTransformer(K, len(labels), train_data)]
+        K_neighbors = task.getK()
+        transformers = [dc.trans.IRVTransformer(K_neighbors, len(labels), train_data)]
         for transformer in transformers:
             train_data = transformer.transform(train_data)
             val_data = transformer.transform(val_data)
             test_data = transformer.transform(test_data)        
         
-        train_data = undo_transforms(train_data, [dc.trans.BalancingTransformer(transform_w=True, dataset=train_data),
-                                                  dc.trans.IRVTransformer(K, len(labels), train_data)])
-        val_data = undo_transforms(val_data, [dc.trans.BalancingTransformer(transform_w=True, dataset=val_data),
-                                                  dc.trans.IRVTransformer(K, len(labels), train_data)])
-        test_data = undo_transforms(test_data, [dc.trans.BalancingTransformer(transform_w=True, dataset=test_data),
-                                                  dc.trans.IRVTransformer(K, len(labels), train_data)])
-                                                  
+        #train model
         task.train_and_predict(train_data, val_data, test_data, model_file)
-        task.save_model_params(config_csv_file)
         
-        #####        
+        #Undo transfromations and get metrics
+        train_data = undo_transforms(train_data, [dc.trans.BalancingTransformer(transform_w=True, dataset=train_data),
+                                                  dc.trans.IRVTransformer(K_neighbors, len(labels), train_data)])
+        val_data = undo_transforms(val_data, [dc.trans.BalancingTransformer(transform_w=True, dataset=val_data),
+                                                  dc.trans.IRVTransformer(K_neighbors, len(labels), train_data)])
+        test_data = undo_transforms(test_data, [dc.trans.BalancingTransformer(transform_w=True, dataset=test_data),
+                                                  dc.trans.IRVTransformer(K_neighbors, len(labels), train_data)])
+                                                       
         task.save_model_evaluation_metrics(train_data, model_file,
                                           model_dir+'fold_'+str(i)+'/train_metrics/',
                                           label_names=labels)
@@ -280,3 +280,5 @@ if __name__ == '__main__':
         task.save_model_evaluation_metrics(test_data, model_file,
                                           model_dir+'fold_'+str(i)+'/test_metrics/',
                                           label_names=labels)
+        
+        task.save_model_params(config_csv_file)

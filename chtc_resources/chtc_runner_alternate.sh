@@ -16,6 +16,7 @@ echo 'Done getting from squid'
 ./Anaconda2-4.3.1-Linux-x86_64.sh -b -p ./anaconda > /dev/null #install anaconda, I also add an argument to the directory name
 
 export PATH=$PWD/anaconda/bin:$PATH
+export HOME=$_CONDOR_JOB_IWD
 
 echo 'Done installing anaconda'
 chmod 777 *

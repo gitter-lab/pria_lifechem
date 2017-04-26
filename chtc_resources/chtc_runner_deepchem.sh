@@ -16,6 +16,7 @@ echo 'Done getting from squid'
 ./Anaconda2-4.3.1-Linux-x86_64.sh -b -p ./anaconda > /dev/null #install anaconda, I also add an argument to the directory name
 
 export PATH=$PWD/anaconda/bin:$PATH
+export HOME=$_CONDOR_JOB_IWD
 
 echo 'Done installing anaconda'
 chmod 777 *
@@ -68,14 +69,13 @@ export PYTHONPATH=${PYTHONPATH}:${_CONDOR_JOB_IWD}/virtual-screening:${_CONDOR_J
 cd virtual-screening
 
 #set up matplotlib.use('Agg') so no Could not connect to display error occurs
-export HOME=$_CONDOR_JOB_IWD
 mkdir $HOME/.config
 mkdir $HOME/.config/matplotlib
 echo 'backend: Agg' > $HOME/.config/matplotlib/matplotlibrc
 
 #run python job
 python_jobs_dir=$1
-KERAS_BACKEND=theano THEANO_FLAGS="base_compiledir=./tmp,floatX=float32,device=cuda,gpuarray.preallocate=0.8" python virtual_screening/chtc_distributor.py $python_jobs_dir
+python virtual_screening/models/deepchem_irv.py --config_json_file=./json/deepchem_irv.json --model_dir=../job_results/irv/deepchem_irv_${cluster}_${process}/ --dataset_dir=./dataset/keck/fold_5/
 
 echo 'Done running job'
 
