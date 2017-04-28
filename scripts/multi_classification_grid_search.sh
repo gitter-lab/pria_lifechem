@@ -13,6 +13,8 @@ echo Cluster $cluster
 echo Process $process
 echo RunningOn $runningon
 
+export HOME=$PWD
+
 wget -q –retry-connrefused –waitretry=10 https://repo.continuum.io/archive/Anaconda2-4.3.1-Linux-x86_64.sh #here I get the anaconda file from squid
 chmod 777 * #wget does strange things
 ./Anaconda2-4.3.1-Linux-x86_64.sh -b -p ./anaconda > /dev/null #install anaconda, I also add an argument to the directory name
@@ -45,9 +47,10 @@ chmod 777 *
 cp -r dataset/* virtual-screening/dataset/
 
 echo
-#run python job
-cd virtual-screening/virtual_screening
-echo "start"
+cd virtual-screening
+pip install --user -e .
+cd virtual_screening/models
+echo " ------------------ Start ------------------"
 date
 KERAS_BACKEND=theano \
 THEANO_FLAGS="base_compiledir=./tmp,device=gpu,floatX=float32,gpuarray.preallocate=0.8" \
@@ -58,6 +61,6 @@ python grid_search_optimization.py \
 --SMILES_mapping_json_file=../../json/SMILES_mapping.json \
 --process_num=$process \
 --score_file=$_CONDOR_JOB_IWD/$transfer_output_files/$process.score.csv \
---model=multi_classification >> $_CONDOR_JOB_IWD/$transfer_output_files/$process.out
-echo 'Done running job'
+--model=multi_classification > $_CONDOR_JOB_IWD/$transfer_output_files/$process.out
+echo " ------------------ Done ------------------"
 date

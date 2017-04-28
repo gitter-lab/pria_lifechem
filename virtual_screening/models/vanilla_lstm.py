@@ -14,10 +14,10 @@ from keras.preprocessing import sequence
 from keras.layers.embeddings import Embedding
 from keras.optimizers import SGD, Adam
 from sklearn.cross_validation import StratifiedShuffleSplit
-from function import read_merged_data, extract_SMILES_and_label
-from evaluation import roc_auc_single, bedroc_auc_single, \
+from virtual_screening.function import read_merged_data, extract_SMILES_and_label
+from virtual_screening.evaluation import roc_auc_single, bedroc_auc_single, \
     precision_auc_single, enrichment_factor_single
-from CallBacks import KeckCallBackOnROC, KeckCallBackOnPrecision
+from virtual_screening.models.CallBacks import KeckCallBackOnROC, KeckCallBackOnPrecision
 
 
 class VanillaLSTM:
