@@ -53,13 +53,13 @@ cd virtual_screening/models
 echo " ------------------ Start ------------------"
 date
 KERAS_BACKEND=theano \
-THEANO_FLAGS="base_compiledir=./tmp,floatX=float32,gpuarray.preallocate=0.8" \
+THEANO_FLAGS="base_compiledir=./tmp,device=gpu,floatX=float32,gpuarray.preallocate=0.8" \
 python grid_search_optimization.py \
---config_json_file=../json/single_regression.json \
+--config_json_file=../../json/vanilla_lstm.json \
 --PMTNN_weight_file=$_CONDOR_JOB_IWD/$transfer_output_files/$process.weight \
 --config_csv_file=$_CONDOR_JOB_IWD/$transfer_output_files/$process.result.csv \
---SMILES_mapping_json_file=../json/SMILES_mapping.json \
+--SMILES_mapping_json_file=../../json/SMILES_mapping.json \
 --process_num=$process \
---model=single_regression > $_CONDOR_JOB_IWD/$transfer_output_files/$process.out
+--model=vanilla_lstm > $_CONDOR_JOB_IWD/$transfer_output_files/$process.out
 echo " ------------------ Done ------------------"
 date
