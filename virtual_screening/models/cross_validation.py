@@ -196,7 +196,6 @@ def run_vanilla_lstm(running_index):
     return
 
 
-
 def run_multiple_classification(running_index):
     if running_index >= cross_validation_upper_bound:
         raise ValueError('Process number out of limit. At most {}.'.format(cross_validation_upper_bound-1))
@@ -230,7 +229,7 @@ def run_multiple_classification(running_index):
     val_pd.fillna(0, inplace=True)
     test_pd = read_merged_data(test_file_list)
     test_pd.fillna(0, inplace=True)
-    
+
     labels_list = train_pd.columns[-128:].tolist() # Last 128 is PCBA labels
     labels_list.append('Keck_Pria_AS_Retest') # Add Keck Pria as last label
 
@@ -286,7 +285,7 @@ if __name__ == '__main__':
     parser.add_argument('--model', dest='model',
                         action='store', required=True)
     parser.add_argument('--cross_validation_upper_bound', dest='cross_validation_upper_bound', type=int,
-                        action='store', required=False, default=25)
+                        action='store', required=False, default=20)
     given_args = parser.parse_args()
     config_json_file = given_args.config_json_file
     PMTNN_weight_file = given_args.PMTNN_weight_file
