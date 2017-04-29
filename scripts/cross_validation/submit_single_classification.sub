@@ -8,7 +8,7 @@
 ############################################################################
 
 # should mkdir this output dir first
-transfer_output_files = ../output/single_classification
+transfer_output_files = single_classification
 
 Executable = single_classification_grid_search.sh
 Universe = vanilla
@@ -26,15 +26,11 @@ Request_cpus = 1
 Request_memory = 3GB
 Request_disk = 9GB
 
-# uncomment following three lines in case of using GPU
-#Request_Gpus = 1
-#+AccountingGroup = "BMI_Gitter"
-
 +WantFlocking = true
 
 Environment = "cluster=$(Cluster) process=$(Process) runningon=$$(Name) transfer_output_files=$(transfer_output_files)"
 getenv = true
 
-Queue 48
+Queue 20
 
 #END

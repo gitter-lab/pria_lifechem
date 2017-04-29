@@ -54,11 +54,11 @@ echo " ------------------ Start ------------------"
 date
 KERAS_BACKEND=theano \
 THEANO_FLAGS="base_compiledir=./tmp,floatX=float32,gpuarray.preallocate=0.8" \
-python grid_search_optimization.py \
---config_json_file=../../json/single_regression.json \
+python cross_validation.py \
+--config_json_file=../../json/single_classification.json \
 --PMTNN_weight_file=$_CONDOR_JOB_IWD/$transfer_output_files/$process.weight \
 --config_csv_file=$_CONDOR_JOB_IWD/$transfer_output_files/$process.result.csv \
 --process_num=$process \
---model=single_regression > $_CONDOR_JOB_IWD/$transfer_output_files/$process.out
+--model=single_classification > $_CONDOR_JOB_IWD/$transfer_output_files/$process.out
 echo " ------------------ Done ------------------"
 date
