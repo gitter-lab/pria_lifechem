@@ -343,6 +343,9 @@ def run_multiple_classification(hyperparameter_sets, hyperparameter_index):
 
 
 def run_hyperparameter_sets(model):
+    global test_ratio
+    test_ratio = 0.2
+
     if model == 'single_classification':
         hyperparameter_sets = get_hyperparameter_sets(model)
         run_single_classification(hyperparameter_sets, process_num)
@@ -351,10 +354,12 @@ def run_hyperparameter_sets(model):
         run_single_regression(hyperparameter_sets, process_num)
     elif model == 'vanilla_lstm':
         hyperparameter_sets = get_hyperparameter_sets(model)
+        global SMILES_mapping_json_file
         SMILES_mapping_json_file = given_args.SMILES_mapping_json_file
         run_vanilla_lstm(hyperparameter_sets, process_num)
     elif model == 'multi_classification':
         hyperparameter_sets = get_hyperparameter_sets(model)
+        global score_file
         score_file = given_args.score_file
         run_multiple_classification(hyperparameter_sets, process_num)
     else:
@@ -421,5 +426,5 @@ if __name__ == '__main__':
         PMTNN_weight_file = given_args.PMTNN_weight_file
         config_csv_file = given_args.config_csv_file
         process_num = given_args.process_num
-        run_hyperparameter_set(model)
+        run_hyperparameter_sets(model)
 
