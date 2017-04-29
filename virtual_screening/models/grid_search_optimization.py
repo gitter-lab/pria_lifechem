@@ -19,7 +19,51 @@ from virtual_screening.models.deep_regression import *
 from virtual_screening.models.vanilla_lstm import *
 
 
-def run_single_classification():
+def get_hyperparameter_sets(model):
+    if model == 'single_classification':
+        hyperparameter_sets = {'optimizer': ['adam'],
+                               'learning rate': [0.00003, 0.0001, 0.003],
+                               'weighted schema': ['no_weight', 'weighted_sample'],
+                               'epoch patience': [{'epoch_size': 200, 'patience': 50},
+                                                  {'epoch_size': 1000, 'patience': 200}],
+                               'early stopping': ['auc', 'precision'],
+                               'activations': [{0: 'relu', 1: 'sigmoid', 2: 'sigmoid'},
+                                               {0: 'relu', 1: 'relu', 2: 'sigmoid'}]}
+    elif model == 'single_regression':
+        hyperparameter_sets = {'optimizer': ['adam'],
+                               'learning rate': [0.00003, 0.0001, 0.003],
+                               'weighted schema': ['no_weight'],
+                               'epoch patience': [{'epoch_size': 200, 'patience': 50},
+                                                  {'epoch_size': 1000, 'patience': 200}],
+                               'early stopping': ['auc', 'precision'],
+                               'activations': [{0: 'sigmoid', 1: 'sigmoid', 2: 'linear'},
+                                               {0: 'relu', 1: 'sigmoid', 2: 'sigmoid'}]}
+    elif model == 'vanilla_lstm':
+        hyperparameter_sets = {'optimizer': ['rmsprop'],
+                               'epoch patience': [{'epoch_size': 200, 'patience': 50}],
+                               'early stopping': ['auc'],
+                               'embedding_size': [30, 50, 100],
+                               'hidden_size': [
+                                   [50],
+                                   [100],
+                                   [100, 10],
+                                   [100, 50],
+                                   [50, 10]
+                               ],
+                               'dropout': [0.2, 0.5]}
+    elif model == 'multi_classification':
+        hyperparameter_sets = {'optimizer': ['adam'],
+                               'learning rate': [0.00003, 0.0001, 0.003],
+                               'weighted schema': ['no_weight', 'weighted_sample'],
+                               'epoch patience': [{'epoch_size': 200, 'patience': 50},
+                                                  {'epoch_size': 1000, 'patience': 200}],
+                               'early stopping': ['precision'],
+                               'activations': [{0: 'relu', 1: 'sigmoid', 2: 'sigmoid'},
+                                               {0: 'relu', 1: 'relu', 2: 'sigmoid'}]}
+    return hyperparameter_sets
+
+
+def run_single_classification(hyperparameter_sets, hyperparameter_index):
     # specify dataset
     k = 5
     directory = '../../dataset/fixed_dataset/fold_{}/'.format(k)
@@ -50,19 +94,11 @@ def run_single_classification():
     with open(config_json_file, 'r') as f:
         conf = json.load(f)
 
-    hyperparameter_sets = {'optimizer': ['adam'],
-                           'learning rate': [0.00003, 0.0001, 0.003],
-                           'weighted schema': ['no_weight', 'weighted_sample'],
-                           'epoch patience': [{'epoch_size': 200, 'patience': 50},
-                                              {'epoch_size': 1000, 'patience': 200}],
-                           'early stopping': ['auc', 'precision'],
-                           'activations': [{0: 'relu', 1: 'sigmoid', 2: 'sigmoid'},
-                                           {0: 'relu', 1: 'relu', 2: 'sigmoid'}]}
     hyperparameters = ParameterGrid(hyperparameter_sets)
 
     cnt = 0
     for param in hyperparameters:
-        if cnt != process_num:
+        if cnt != hyperparameter_index:
             cnt += 1
             continue
         conf['compile']['optimizer']['option'] = param['optimizer']
@@ -79,7 +115,7 @@ def run_single_classification():
         print 'Testing hyperparameter ', param
         break
 
-    if cnt > process_num:
+    if cnt > hyperparameter_index:
         raise ValueError('Process number out of limit. At most {}.'.format(cnt))
 
     task = SingleClassification(conf=conf)
@@ -89,7 +125,7 @@ def run_single_classification():
     return
 
 
-def run_single_regression():
+def run_single_regression(hyperparameter_sets, hyperparameter_index):
     # specify dataset
     k = 5
     directory = '../../dataset/fixed_dataset/fold_{}/'.format(k)
@@ -126,19 +162,11 @@ def run_single_regression():
     with open(config_json_file, 'r') as f:
         conf = json.load(f)
 
-    hyperparameter_sets = {'optimizer': ['adam'],
-                           'learning rate': [0.00003, 0.0001, 0.003],
-                           'weighted schema': ['no_weight'],
-                           'epoch patience': [{'epoch_size': 200, 'patience': 50},
-                                              {'epoch_size': 1000, 'patience': 200}],
-                           'early stopping': ['auc', 'precision'],
-                           'activations': [{0: 'sigmoid', 1: 'sigmoid', 2: 'linear'},
-                                           {0: 'relu', 1: 'sigmoid', 2: 'sigmoid'}]}
     hyperparameters = ParameterGrid(hyperparameter_sets)
 
     cnt = 0
     for param in hyperparameters:
-        if cnt != process_num:
+        if cnt != hyperparameter_index:
             cnt += 1
             continue
         conf['compile']['optimizer']['option'] = param['optimizer']
@@ -155,7 +183,7 @@ def run_single_regression():
         print 'Testing hyperparameter ', param
         break
 
-    if cnt > process_num:
+    if cnt > hyperparameter_index:
         raise ValueError('Process number out of limit. At most {}.'.format(cnt))
 
     task = SingleRegression(conf=conf)
@@ -168,7 +196,7 @@ def run_single_regression():
     return
 
 
-def run_vanilla_lstm():
+def run_vanilla_lstm(hyperparameter_sets, hyperparameter_index):
     # specify dataset
     k = 5
     directory = '../../dataset/fixed_dataset/fold_{}/'.format(k)
@@ -201,23 +229,11 @@ def run_vanilla_lstm():
     with open(config_json_file, 'r') as f:
         conf = json.load(f)
 
-    hyperparameter_sets = {'optimizer': ['rmsprop'],
-                           'epoch patience': [{'epoch_size': 200, 'patience': 50}],
-                           'early stopping': ['auc'],
-                           'embedding_size': [30, 50, 100],
-                           'hidden_size': [
-                               [50],
-                               [100],
-                               [100, 10],
-                               [100, 50],
-                               [50, 10]
-                           ],
-                           'dropout': [0.2, 0.5]}
     hyperparameters = ParameterGrid(hyperparameter_sets)
 
     cnt = 0
     for param in hyperparameters:
-        if cnt != process_num:
+        if cnt != hyperparameter_index:
             cnt += 1
             continue
         conf['lstm']['embedding_size'] = param['embedding_size']
@@ -234,7 +250,7 @@ def run_vanilla_lstm():
         print 'Testing hyperparameter ', param
         break
 
-    if cnt > process_num:
+    if cnt > hyperparameter_index:
         raise ValueError('Process number out of limit. At most {}.'.format(cnt))
 
     task = VanillaLSTM(conf)
@@ -249,7 +265,7 @@ def run_vanilla_lstm():
 
 
 
-def run_multiple_classification():
+def run_multiple_classification(hyperparameter_sets, hyperparameter_index):
     # specify dataset
     k = 5
     directory = '../../dataset/keck_pcba/fold_{}/'.format(k)
@@ -292,19 +308,11 @@ def run_multiple_classification():
     with open(config_json_file, 'r') as f:
         conf = json.load(f)
 
-    hyperparameter_sets = {'optimizer': ['adam'],
-                           'learning rate': [0.00003, 0.0001, 0.003],
-                           'weighted schema': ['no_weight', 'weighted_sample'],
-                           'epoch patience': [{'epoch_size': 200, 'patience': 50},
-                                              {'epoch_size': 1000, 'patience': 200}],
-                           'early stopping': ['precision'],
-                           'activations': [{0: 'relu', 1: 'sigmoid', 2: 'sigmoid'},
-                                           {0: 'relu', 1: 'relu', 2: 'sigmoid'}]}
     hyperparameters = ParameterGrid(hyperparameter_sets)
 
     cnt = 0
     for param in hyperparameters:
-        if cnt != process_num:
+        if cnt != hyperparameter_index:
             cnt += 1
             continue
         conf['compile']['optimizer']['option'] = param['optimizer']
@@ -321,7 +329,7 @@ def run_multiple_classification():
         print 'Testing hyperparameter ', param
         break
 
-    if cnt > process_num:
+    if cnt > hyperparameter_index:
         raise ValueError('Process number out of limit. At most {}.'.format(cnt))
 
     task = MultiClassification(conf=conf)
@@ -334,38 +342,84 @@ def run_multiple_classification():
     return
 
 
+def run_hyperparameter_sets(model):
+    if model == 'single_classification':
+        hyperparameter_sets = get_hyperparameter_sets(model)
+        run_single_classification(hyperparameter_sets, process_num)
+    elif model == 'single_regression':
+        hyperparameter_sets = get_hyperparameter_sets(model)
+        run_single_regression(hyperparameter_sets, process_num)
+    elif model == 'vanilla_lstm':
+        hyperparameter_sets = get_hyperparameter_sets(model)
+        SMILES_mapping_json_file = given_args.SMILES_mapping_json_file
+        run_vanilla_lstm(hyperparameter_sets, process_num)
+    elif model == 'multi_classification':
+        hyperparameter_sets = get_hyperparameter_sets(model)
+        score_file = given_args.score_file
+        run_multiple_classification(hyperparameter_sets, process_num)
+    else:
+        raise Exception('No such model! Should be among [{}, {}, {}, {}].'.format(
+            'single_classification',
+            'single_regression',
+            'vanilla_lstm',
+            'multi_classification'
+        ))
+    return
+
+
+def transform_into_md(list_):
+    str_ = '|'
+    for val in list_:
+        str_ = '{} {} |'.format(str_, val)
+    return str_
+
+
+def get_hyperparameter_sets_in_markdown(model):
+    hyperparameter_sets = get_hyperparameter_sets(model)
+    hyperparameters = ParameterGrid(hyperparameter_sets)
+
+    for param in hyperparameters:
+        keys = param.keys()
+        print '| {} {}'.format('count', transform_into_md(keys))
+        break
+
+    count = 0
+    for param in hyperparameters:
+        values = param.values()
+        print '| {} {}'.format(count, transform_into_md(values))
+        count += 1
+    return
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--config_json_file', action="store", dest="config_json_file", required=True)
-    parser.add_argument('--PMTNN_weight_file', action="store", dest="PMTNN_weight_file", required=True)
-    parser.add_argument('--config_csv_file', action="store", dest="config_csv_file", required=True)
-    parser.add_argument('--process_num', action='store', dest='process_num', required=True)
-    parser.add_argument('--SMILES_mapping_json_file', action='store', dest='SMILES_mapping_json_file', default= '../../json/SMILES_mapping.json')
-    parser.add_argument('--score_file', action='store', dest='score_file', required=False)
-    parser.add_argument('--model', action='store', dest='model',required=True)
+    parser.add_argument('--config_json_file', dest="config_json_file",
+                        action="store", required=False)
+    parser.add_argument('--PMTNN_weight_file', dest="PMTNN_weight_file",
+                        action="store", required=False)
+    parser.add_argument('--config_csv_file', dest="config_csv_file",
+                        action="store", required=False)
+    parser.add_argument('--process_num', dest='process_num', type=int,
+                        action='store', required=False)
+    parser.add_argument('--SMILES_mapping_json_file', dest='SMILES_mapping_json_file',
+                        action='store', required=False, default= '../../json/SMILES_mapping.json')
+    parser.add_argument('--score_file', dest='score_file',
+                        action='store', required=False)
+    parser.add_argument('--model', dest='model',
+                        action='store', required=True)
+    parser.add_argument('--is_print', dest='is_print', type=bool,
+                        action='store', required=False, default=False)
+
     given_args = parser.parse_args()
-    config_json_file = given_args.config_json_file
-    PMTNN_weight_file = given_args.PMTNN_weight_file
-    config_csv_file = given_args.config_csv_file
-    process_num = int(given_args.process_num)
     model = given_args.model
+    is_print = given_args.is_print
 
-    test_ratio = 0.2
-
-    if model == 'single_classification':
-        run_single_classification()
-    elif model == 'single_regression':
-        run_single_regression()
-    elif model == 'vanilla_lstm':
-        SMILES_mapping_json_file = given_args.SMILES_mapping_json_file
-        run_vanilla_lstm()
-    elif model == 'multi_classification':
-        score_file = given_args.score_file
-        run_multiple_classification()
+    if is_print:
+        get_hyperparameter_sets_in_markdown(model)
     else:
-        raise Exception('No such model! Should be among [{}, {}, {}].'.format(
-            'single_classification',
-            'single_regression',
-            'vanilla_lstm'
-        ))
+        config_json_file = given_args.config_json_file
+        PMTNN_weight_file = given_args.PMTNN_weight_file
+        config_csv_file = given_args.config_csv_file
+        process_num = given_args.process_num
+        run_hyperparameter_set(model)
+
