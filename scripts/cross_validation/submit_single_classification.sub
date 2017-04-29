@@ -10,7 +10,7 @@
 # should mkdir this output dir first
 transfer_output_files = single_classification
 
-Executable = single_classification_grid_search.sh
+Executable = single_classification_cross_validation.sh
 Universe = vanilla
 
 Log = $(transfer_output_files)/chtc_cpu_job.$(Cluster)_$(Process).log
