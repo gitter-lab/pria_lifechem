@@ -120,7 +120,9 @@ class Deepchem_IRV:
                 print 'Val\tAUC[ROC]: %.6f\tAUC[PR]: %.6f' % \
                         (curr_roc, curr_pr)  
             
-            
+        print('\n\n Training Done: \n\n')
+        #copy back best_model_ckpt so deepchem gets best model
+        move(best_ckpt_file, curr_ckpt_file)
         self.predict_with_existing(train_data, 
                                    val_data, 
                                    test_data)

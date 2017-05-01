@@ -22,7 +22,7 @@ echo 'Done installing anaconda'
 chmod 777 *
 
 #deepchem stuff
-git clone https://github.com/deepchem/deepchem.git
+git clone https://github.com/Malnammi/deepchem.git
 
 conda install -y -c omnia openbabel=2.4.0 > /dev/null
 conda install -y -c omnia pdbfixer=1.4 > /dev/null
