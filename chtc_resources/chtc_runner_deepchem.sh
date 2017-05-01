@@ -40,6 +40,9 @@ conda install -y -c conda-forge nose=1.3.7 > /dev/null
 conda install --yes -c conda-forge tensorflow=1.0.0 > /dev/null
 conda install --yes -c jjhelmus tensorflow-gpu=1.0.1 > /dev/null
 conda install --yes mkl-service > /dev/null
+conda install --yes -c r rpy2 > /dev/null
+conda install --yes -c bioconda r-prroc=1.1 > /dev/null
+conda install --yes -c auto croc=1.0.63 > /dev/null
 
 #wget -q –retry-connrefused –waitretry=10 http://github.com/deepchem/deepchem/archive/master.zip > /dev/null
 #unzip master.zip > /dev/null
@@ -49,7 +52,6 @@ conda install --yes mkl-service > /dev/null
 cd deepchem
 python setup.py install
 nosetests -v deepchem --nologcapture
-source activate deepchem
 cd ..
 
 echo 'Done installing libraries'
@@ -61,7 +63,7 @@ curl -H "Authorization: token 5879e760ce2f7b753aa80bda34811162ec7ababe" -L https
 unzip virtual-screening-master.zip > /dev/null
 rm -f virtual-screening-master.zip
 
-mv lsc* virtual-screening
+mv chao* virtual-screening
 rm -rf ./virtual-screening/dataset
 mv ./dataset/ ./virtual-screening/dataset/
 export PYTHONPATH=${PYTHONPATH}:${_CONDOR_JOB_IWD}/virtual-screening:${_CONDOR_JOB_IWD}/virtual-screening/virtual_screening:${_CONDOR_JOB_IWD}/virtual-screening/virtual_screening/models

@@ -242,11 +242,11 @@ if __name__ == '__main__':
     
     for i in range(k):    
         csv_file_list = output_file_list[:]
-        test_pd = read_merged_data([csv_file_list[i]])
+        test_files = [csv_file_list[i]]
         csv_file_list.pop(i)
-        val_pd = read_merged_data([csv_file_list[i%len(csv_file_list)]])
+        val_files = [csv_file_list[i%len(csv_file_list)]]
         csv_file_list.pop(i%len(csv_file_list))
-        train_pd = read_merged_data(csv_file_list)
+        train_files = csv_file_list
         
         labels = ['Keck_Pria_AS_Retest', 'Keck_Pria_FP_data', 'Keck_Pria_Continuous',
                   'Keck_RMI_cdd', 'FP counts % inhibition']
