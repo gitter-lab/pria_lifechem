@@ -51,7 +51,6 @@ conda install --yes -c auto croc=1.0.63 > /dev/null
 
 cd deepchem
 python setup.py install
-nosetests -v deepchem --nologcapture
 cd ..
 
 echo 'Done installing libraries'
