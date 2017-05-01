@@ -443,6 +443,7 @@ class MultiClassification:
                               X_val, y_val,
                               X_test, y_test,
                               PMTNN_weight_file,
+                              score_file,
                               eval_indices=[-1],
                               eval_mean_or_median=np.mean):
         def get_model_roc_auc(true_label,
@@ -470,7 +471,6 @@ class MultiClassification:
         y_pred_on_val = model.predict(X_val)
         y_pred_on_test = model.predict(X_test)
 
-        print
         print('train precision: {}'.format(get_model_precision_auc(y_train, y_pred_on_train)))
         print('train roc: {}'.format(get_model_roc_auc(y_train, y_pred_on_train)))
         print('train bedroc: {}'.format(get_model_bedroc_auc(y_train, y_pred_on_train)))
@@ -483,6 +483,13 @@ class MultiClassification:
         print('test roc: {}'.format(get_model_roc_auc(y_test, y_pred_on_test)))
         print('test bedroc: {}'.format(get_model_bedroc_auc(y_test, y_pred_on_test)))
         print
+
+        out = open(score_file, 'w')
+        print >> out, "EF"
+        for EF_ratio in self.EF_ratio_list:
+            for i in range(y_test.shape[1]):
+                n_actives, ef, ef_max = enrichment_factor_single(y_test[:, i], y_pred_on_test[:, i], EF_ratio)
+                print >> out, 'ratio:', EF_ratio, 'EF:', ef, 'active:', n_actives
 
         return
 
