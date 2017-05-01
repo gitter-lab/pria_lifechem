@@ -82,10 +82,8 @@ class Deepchem_IRV:
         
         self.setup_model(logdir)
         
-        y_val, y_pred_on_val = self.get_prediction_info(val_data)
-        curr_pr = precision_auc_multi(y_val, y_pred_on_val, 
-                                      range(y_val.shape[1]), np.mean)
-        best_pr = curr_pr
+        curr_pr = 0
+        best_pr = 0
         counter = 0
         best_epoch = 0        
         for i in range(self.nb_epochs):            
@@ -220,9 +218,11 @@ if __name__ == '__main__':
     config_csv_file = model_dir+'model_config.csv'
     #####
     scratch_dir = os.environ.get('_CONDOR_JOB_IWD')
+
     if not os.path.exists(model_dir):
         os.makedirs(model_dir)    
-    
+    if not os.path.exists(model_file):
+        os.makedirs(model_file) 
     # specify dataset
     directory = dataset_dir
     file_list = []
