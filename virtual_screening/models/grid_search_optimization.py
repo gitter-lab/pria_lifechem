@@ -60,6 +60,13 @@ def get_hyperparameter_sets(model):
                                'early stopping': ['precision'],
                                'activations': [{0: 'relu', 1: 'sigmoid', 2: 'sigmoid'},
                                                {0: 'relu', 1: 'relu', 2: 'sigmoid'}]}
+    else:
+        raise Exception('No such model! Should be among [{}, {}, {}, {}].'.format(
+            'single_classification',
+            'single_regression',
+            'vanilla_lstm',
+            'multi_classification'
+        ))
     return hyperparameter_sets
 
 
@@ -383,17 +390,20 @@ def get_hyperparameter_sets_in_markdown(model):
     hyperparameter_sets = get_hyperparameter_sets(model)
     hyperparameters = ParameterGrid(hyperparameter_sets)
 
+    content = ''
     for param in hyperparameters:
         keys = param.keys()
-        print '| {} {}'.format('count', transform_into_md(keys))
+        header = '| {} {}'.format('count', transform_into_md(keys))
+        dividing_line = transform_into_md(['---' for _ in range(1+len(keys))])
+        content = '{}\n{}'.format(header, dividing_line)
         break
 
     count = 0
     for param in hyperparameters:
         values = param.values()
-        print '| {} {}'.format(count, transform_into_md(values))
+        content = '{}\n| {} {}'.format(content, count, transform_into_md(values))
         count += 1
-    return
+    return content
 
 
 if __name__ == '__main__':
@@ -420,7 +430,8 @@ if __name__ == '__main__':
     is_print = given_args.is_print
 
     if is_print:
-        get_hyperparameter_sets_in_markdown(model)
+        content = get_hyperparameter_sets_in_markdown(model)
+        print content
     else:
         config_json_file = given_args.config_json_file
         PMTNN_weight_file = given_args.PMTNN_weight_file
