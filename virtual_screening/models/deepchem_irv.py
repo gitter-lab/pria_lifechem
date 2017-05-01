@@ -202,8 +202,8 @@ class Deepchem_IRV:
         return y_true, y_pred
                 
         
-    def getK():
-        return self.K;
+    def getK(self):
+        return self.K
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
