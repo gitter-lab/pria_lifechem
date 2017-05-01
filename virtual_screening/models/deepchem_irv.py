@@ -14,6 +14,7 @@ import deepchem as dc
 from sklearn.externals import joblib
 from sklearn.grid_search import ParameterGrid
 from deepchem.trans import undo_transforms
+from shutil import move
 
 rnd_state=1337
 np.random.seed(seed=rnd_state)
@@ -46,18 +47,24 @@ class Deepchem_IRV:
         self.model_dict = {}
         self.model = None
         
-        self.nb_epochs=conf['fitting']['nb_epochs']
+        self.nb_epochs = conf['fitting']['nb_epochs']
+        self.batch_size = conf['fitting']['batch_size']
+        self.learning_rate = conf['fitting']['learning_rate']
+        self.penalty = conf['fitting']['penalty']
+        
+        self.early_stopping_patience = conf['fitting']['early_stopping']['patience']
+        self.early_stopping_option = conf['fitting']['early_stopping']['option']
         return
 
-    def setup_model(self, model_file):
+    def setup_model(self, logdir):
         self.model = dc.models.TensorflowMultiTaskIRVClassifier(
                                                    len(self.label_names),
                                                    K=self.K,
-                                                   learning_rate=0.001,
-                                                   penalty=0.05,
-                                                   batch_size=32,
+                                                   learning_rate=self.learning_rate,
+                                                   penalty=self.penalty,
+                                                   batch_size=self.batch_size,
                                                    fit_transformers=[],
-                                                   logdir=model_file)        
+                                                   logdir=logdir)        
         return
         
         
@@ -65,12 +72,55 @@ class Deepchem_IRV:
                           train_data,
                           val_data,
                           test_data,
-                          model_file):
-                              
-        self.setup_model(model_file)
-        self.model.fit(train_data, nb_epoch=self.nb_epochs)
-        self.model.save()     
+                          logdir):
         
+        # DC saves tf models using tf.train.Saver, saving multiple checkpoints.
+        # It always saves a checkpoint after training. 
+        # We are training for 1 epoch, so model location is logdir+'model.ckpt-1'.        
+        curr_ckpt_file = logdir+'model.ckpt-1'
+        best_ckpt_file = logdir+'best_model.ckpt'
+        
+        self.setup_model(logdir)
+        
+        y_val, y_pred_on_val = self.get_prediction_info(val_data)
+        curr_pr = precision_auc_multi(y_val, y_pred_on_val, 
+                                      range(y_val.shape[1]), np.mean)
+        best_pr = curr_pr
+        counter = 0
+        best_epoch = 0        
+        for i in range(self.nb_epochs):            
+            self.model.fit(train_data, nb_epoch=1)
+            
+            y_val, y_pred_on_val = self.get_prediction_info(val_data)
+            curr_pr = precision_auc_multi(y_val, y_pred_on_val, 
+                                      range(y_val.shape[1]), np.mean)
+            if curr_pr < best_pr:
+                if counter >= patience:
+                    break
+                counter += 1
+            else:
+                counter = 0
+                best_pr = curr_pr
+                #copy model file with different name to keep track of best model
+                move(curr_ckpt_file, best_ckpt_file)
+
+            
+            if i%5 == 0:
+                y_train, y_pred_on_train = self.get_prediction_info(train_data)
+                curr_roc = roc_auc_multi(y_val, y_pred_on_val, 
+                                      range(y_val.shape[1]), np.mean)
+                train_roc = roc_auc_multi(y_train, y_pred_on_train, 
+                                      range(y_train.shape[1]), np.mean)
+                train_pr = precision_auc_multi(y_train, y_pred_on_train, 
+                                      range(y_train.shape[1]), np.mean)
+
+                print('Epoch {}/{}'.format(i + 1, self.nb_epoch))
+                print 'Train\tAUC[ROC]: %.6f\tAUC[PR]: %.6f' % \
+                        (train_roc, train_pr)
+                print 'Val\tAUC[ROC]: %.6f\tAUC[PR]: %.6f' % \
+                        (curr_roc, curr_pr)  
+            
+            
         self.predict_with_existing(train_data, 
                                    val_data, 
                                    test_data)
@@ -81,43 +131,9 @@ class Deepchem_IRV:
                               val_data,
                               test_data):  
         
-        y_pred_on_train = self.model.predict_proba(train_data)
-        y_pred_on_val = self.model.predict_proba(val_data)
-        y_pred_on_test = self.model.predict_proba(test_data)    
-        
-        y_train = train_data.y()
-        y_val = val_data.y()
-        y_test = test_data.y()
-        w_train = train_data.w()
-        w_val = val_data.w()
-        w_test = test_data.w()
-        
-        y_train[:,2] = y_train[:,0]
-        y_train[:,4] = y_train[:,3]
-        y_val[:,2] = y_val[:,0]
-        y_val[:,4] = y_val[:,3]
-        y_test[:,2] = y_test[:,0]
-        y_test[:,4] = y_test[:,3]
-        
-        w_train[:,2] = w_train[:,0]
-        w_train[:,4] = w_train[:,3]
-        w_val[:,2] = w_val[:,0]
-        w_val[:,4] = w_val[:,3]
-        w_test[:,2] = w_test[:,0]
-        w_test[:,4] = w_test[:,3]
-        
-        for i, label in zip(range(len(self.label_names)), self.label_names):     
-            y_train[np.where(w_train[:,i] == 0)[0],i] = -1
-            y_val[np.where(w_val[:,i] == 0)[0],i] = -1
-            y_test[np.where(w_test[:,i] == 0)[0],i] = -1
-         
-        y_train = np.insert(y_train, 3, y_train[:,1], axis=1)
-        y_val = np.insert(y_val, 3, y_val[:,1], axis=1)
-        y_test = np.insert(y_test, 3, y_test[:,1], axis=1)
-        
-        y_pred_on_train = np.insert(y_pred_on_train, 3, y_pred_on_train[:,2], axis=1)
-        y_pred_on_val = np.insert(y_pred_on_val, 3, y_pred_on_val[:,2], axis=1)
-        y_pred_on_test = np.insert(y_pred_on_test, 3, y_pred_on_test[:,2], axis=1)
+        y_train, y_pred_on_train = self.get_prediction_info(train_data)
+        y_val, y_pred_on_val = self.get_prediction_info(val_data)
+        y_test, y_pred_on_test = self.get_prediction_info(test_data)
         
         print
         print('train precision: {}'.format(precision_auc_multi(y_train, y_pred_on_train, range(y_train.shape[1]), np.mean)))
@@ -133,26 +149,38 @@ class Deepchem_IRV:
         print('test bedroc: {}'.format(bedroc_auc_multi(y_test, y_pred_on_test, range(y_test.shape[1]), np.mean)))
         print
         
-        label_list = ['Keck_Pria_AS_Retest', 'Keck_Pria_FP_data', 
-                      'Keck_Pria_Continuous_AS_Retest', 'Keck_Pria_Continuous_FP_data',
-                      'Keck_RMI_cdd', 'FP counts % inhibition']
-        nef_auc_mean = np.mean(np.array(nef_auc(y_train, y_pred_on_train, self.EF_ratio_list, label_list))) 
+        nef_auc_mean = np.mean(np.array(nef_auc(y_train, y_pred_on_train, self.EF_ratio_list, self.label_names))) 
         print('train nef auc: {}'.format(nef_auc_mean))
-        nef_auc_mean = np.mean(np.array(nef_auc(y_val, y_pred_on_val, self.EF_ratio_list, label_list))) 
+        nef_auc_mean = np.mean(np.array(nef_auc(y_val, y_pred_on_val, self.EF_ratio_list, self.label_names))) 
         print('val nef auc: {}'.format(nef_auc_mean))
-        nef_auc_mean = np.mean(np.array(nef_auc(y_test, y_pred_on_test, self.EF_ratio_list, label_list))) 
+        nef_auc_mean = np.mean(np.array(nef_auc(y_test, y_pred_on_test, self.EF_ratio_list, self.label_names))) 
         print('test nef auc: {}'.format(nef_auc_mean))
         return
 
     def save_model_evaluation_metrics(self,
                               data,
-                              model_file,
+                              logdir,
                               metric_dir,
                               label_names=None):
         
         if not os.path.exists(metric_dir):
             os.makedirs(metric_dir)   
         
+        y_true, y_pred = self.get_prediction_info(data)
+        
+        label_list = ['Keck_Pria_AS_Retest', 'Keck_Pria_FP_data', 
+                      'Keck_Pria_Continuous_AS_Retest', 'Keck_Pria_Continuous_FP_data',
+                      'Keck_RMI_cdd', 'FP counts % inhibition']
+        evaluate_model(y_true, y_pred, metric_dir, label_list)        
+        return
+        
+    def save_model_params(self, config_csv_file):      
+        data = str(self.param)
+        with open(config_csv_file, 'w') as csvfile:
+            csvfile.write(data)
+        return
+        
+    def get_prediction_info(self, data):
         y_pred = self.model.predict_proba(data)
         
         y_true = data.y()
@@ -169,18 +197,9 @@ class Deepchem_IRV:
         y_true = np.insert(y_true, 3, y_true[:,1], axis=1)
         y_pred = np.insert(y_pred, 3, y_pred[:,2], axis=1)
         
-        label_list = ['Keck_Pria_AS_Retest', 'Keck_Pria_FP_data', 
-                      'Keck_Pria_Continuous_AS_Retest', 'Keck_Pria_Continuous_FP_data',
-                      'Keck_RMI_cdd', 'FP counts % inhibition']
-        evaluate_model(y_true, y_pred, metric_dir, label_list)        
-        return
+        return y_true, y_pred
+                
         
-    def save_model_params(self, config_csv_file):      
-        data = str(self.param)
-        with open(config_csv_file, 'w') as csvfile:
-            csvfile.write(data)
-        return
-
     def getK():
         return self.K;
 
@@ -270,7 +289,8 @@ if __name__ == '__main__':
                                                   dc.trans.IRVTransformer(K_neighbors, len(labels), train_data)])
         test_data = undo_transforms(test_data, [dc.trans.BalancingTransformer(transform_w=True, dataset=test_data),
                                                   dc.trans.IRVTransformer(K_neighbors, len(labels), train_data)])
-                                                       
+        
+        task.predict_with_existing(train_data, val_data, test_data)                                         
         task.save_model_evaluation_metrics(train_data, model_file,
                                           model_dir+'fold_'+str(i)+'/train_metrics/',
                                           label_names=labels)
