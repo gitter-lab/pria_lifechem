@@ -250,6 +250,8 @@ if __name__ == '__main__':
         
         labels = ['Keck_Pria_AS_Retest', 'Keck_Pria_FP_data', 'Keck_Pria_Continuous',
                   'Keck_RMI_cdd', 'FP counts % inhibition']
+#        labels = ['Keck_Pria_AS_Retest', 'Keck_Pria_FP_data', 'Keck_Pria_Continuous',
+#                  'Keck_RMI_cdd', 'FP counts % inhibition']
     
         featurizer='ECFP'
         if featurizer == 'ECFP':
@@ -262,6 +264,10 @@ if __name__ == '__main__':
                                    featurizer=featurizer_func)
         
         # extract data, and split training data into training and val
+        orig_train_data = loader.featurize(train_files, shard_size=2**15)
+        orig_val_data = loader.featurize(val_files, shard_size=2**15)
+        orig_test_data = loader.featurize(test_files, shard_size=2**15)
+        
         train_data = loader.featurize(train_files, shard_size=2**15)
         val_data = loader.featurize(val_files, shard_size=2**15)
         test_data = loader.featurize(test_files, shard_size=2**15)
@@ -285,12 +291,11 @@ if __name__ == '__main__':
         task.train_and_predict(train_data, val_data, test_data, model_file)
         
         #Undo transfromations and get metrics
-        train_data = undo_transforms(train_data, [dc.trans.BalancingTransformer(transform_w=True, dataset=train_data),
-                                                  dc.trans.IRVTransformer(K_neighbors, len(labels), train_data)])
-        val_data = undo_transforms(val_data, [dc.trans.BalancingTransformer(transform_w=True, dataset=val_data),
-                                                  dc.trans.IRVTransformer(K_neighbors, len(labels), train_data)])
-        test_data = undo_transforms(test_data, [dc.trans.BalancingTransformer(transform_w=True, dataset=test_data),
-                                                  dc.trans.IRVTransformer(K_neighbors, len(labels), train_data)])
+        transformers = [dc.trans.IRVTransformer(K_neighbors, len(labels), orig_train_data)]
+        for transformer in transformers:
+            train_data = transformer.transform(orig_train_data)
+            val_data = transformer.transform(orig_val_data)
+            test_data = transformer.transform(orig_test_data)       
         
         task.predict_with_existing(train_data, val_data, test_data)                                         
         task.save_model_evaluation_metrics(train_data, model_file,
