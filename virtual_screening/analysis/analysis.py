@@ -4,10 +4,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-modes = {0: 'train prec', 1: 'train roc', 2: 'train bedroc',
-         3: 'val prec', 4: 'val roc', 5: 'val bedroc',
-         6: 'test prec', 7: 'test roc', 8: 'test bedroc',
-         9: 'EF_2', 10: 'EF_1', 11: 'EF_015', 12: 'EF_01'}
+evaluations = {0: 'train prec', 1: 'train roc', 2: 'train bedroc',
+               3: 'val prec', 4: 'val roc', 5: 'val bedroc',
+               6: 'test prec', 7: 'test roc', 8: 'test bedroc',
+               9: 'EF_2', 10: 'EF_1', 11: 'EF_015', 12: 'EF_01'}
+
 facecolors = ['r', 'g', 'b', 'y', 'm', 'c', 'k', 'b']
 
 
@@ -124,7 +125,7 @@ def action(dir_name, k):
            EF_2_list, EF_1_list, EF_015_list, EF_01_list
 
 
-def plot_single_model_single_mode(dir_path, k, mode, title):
+def plot_single_model_single_evaluation(dir_path, k, evaluation, title):
     plt.figure(dpi=80)
     X = np.arange(k)
 
@@ -136,34 +137,34 @@ def plot_single_model_single_mode(dir_path, k, mode, title):
     print 'k ', k
     print 'train size : ', train_prec_list.shape
 
-    if mode == 'train prec':
+    if evaluation == 'train prec':
         Y = train_prec_list
-    elif mode == 'train roc':
+    elif evaluation == 'train roc':
         Y = train_roc_list
-    elif mode == 'train bedroc':
+    elif evaluation == 'train bedroc':
         Y = train_bedroc_list
-    elif mode == 'val prec':
+    elif evaluation == 'val prec':
         Y = val_prec_list
-    elif mode == 'val roc':
+    elif evaluation == 'val roc':
         Y = val_roc_list
-    elif mode == 'val bedroc':
+    elif evaluation == 'val bedroc':
         Y = val_bedroc_list
-    elif mode == 'test prec':
+    elif evaluation == 'test prec':
         Y = test_prec_list
-    elif mode == 'test roc':
+    elif evaluation == 'test roc':
         Y = test_roc_list
-    elif mode == 'test bedroc':
+    elif evaluation == 'test bedroc':
         Y = test_bedroc_list
-    elif mode == 'EF_2':
+    elif evaluation == 'EF_2':
         Y = EF_2_list[:, 1]
-    elif mode == 'EF_1':
+    elif evaluation == 'EF_1':
         Y = EF_1_list[:, 1]
-    elif mode == 'EF_015':
+    elif evaluation == 'EF_015':
         Y = EF_015_list[:, 1]
-    elif mode == 'EF_01':
+    elif evaluation == 'EF_01':
         Y = EF_01_list[:, 1]
     else:
-        raise Exception('No such target name.')
+        raise Exception('No such evaluation method.')
 
     plt.bar(X, Y, width=0.4, edgecolor='white', alpha=0.8, label=k)
     plt.legend(bbox_to_anchor=(0., 1.02, 1., .102), loc=3)
@@ -175,8 +176,8 @@ def plot_single_model_single_mode(dir_path, k, mode, title):
     return
 
 
-def plot_single_model_multi_mode(dir_path, k, mode_list, title):
-    print mode_list
+def plot_single_model_multi_evaluations(dir_path, k, evaluation_list, title):
+    print evaluation_list
     plt.figure(dpi=80)
     X = np.arange(k)
 
@@ -185,38 +186,38 @@ def plot_single_model_multi_mode(dir_path, k, mode_list, title):
     test_prec_list, test_roc_list, test_bedroc_list, \
     EF_2_list, EF_1_list, EF_015_list, EF_01_list = action(dir_path, k)
 
-    for i in range(len(mode_list)):
-        mode = mode_list[i]
-        if mode == 'train prec':
+    for i in range(len(evaluation_list)):
+        evaluation = evaluation_list[i]
+        if evaluation == 'train prec':
             Y = train_prec_list
-        elif mode == 'train roc':
+        elif evaluation == 'train roc':
             Y = train_roc_list
-        elif mode == 'train bedroc':
+        elif evaluation == 'train bedroc':
             Y = train_bedroc_list
-        elif mode == 'val prec':
+        elif evaluation == 'val prec':
             Y = val_prec_list
-        elif mode == 'val roc':
+        elif evaluation == 'val roc':
             Y = val_roc_list
-        elif mode == 'val bedroc':
+        elif evaluation == 'val bedroc':
             Y = val_bedroc_list
-        elif mode == 'test prec':
+        elif evaluation == 'test prec':
             Y = test_prec_list
-        elif mode == 'test roc':
+        elif evaluation == 'test roc':
             Y = test_roc_list
-        elif mode == 'test bedroc':
+        elif evaluation == 'test bedroc':
             Y = test_bedroc_list
-        elif mode == 'EF_2':
+        elif evaluation == 'EF_2':
             Y = EF_2_list[:, 1]
-        elif mode == 'EF_1':
+        elif evaluation == 'EF_1':
             Y = EF_1_list[:, 1]
-        elif mode == 'EF_015':
+        elif evaluation == 'EF_015':
             Y = EF_015_list[:, 1]
-        elif mode == 'EF_01':
+        elif evaluation == 'EF_01':
             Y = EF_01_list[:, 1]
         else:
-            raise Exception('no such target name')
+            raise Exception('No such evaluation method.')
 
-        plt.bar(X+0.2*i, Y, width=0.2, edgecolor='white', facecolor=facecolors[i], alpha=0.8, label=mode)
+        plt.bar(X+0.2*i, Y, width=0.2, edgecolor='white', facecolor=facecolors[i], alpha=0.8, label=evaluation)
 
     plt.legend(bbox_to_anchor=(0., 1.02, 1., .102), loc=3)
     plt.xlim(0, k)
@@ -227,6 +228,50 @@ def plot_single_model_multi_mode(dir_path, k, mode_list, title):
     return
 
 
-def analysis():
-    
+def get_ranked_analysis(dir_path, k, evaluation_list, fetch_top_num):
+
+    train_prec_list, train_roc_list, train_bedroc_list, \
+    val_prec_list, val_roc_list, val_bedroc_list, \
+    test_prec_list, test_roc_list, test_bedroc_list, \
+    EF_2_list, EF_1_list, EF_015_list, EF_01_list = action(dir_path, k)
+
+    for i in range(len(evaluation_list)):
+        evaluation = evaluation_list[i]
+        print 'Analyze {}:'.format(evaluation)
+        if evaluation == 'train prec':
+            Y = train_prec_list
+        elif evaluation == 'train roc':
+            Y = train_roc_list
+        elif evaluation == 'train bedroc':
+            Y = train_bedroc_list
+        elif evaluation == 'val prec':
+            Y = val_prec_list
+        elif evaluation == 'val roc':
+            Y = val_roc_list
+        elif evaluation == 'val bedroc':
+            Y = val_bedroc_list
+        elif evaluation == 'test prec':
+            Y = test_prec_list
+        elif evaluation == 'test roc':
+            Y = test_roc_list
+        elif evaluation == 'test bedroc':
+            Y = test_bedroc_list
+        elif evaluation == 'EF_2':
+            Y = EF_2_list[:, 1]
+        elif evaluation == 'EF_1':
+            Y = EF_1_list[:, 1]
+        elif evaluation == 'EF_015':
+            Y = EF_015_list[:, 1]
+        elif evaluation == 'EF_01':
+            Y = EF_01_list[:, 1]
+        else:
+            raise Exception('No such evaluation method.')
+
+        sorted_y = [i[0] for i in sorted(enumerate(Y), key=lambda x:x[1])]
+        print 'Top {} rankings: '.format(fetch_top_num),
+        print sorted_y[:fetch_top_num]
+
+        print
+
+
     return
