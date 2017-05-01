@@ -267,7 +267,7 @@ def get_ranked_analysis(dir_path, k, evaluation_list, fetch_top_num):
         else:
             raise Exception('No such evaluation method.')
 
-        sorted_y = [i[0] for i in sorted(enumerate(Y), key=lambda x:x[1])]
+        sorted_y = [i[0] for i in sorted(enumerate(Y), key=lambda x:x[1], reverse=True)]
         print 'Top {} rankings: '.format(fetch_top_num),
         print sorted_y[:fetch_top_num]
 
