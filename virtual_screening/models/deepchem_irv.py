@@ -266,9 +266,9 @@ if __name__ == '__main__':
         val_data = loader.featurize(val_files, shard_size=2**15)
         test_data = loader.featurize(test_files, shard_size=2**15)
         
-        train_data = transformer.transform(dc.trans.BalancingTransformer(transform_w=True, dataset=train_data))
-        val_data = transformer.transform(dc.trans.BalancingTransformer(transform_w=True, dataset=val_data))
-        test_data = transformer.transform(dc.trans.BalancingTransformer(transform_w=True, dataset=test_data))
+        train_data = dc.trans.BalancingTransformer(transform_w=True, dataset=train_data).transform(train_data)
+        val_data = dc.trans.BalancingTransformer(transform_w=True, dataset=val_data).transform(val_data)
+        test_data = dc.trans.BalancingTransformer(transform_w=True, dataset=test_data).transform(test_data)
            
         
         with open(config_json_file, 'r') as f:

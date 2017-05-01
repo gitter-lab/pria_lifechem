@@ -90,7 +90,7 @@ rm -f Anaconda*
 rm -R -f virtual-screening*
 rm -R -f deepchem*
 rm -rf ./anaconda*
-
+rm -rf ./tmp*
 
 echo _CONDOR_JOB_IWD $_CONDOR_JOB_IWD
 echo Cluster $cluster
