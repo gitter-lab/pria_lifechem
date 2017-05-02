@@ -6,7 +6,7 @@
   },
   "fitting": {
     "nb_epochs": 100,
-    "batch_size": 32,
+    "batch_size": 512,
 	"learning_rate": 0.001,
     "penalty": 0.05,
 	"early_stopping": {
