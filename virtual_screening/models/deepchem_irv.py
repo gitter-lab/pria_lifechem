@@ -251,9 +251,9 @@ if __name__ == '__main__':
         
         labels = ['Keck_Pria_AS_Retest', 'Keck_Pria_FP_data', 'Keck_Pria_Continuous',
                   'Keck_RMI_cdd', 'FP counts % inhibition']
-#        labels = ['Keck_Pria_AS_Retest', 'Keck_Pria_FP_data', 'Keck_Pria_Continuous',
-#                  'Keck_RMI_cdd', 'FP counts % inhibition']
-    
+        #        labels = ['Keck_Pria_AS_Retest', 'Keck_Pria_FP_data', 'Keck_Pria_Continuous',
+        #                  'Keck_RMI_cdd', 'FP counts % inhibition']
+        
         featurizer='ECFP'
         if featurizer == 'ECFP':
             featurizer_func = dc.feat.CircularFingerprint(size=1024)
@@ -264,7 +264,7 @@ if __name__ == '__main__':
                                    smiles_field="SMILES", 
                                    featurizer=featurizer_func,
                                    verbose=False)
-        
+
         # extract data, and split training data into training and val
         orig_train_data = loader.featurize(train_files, shard_size=2**15)
         orig_val_data = loader.featurize(val_files, shard_size=2**15)
@@ -293,7 +293,7 @@ if __name__ == '__main__':
         task.train_and_predict(train_data, val_data, test_data, model_file)
         
         #Undo transfromations and get metrics
-        transformers = [dc.trans.IRVTransformer(K_neighbors, len(labels), orig_train_data)]
+        transformers = [dc.trans.IRVTransformer(K_neighbors, len(labels), train_data)]
         for transformer in transformers:
             train_data = transformer.transform(orig_train_data)
             val_data = transformer.transform(orig_val_data)
