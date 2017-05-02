@@ -371,7 +371,6 @@ class MultiClassification:
                       nb_epoch=self.fit_nb_epoch,
                       batch_size=self.fit_batch_size,
                       verbose=self.fit_verbose,
-                      # validation_data=(X_val, y_val),
                       class_weight=cw,
                       shuffle=True,
                       callbacks=callbacks)
@@ -404,7 +403,6 @@ class MultiClassification:
                       nb_epoch=self.fit_nb_epoch,
                       batch_size=self.fit_batch_size,
                       verbose=self.fit_verbose,
-                      # validation_data=(X_val, y_val),
                       class_weight=cw,
                       shuffle=True,
                       callbacks=callbacks)
@@ -429,6 +427,12 @@ class MultiClassification:
         print('test bedroc: {}'.format(get_model_bedroc_auc(y_test, y_pred_on_test)))
         print
 
+        # Just print last target EF into output file.
+        for EF_ratio in self.EF_ratio_list:
+            n_actives, ef, ef_max = enrichment_factor_single(y_test[:, -1], y_pred_on_test[:, -1], EF_ratio)
+            print('ratio: {}, EF: {},\tactive: {}'.format(EF_ratio, ef, n_actives))
+
+        # Store all the target EF into score file.
         out = open(score_file, 'w')
         print >> out, "EF"
         for EF_ratio in self.EF_ratio_list:
