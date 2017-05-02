@@ -64,7 +64,9 @@ class Deepchem_IRV:
                                                    penalty=self.penalty,
                                                    batch_size=self.batch_size,
                                                    fit_transformers=[],
-                                                   logdir=logdir)        
+                                                   logdir=logdir,
+                                                   verbose=True,
+                                                   batch_size=512)        
         return
         
         
