@@ -184,8 +184,8 @@ class Deepchem_IRV:
     def get_prediction_info(self, data):
         y_pred = self.model.predict_proba(data)
         
-        y_true = data.y()
-        w_true = data.w()
+        y_true = data.y
+        w_true = data.w
         
         y_true[:,2] = y_true[:,0]
         y_true[:,4] = y_true[:,3]
@@ -262,7 +262,8 @@ if __name__ == '__main__':
             
         loader = dc.data.CSVLoader(tasks=labels, 
                                    smiles_field="SMILES", 
-                                   featurizer=featurizer_func)
+                                   featurizer=featurizer_func,
+                                   verbose=False)
         
         # extract data, and split training data into training and val
         orig_train_data = loader.featurize(train_files, shard_size=2**15)
