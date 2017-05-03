@@ -182,7 +182,7 @@ class Deepchem_IRV:
         return
         
     def get_prediction_info(self, data):
-        y_pred = self.model.predict_proba(data)
+        y_pred = self.model.predict_proba(data)[:,:,1]
         
         y_true = data.y
         w_true = data.w
@@ -273,6 +273,14 @@ if __name__ == '__main__':
         train_data = loader.featurize(train_files, shard_size=2**15)
         val_data = loader.featurize(val_files, shard_size=2**15)
         test_data = loader.featurize(test_files, shard_size=2**15)
+        
+        orig_train_data = dc.data.NumpyDataset(orig_train_data.X, orig_train_data.y, orig_train_data.w, orig_train_data.ids)
+        orig_val_data = dc.data.NumpyDataset(orig_val_data.X, orig_val_data.y, orig_val_data.w, orig_val_data.ids)
+        orig_test_data = dc.data.NumpyDataset(orig_test_data.X, orig_test_data.y, orig_test_data.w, orig_test_data.ids)
+
+        train_data = dc.data.NumpyDataset(train_data.X, train_data.y, train_data.w, train_data.ids)
+        val_data = dc.data.NumpyDataset(val_data.X, val_data.y, val_data.w, val_data.ids)
+        test_data = dc.data.NumpyDataset(test_data.X, test_data.y, test_data.w, test_data.ids)
         
         train_data = dc.trans.BalancingTransformer(transform_w=True, dataset=train_data).transform(train_data)
         val_data = dc.trans.BalancingTransformer(transform_w=True, dataset=val_data).transform(val_data)
