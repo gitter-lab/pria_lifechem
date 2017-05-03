@@ -204,7 +204,7 @@ class SingleClassification:
                               X_val, y_val,
                               X_test, y_test,
                               PMTNN_weight_file):
-        model = setup_model()
+        model = self.setup_model()
         model.load_weights(PMTNN_weight_file)
 
         y_pred_on_train = model.predict(X_train)
@@ -225,12 +225,16 @@ class SingleClassification:
         print('test bedroc: {}'.format(bedroc_auc_single(y_test, y_pred_on_test)))
         print
 
+        for EF_ratio in self.EF_ratio_list:
+            n_actives, ef, ef_max = enrichment_factor_single(y_test, y_pred_on_test, EF_ratio)
+            print('ratio: {}, EF: {},\tactive: {}'.format(EF_ratio, ef, n_actives))
+
         return
 
     def get_EF_score_with_existing_model(self,
                                          X_test, y_test,
                                          file_path, EF_ratio):
-        model = setup_model()
+        model = self.setup_model()
         model.load_weights(file_path)
         y_pred_on_test = model.predict(X_test)
         n_actives, ef, ef_max = enrichment_factor_single(y_test, y_pred_on_test, EF_ratio)
