@@ -165,6 +165,17 @@ def read_merged_data(input_file_list):
 
 
 '''
+Merge data frame corresponding to the corresponding index
+'''
+def merge_pd(data_pd_list, index_list):
+    whole_pd = pd.DataFrame()
+    for index in index_list:
+        data_pd = data_pd_list[index]
+        whole_pd = whole_pd.append(data_pd)
+    return whole_pd
+
+
+'''
 Get the fingerprints, with feature_name specified, and label_name specified
 '''
 def extract_feature_and_label(data_pd,
