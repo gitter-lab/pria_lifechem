@@ -447,7 +447,8 @@ def plot_cross_validation(dir_path_list, evaluation_list, model_list, title):
                             'model': model_column})
 
     sns.boxplot(x="evaluation method", y="value", hue="model", data=data_pd, palette="PRGn")
-    sns.swarmplot(x="evaluation method", y="value", hue="model", data=data_pd, palette="PRGn", split=True)
+    # sns.violinplot(x="evaluation method", y="value", hue="model", data=data_pd, palette="PRGn", inner=None)
+    sns.swarmplot(x="evaluation method", y="value", hue="model", data=data_pd, palette="YlOrBr", split=True, size=3)
     sns.despine(offset=20, trim=True)
     sns.plt.rcParams['figure.figsize'] = (10.0, 5.0)
     sns.plt.title(title)
