@@ -202,7 +202,7 @@ def run_multiple_classification(running_index):
 
     # specify dataset
     k = 5
-    directory = '../../dataset/fixed_dataset/fold_{}/'.format(k)
+    directory = '../../dataset/keck_pcba/fold_{}/'.format(k)
     file_list = []
     for i in range(k):
         file_list.append('{}file_{}.csv'.format(directory, i))
