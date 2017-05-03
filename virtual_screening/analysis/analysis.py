@@ -382,16 +382,16 @@ def fetch_one_model(dir_path, number, evaluation_list, model):
         value_column.extend(list(train_bedroc_list))
         model_column.extend([model for _ in train_bedroc_list])
 
-    if 'validation prec' in evaluation_list:
-        evaluation_column.extend(['validation prec' for _ in val_prec_list])
+    if 'val prec' in evaluation_list:
+        evaluation_column.extend(['val prec' for _ in val_prec_list])
         value_column.extend(list(val_prec_list))
         model_column.extend([model for _ in val_prec_list])
-    if 'validation roc' in evaluation_list:
-        evaluation_column.extend(['validation roc' for _ in val_roc_list])
+    if 'val roc' in evaluation_list:
+        evaluation_column.extend(['val roc' for _ in val_roc_list])
         value_column.extend(list(val_roc_list))
         model_column.extend([model for _ in val_roc_list])
-    if 'validation bedroc' in evaluation_list:
-        evaluation_column.extend(['validation bedroc' for _ in val_bedroc_list])
+    if 'val bedroc' in evaluation_list:
+        evaluation_column.extend(['val bedroc' for _ in val_bedroc_list])
         value_column.extend(list(val_bedroc_list))
         model_column.extend([model for _ in val_bedroc_list])
 
@@ -408,27 +408,27 @@ def fetch_one_model(dir_path, number, evaluation_list, model):
         value_column.extend(list(test_prec_list))
         model_column.extend([model for _ in test_prec_list])
 
-    if 'ratio: 0.02' in evaluation_list:
-        evaluation_column.extend(['ratio: 0.02' for _ in EF_2_list])
-        value_column.extend(list(EF_2_list))
+    if 'EF_2' in evaluation_list:
+        evaluation_column.extend(['EF_2' for _ in EF_2_list])
+        value_column.extend(list(EF_2_list[:,1]))
         model_column.extend([model for _ in EF_2_list])
-    if 'ratio: 0.01' in evaluation_list:
-        evaluation_column.extend(['ratio: 0.01' for _ in EF_1_list])
-        value_column.extend(list(EF_1_list))
+    if 'EF_1' in evaluation_list:
+        evaluation_column.extend(['EF_1' for _ in EF_1_list])
+        value_column.extend(list(EF_1_list[:,1]))
         model_column.extend([model for _ in EF_1_list])
-    if 'ratio: 0.0015' in evaluation_list:
-        evaluation_column.extend(['ratio: 0.0015' for _ in EF_015_list])
-        value_column.extend(list(EF_015_list))
+    if 'EF_015' in evaluation_list:
+        evaluation_column.extend(['EF_015' for _ in EF_015_list])
+        value_column.extend(list(EF_015_list[:,1]))
         model_column.extend([model for _ in EF_015_list])
-    if 'ratio: 0.001' in evaluation_list:
-        evaluation_column.extend(['ratio: 0.001' for _ in EF_01_list])
-        value_column.extend(list(EF_01_list))
+    if 'EF_01' in evaluation_list:
+        evaluation_column.extend(['EF_01' for _ in EF_01_list])
+        value_column.extend(list(EF_01_list[:,1]))
         model_column.extend([model for _ in EF_01_list])
 
     return evaluation_column, value_column, model_column
 
 
-def plot_cross_validation(dir_path_list, evaluation_list, model_list):
+def plot_cross_validation(dir_path_list, evaluation_list, model_list, title):
     evaluation_column = []
     value_column = []
     model_column = []
@@ -449,5 +449,6 @@ def plot_cross_validation(dir_path_list, evaluation_list, model_list):
     sns.boxplot(x="evaluation method", y="value", hue="model", data=data_pd, palette="PRGn")
     sns.despine(offset=20, trim=True)
     sns.plt.rcParams['figure.figsize'] = (10.0, 5.0)
+    sns.plt.title(title)
 
     return
