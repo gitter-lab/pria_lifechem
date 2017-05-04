@@ -139,15 +139,12 @@ class Deepchem_IRV:
         print
         print('train precision: {}'.format(precision_auc_multi(y_train, y_pred_on_train, range(y_train.shape[1]), np.mean)))
         print('train roc: {}'.format(roc_auc_multi(y_train, y_pred_on_train, range(y_train.shape[1]), np.mean)))
-        print('train bedroc: {}'.format(bedroc_auc_multi(y_train, y_pred_on_train, range(y_train.shape[1]), np.mean)))
         print
         print('val precision: {}'.format(precision_auc_multi(y_val, y_pred_on_val, range(y_val.shape[1]), np.mean)))
         print('val roc: {}'.format(roc_auc_multi(y_val, y_pred_on_val, range(y_val.shape[1]), np.mean)))
-        print('val bedroc: {}'.format(bedroc_auc_multi(y_val, y_pred_on_val, range(y_val.shape[1]), np.mean)))
         print
         print('test precision: {}'.format(precision_auc_multi(y_test, y_pred_on_test, range(y_test.shape[1]), np.mean)))
         print('test roc: {}'.format(roc_auc_multi(y_test, y_pred_on_test, range(y_test.shape[1]), np.mean)))
-        print('test bedroc: {}'.format(bedroc_auc_multi(y_test, y_pred_on_test, range(y_test.shape[1]), np.mean)))
         print
         
         nef_auc_mean = np.mean(np.array(nef_auc(y_train, y_pred_on_train, self.EF_ratio_list, self.label_names))) 
@@ -200,8 +197,8 @@ class Deepchem_IRV:
         
         return y_true, y_pred
                 
-        
-    def getK(self):
+    @property    
+    def K(self):
         return self.K
 
 if __name__ == '__main__':
@@ -290,7 +287,7 @@ if __name__ == '__main__':
         with open(config_json_file, 'r') as f:
             conf = json.load(f)
         task = Deepchem_IRV(conf=conf)
-        K_neighbors = task.getK()
+        K_neighbors = task.K
         transformers = [dc.trans.IRVTransformer(K_neighbors, len(labels), train_data)]
         for transformer in transformers:
             train_data = transformer.transform(train_data)

@@ -49,6 +49,7 @@ class SKLearn_RandomForest:
             self.class_weight = None
         
         self.model_dict = {}
+        self.useVal = bool(conf['useVal'])
         return
 
     def setup_model(self):
@@ -56,7 +57,7 @@ class SKLearn_RandomForest:
             self.model_dict[self.label_names[i]] = RandomForestClassifier(n_estimators=self.n_estimators, 
                                            max_features=self.max_features, 
                                            min_samples_leaf=self.min_samples_leaf, 
-                                           n_jobs=2, 
+                                           n_jobs=6, 
                                            class_weight=self.class_weight,
                                            random_state=rnd_state,
                                            oob_score=False, 
@@ -65,7 +66,7 @@ class SKLearn_RandomForest:
             self.model_dict[self.label_names[i]] = RandomForestRegressor(n_estimators=self.n_estimators, 
                                            max_features=self.max_features, 
                                            min_samples_leaf=self.min_samples_leaf, 
-                                           n_jobs=2,
+                                           n_jobs=6,
                                            random_state=rnd_state,
                                            oob_score=False, 
                                            verbose=1) 
@@ -80,15 +81,13 @@ class SKLearn_RandomForest:
                               
         self.setup_model()
         
-        X_train = np.concatenate((X_train, X_val))
-        y_train = np.concatenate((y_train, y_val))
+        if not self.useVal:
+            X_train = np.concatenate((X_train, X_val))
+            y_train = np.concatenate((y_train, y_val))
         
         p = np.random.permutation(len(X_train))
         X_train = X_train[p,:]
         y_train = y_train[p,:]
-        p = np.random.permutation(len(X_test))
-        X_test = X_test[p,:]
-        y_test = y_test[p,:]
         
         for i, label in zip(range(len(self.label_names)), self.label_names):
             y = y_train[:,i]
@@ -106,42 +105,25 @@ class SKLearn_RandomForest:
                               X_val, y_val,
                               X_test, y_test,
                               model_file):  
-                                  
-        X_train = np.concatenate((X_train, X_val))
-        y_train = np.concatenate((y_train, y_val))
+        if self.useVal:
+            y_val, y_pred_on_val = get_prediction_info(X_val, y_val)
+        else:                          
+            X_train = np.concatenate((X_train, X_val))
+            y_train = np.concatenate((y_train, y_val))
         
-        y_pred_on_train = np.zeros(shape=y_train.shape)
-        y_pred_on_test = np.zeros(shape=y_test.shape)
-        
-        y_train[:,2] = y_train[:,0]
-        y_train[:,4] = y_train[:,3]
-        y_test[:,2] = y_test[:,0]
-        y_test[:,4] = y_test[:,3]
-        
-        for i, label in zip(range(len(self.label_names)), self.label_names):     
-            model = joblib.load(model_file+'_'+label+'.pkl')
-            
-            if i in [0,1,3]:  
-                y_pred_on_train[:,i] =  model.predict_proba(X_train)[:,1]
-                y_pred_on_test[:,i] = model.predict_proba(X_test)[:,1]
-            else:
-                y_pred_on_train[:,i] =  model.predict(X_train)
-                y_pred_on_test[:,i] = model.predict(X_test)
-            
-            y_train[np.where(np.isnan(y_train[:,i]))[0],i] = -1
-            y_test[np.where(np.isnan(y_test[:,i]))[0],i] = -1
-         
-        y_train = np.insert(y_train, 3, y_train[:,1], axis=1)
-        y_test = np.insert(y_test, 3, y_test[:,1], axis=1)
-        
-        y_pred_on_train = np.insert(y_pred_on_train, 3, y_pred_on_train[:,2], axis=1)
-        y_pred_on_test = np.insert(y_pred_on_test, 3, y_pred_on_test[:,2], axis=1)
+        y_train, y_pred_on_train = get_prediction_info(X_train, y_train)        
+        y_test, y_pred_on_test = get_prediction_info(X_test, y_test)
         
         print
         print('train precision: {}'.format(precision_auc_multi(y_train, y_pred_on_train, range(y_train.shape[1]), np.mean)))
         print('train roc: {}'.format(roc_auc_multi(y_train, y_pred_on_train, range(y_train.shape[1]), np.mean)))
         print('train bedroc: {}'.format(bedroc_auc_multi(y_train, y_pred_on_train, range(y_train.shape[1]), np.mean)))
         print
+        if self.useVal:
+            print('val precision: {}'.format(precision_auc_multi(y_val, y_pred_on_val, range(y_val.shape[1]), np.mean)))
+            print('val roc: {}'.format(roc_auc_multi(y_val, y_pred_on_val, range(y_val.shape[1]), np.mean)))
+            print('val bedroc: {}'.format(bedroc_auc_multi(y_val, y_pred_on_val, range(y_val.shape[1]), np.mean)))
+            print
         print('test precision: {}'.format(precision_auc_multi(y_test, y_pred_on_test, range(y_test.shape[1]), np.mean)))
         print('test roc: {}'.format(roc_auc_multi(y_test, y_pred_on_test, range(y_test.shape[1]), np.mean)))
         print('test bedroc: {}'.format(bedroc_auc_multi(y_test, y_pred_on_test, range(y_test.shape[1]), np.mean)))
@@ -152,6 +134,9 @@ class SKLearn_RandomForest:
                       'Keck_RMI_cdd', 'FP counts % inhibition']
         nef_auc_mean = np.mean(np.array(nef_auc(y_train, y_pred_on_train, self.EF_ratio_list, label_list))) 
         print('train nef auc: {}'.format(nef_auc_mean))
+        if self.useVal:
+            nef_auc_mean = np.mean(np.array(nef_auc(y_val, y_pred_on_val, self.EF_ratio_list, label_list))) 
+            print('val nef auc: {}'.format(nef_auc_mean))
         nef_auc_mean = np.mean(np.array(nef_auc(y_test, y_pred_on_test, self.EF_ratio_list, label_list))) 
         print('test nef auc: {}'.format(nef_auc_mean))
         return
@@ -165,6 +150,21 @@ class SKLearn_RandomForest:
         if not os.path.exists(metric_dir):
             os.makedirs(metric_dir)   
         
+        y_true, y_pred = get_prediction_info(X, y_true)
+        
+        label_list = ['Keck_Pria_AS_Retest', 'Keck_Pria_FP_data', 
+                      'Keck_Pria_Continuous_AS_Retest', 'Keck_Pria_Continuous_FP_data',
+                      'Keck_RMI_cdd', 'FP counts % inhibition']
+        evaluate_model(y_true, y_pred, metric_dir, label_list)        
+        return
+        
+    def save_model_params(self, config_csv_file):      
+        data = str(self.param)
+        with open(config_csv_file, 'w') as csvfile:
+            csvfile.write(data)
+        return
+    
+    def get_prediction_info(self, X, y_true):
         y_pred = np.zeros(shape=y_true.shape)
         
         y_true[:,2] = y_true[:,0]
@@ -182,19 +182,12 @@ class SKLearn_RandomForest:
         y_true = np.insert(y_true, 3, y_true[:,1], axis=1)
         y_pred = np.insert(y_pred, 3, y_pred[:,2], axis=1)
         
-        label_list = ['Keck_Pria_AS_Retest', 'Keck_Pria_FP_data', 
-                      'Keck_Pria_Continuous_AS_Retest', 'Keck_Pria_Continuous_FP_data',
-                      'Keck_RMI_cdd', 'FP counts % inhibition']
-        evaluate_model(y_true, y_pred, metric_dir, label_list)        
-        return
+        return y_true, y_pred
         
-    def save_model_params(self, config_csv_file):      
-        data = str(self.param)
-        with open(config_csv_file, 'w') as csvfile:
-            csvfile.write(data)
-        return
-
-
+    @property    
+    def useVal(self):
+        return self.useVal
+        
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--config_json_file', action="store", dest="config_json_file", required=True)
@@ -264,10 +257,19 @@ if __name__ == '__main__':
         task.save_model_params(config_csv_file)
         
         #####
-        task.save_model_evaluation_metrics(np.concatenate((X_train, X_val)), 
+        if task.useVal:
+            task.save_model_evaluation_metrics(X_train, y_train, model_file,
+                                          model_dir+'fold_'+str(i)+'/train_metrics/',
+                                          label_names=labels)
+            task.save_model_evaluation_metrics(X_val, y_val, model_file,
+                                          model_dir+'fold_'+str(i)+'/val_metrics/',
+                                          label_names=labels)
+        else:
+            task.save_model_evaluation_metrics(np.concatenate((X_train, X_val)), 
                                            np.concatenate((y_train, y_val)), model_file,
                                           model_dir+'fold_'+str(i)+'/train_metrics/',
                                           label_names=labels)
+        
         task.save_model_evaluation_metrics(X_test, y_test, model_file,
                                           model_dir+'fold_'+str(i)+'/test_metrics/',
                                           label_names=labels)
