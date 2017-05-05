@@ -51,7 +51,31 @@ class SKLearn_RandomForest:
         self.model_dict = {}
         self.useVal = bool(conf['useVal'])
         return
-
+    
+    @property    
+    def useVal(self):
+        return self.useVal
+        
+    def get_prediction_info(self, X, y_true):
+        y_pred = np.zeros(shape=y_true.shape)
+        
+        y_true[:,2] = y_true[:,0]
+        y_true[:,4] = y_true[:,3]
+        
+        for i, label in zip(range(len(self.label_names)), self.label_names):     
+            model = joblib.load(model_file+'_'+label+'.pkl')
+            
+            y_true[np.where(np.isnan(y_true[:,i]))[0],i] = -1
+            if i in [0,1,3]:                
+                y_pred[:,i] =  model.predict_proba(X)[:,1]
+            else:
+                y_pred[:,i] =  model.predict(X)
+        
+        y_true = np.insert(y_true, 3, y_true[:,1], axis=1)
+        y_pred = np.insert(y_pred, 3, y_pred[:,2], axis=1)
+        
+        return y_true, y_pred
+        
     def setup_model(self):
         for i in [0,1,3]:
             self.model_dict[self.label_names[i]] = RandomForestClassifier(n_estimators=self.n_estimators, 
@@ -163,30 +187,6 @@ class SKLearn_RandomForest:
         with open(config_csv_file, 'w') as csvfile:
             csvfile.write(data)
         return
-    
-    def get_prediction_info(self, X, y_true):
-        y_pred = np.zeros(shape=y_true.shape)
-        
-        y_true[:,2] = y_true[:,0]
-        y_true[:,4] = y_true[:,3]
-        
-        for i, label in zip(range(len(self.label_names)), self.label_names):     
-            model = joblib.load(model_file+'_'+label+'.pkl')
-            
-            y_true[np.where(np.isnan(y_true[:,i]))[0],i] = -1
-            if i in [0,1,3]:                
-                y_pred[:,i] =  model.predict_proba(X)[:,1]
-            else:
-                y_pred[:,i] =  model.predict(X)
-        
-        y_true = np.insert(y_true, 3, y_true[:,1], axis=1)
-        y_pred = np.insert(y_pred, 3, y_pred[:,2], axis=1)
-        
-        return y_true, y_pred
-        
-    @property    
-    def useVal(self):
-        return self.useVal
         
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()

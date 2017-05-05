@@ -55,7 +55,30 @@ class Deepchem_IRV:
         self.early_stopping_patience = conf['fitting']['early_stopping']['patience']
         self.early_stopping_option = conf['fitting']['early_stopping']['option']
         return
-
+                
+    @property    
+    def K(self):
+        return self.K
+        
+    def get_prediction_info(self, data):
+        y_pred = self.model.predict_proba(data)[:,:,1]
+        
+        y_true = data.y
+        w_true = data.w
+        
+        y_true[:,2] = y_true[:,0]
+        y_true[:,4] = y_true[:,3]
+        w_true[:,2] = w_true[:,0]
+        w_true[:,4] = w_true[:,3]
+        
+        for i, label in zip(range(len(self.label_names)), self.label_names): 
+            y_true[np.where(w_true[:,i] == 0)[0],i] = -1
+        
+        y_true = np.insert(y_true, 3, y_true[:,1], axis=1)
+        y_pred = np.insert(y_pred, 3, y_pred[:,2], axis=1)
+        
+        return y_true, y_pred
+        
     def setup_model(self, logdir):
         self.model = dc.models.TensorflowMultiTaskIRVClassifier(
                                                    len(self.label_names),
@@ -177,29 +200,6 @@ class Deepchem_IRV:
         with open(config_csv_file, 'w') as csvfile:
             csvfile.write(data)
         return
-        
-    def get_prediction_info(self, data):
-        y_pred = self.model.predict_proba(data)[:,:,1]
-        
-        y_true = data.y
-        w_true = data.w
-        
-        y_true[:,2] = y_true[:,0]
-        y_true[:,4] = y_true[:,3]
-        w_true[:,2] = w_true[:,0]
-        w_true[:,4] = w_true[:,3]
-        
-        for i, label in zip(range(len(self.label_names)), self.label_names): 
-            y_true[np.where(w_true[:,i] == 0)[0],i] = -1
-        
-        y_true = np.insert(y_true, 3, y_true[:,1], axis=1)
-        y_pred = np.insert(y_pred, 3, y_pred[:,2], axis=1)
-        
-        return y_true, y_pred
-                
-    @property    
-    def K(self):
-        return self.K
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
