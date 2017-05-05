@@ -11,6 +11,7 @@ from function import *
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.externals import joblib
 from sklearn.grid_search import ParameterGrid
+import copy
 
 rnd_state=1337
 np.random.seed(seed=rnd_state)
@@ -59,6 +60,7 @@ class SKLearn_RandomForest:
     def get_prediction_info(self, X, y_true):
         y_pred = np.zeros(shape=y_true.shape)
         
+        y_true = copy.deepcopy(y_true)
         y_true[:,2] = y_true[:,0]
         y_true[:,4] = y_true[:,3]
         

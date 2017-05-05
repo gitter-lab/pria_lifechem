@@ -15,6 +15,7 @@ from sklearn.externals import joblib
 from sklearn.grid_search import ParameterGrid
 from deepchem.trans import undo_transforms
 from shutil import move
+import copy
 
 rnd_state=1337
 np.random.seed(seed=rnd_state)
@@ -63,8 +64,8 @@ class Deepchem_IRV:
     def get_prediction_info(self, data):
         y_pred = self.model.predict_proba(data)[:,:,1]
         
-        y_true = data.y
-        w_true = data.w
+        y_true = copy.deepcopy(data.y)
+        w_true = copy.deepcopy(data.w)
         
         y_true[:,2] = y_true[:,0]
         y_true[:,4] = y_true[:,3]
