@@ -130,13 +130,13 @@ class SKLearn_RandomForest:
                               X_test, y_test,
                               model_file):  
         if self.useVal:
-            y_val, y_pred_on_val = get_prediction_info(X_val, y_val)
+            y_val, y_pred_on_val = self.get_prediction_info(X_val, y_val)
         else:                          
             X_train = np.concatenate((X_train, X_val))
             y_train = np.concatenate((y_train, y_val))
         
-        y_train, y_pred_on_train = get_prediction_info(X_train, y_train)        
-        y_test, y_pred_on_test = get_prediction_info(X_test, y_test)
+        y_train, y_pred_on_train = self.get_prediction_info(X_train, y_train)        
+        y_test, y_pred_on_test = self.get_prediction_info(X_test, y_test)
         
         print
         print('train precision: {}'.format(precision_auc_multi(y_train, y_pred_on_train, range(y_train.shape[1]), np.mean)))
@@ -174,7 +174,7 @@ class SKLearn_RandomForest:
         if not os.path.exists(metric_dir):
             os.makedirs(metric_dir)   
         
-        y_true, y_pred = get_prediction_info(X, y_true)
+        y_true, y_pred = self.get_prediction_info(X, y_true)
         
         label_list = ['Keck_Pria_AS_Retest', 'Keck_Pria_FP_data', 
                       'Keck_Pria_Continuous_AS_Retest', 'Keck_Pria_Continuous_FP_data',
