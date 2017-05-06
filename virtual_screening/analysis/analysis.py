@@ -400,13 +400,13 @@ def fetch_one_model(dir_path, number, evaluation_list, model):
         value_column.extend(list(test_prec_list))
         model_column.extend([model for _ in test_prec_list])
     if 'test roc' in evaluation_list:
-        evaluation_column.extend(['test roc' for _ in test_prec_list])
-        value_column.extend(list(test_prec_list))
-        model_column.extend([model for _ in test_prec_list])
+        evaluation_column.extend(['test roc' for _ in test_roc_list])
+        value_column.extend(list(test_roc_list))
+        model_column.extend([model for _ in test_roc_list])
     if 'test bedroc' in evaluation_list:
-        evaluation_column.extend(['test bedroc' for _ in test_prec_list])
-        value_column.extend(list(test_prec_list))
-        model_column.extend([model for _ in test_prec_list])
+        evaluation_column.extend(['test bedroc' for _ in test_bedroc_list])
+        value_column.extend(list(test_bedroc_list))
+        model_column.extend([model for _ in test_bedroc_list])
 
     if 'EF_2' in evaluation_list:
         evaluation_column.extend(['EF_2' for _ in EF_2_list])
