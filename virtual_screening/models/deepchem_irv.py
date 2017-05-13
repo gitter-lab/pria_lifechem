@@ -116,7 +116,7 @@ class Deepchem_IRV:
             
             y_val, y_pred_on_val = self.get_prediction_info(val_data)
             curr_pr = precision_auc_multi(y_val, y_pred_on_val, 
-                                      range(y_val.shape[1]), np.mean)
+                                          [0], np.mean)
             if curr_pr < best_pr:
                 if counter >= patience:
                     break
@@ -239,7 +239,7 @@ if __name__ == '__main__':
                   'Keck_RMI_cdd': np.float64}
     output_file_list = [directory + f_ for f_ in file_list]
     
-    for i in range(k):    
+    for i in range(k*4):    
         csv_file_list = output_file_list[:]
         test_files = [csv_file_list[i]]
         csv_file_list.pop(i)

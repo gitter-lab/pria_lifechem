@@ -5,6 +5,8 @@ mkdir job_results/irv
 mkdir job_results/light_chem
 mkdir job_results/neural_networks
 mkdir job_results/random_forest
+mkdir job_results/irv/${cluster}
+
 
 wget –q –retry–connrefused –waitretry=10 http://proxy.chtc.wisc.edu/SQUID/alnammi/Anaconda2-4.3.1-Linux-x86_64.sh #here I get the anaconda file from squid
 wget -r -nH --cut-dirs=2 -np -R index.html* -q â€“retry-connrefused â€“waitretry=10 http://proxy.chtc.wisc.edu/SQUID/alnammi/dataset/ #here I get the dataset 
@@ -16,7 +18,7 @@ echo 'Done getting from squid'
 ./Anaconda2-4.3.1-Linux-x86_64.sh -b -p ./anaconda > /dev/null #install anaconda, I also add an argument to the directory name
 
 export PATH=$PWD/anaconda/bin:$PATH
-export HOME=$_CONDOR_JOB_IWD
+export HOME=$PWD
 
 echo 'Done installing anaconda'
 chmod 777 *
@@ -65,18 +67,18 @@ rm -f virtual-screening-master.zip
 mv chao* virtual-screening
 rm -rf ./virtual-screening/dataset
 mv ./dataset/ ./virtual-screening/dataset/
-export PYTHONPATH=${PYTHONPATH}:${_CONDOR_JOB_IWD}/virtual-screening:${_CONDOR_JOB_IWD}/virtual-screening/virtual_screening:${_CONDOR_JOB_IWD}/virtual-screening/virtual_screening/models
+export PYTHONPATH=${PYTHONPATH}:${PWD}/virtual-screening:${HOME}/virtual-screening/virtual_screening:${HOME}/virtual-screening/virtual_screening/models
 
 cd virtual-screening
 
 #set up matplotlib.use('Agg') so no Could not connect to display error occurs
-mkdir $HOME/.config
+mkdir $HOME/.confi
 mkdir $HOME/.config/matplotlib
 echo 'backend: Agg' > $HOME/.config/matplotlib/matplotlibrc
 
 #run python job
 python_jobs_dir=$1
-python virtual_screening/models/deepchem_irv.py --config_json_file=./json/deepchem_irv.json --model_dir=../job_results/irv/deepchem_irv_${cluster}_${process}/ --dataset_dir=./dataset/keck/fold_5/
+python virtual_screening/models/deepchem_irv.py --config_json_file=./json/deepchem_irv.json --model_dir=../job_results/irv/${cluster}/deepchem_irv_${cluster}_${process}/ --dataset_dir=./dataset/keck/fold_5/
 
 echo 'Done running job'
 

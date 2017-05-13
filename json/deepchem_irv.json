@@ -5,7 +5,7 @@
     "K": [5, 10, 20, 40, 80, 160]
   },
   "fitting": {
-    "nb_epochs": 100,
+    "nb_epochs": 5000,
     "batch_size": 512,
 	"learning_rate": 0.001,
     "penalty": 0.05,
