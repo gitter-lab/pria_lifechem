@@ -14,7 +14,7 @@ import deepchem as dc
 from sklearn.externals import joblib
 from sklearn.grid_search import ParameterGrid
 from deepchem.trans import undo_transforms
-from shutil import move
+from shutil import move, copy2
 import copy
 
 rnd_state=1337
@@ -125,9 +125,9 @@ class Deepchem_IRV:
                 counter = 0
                 best_pr = curr_pr
                 #copy model file with different name to keep track of best model
-                move(curr_ckpt_file+'.data-00000-of-00001', best_ckpt_file+'.data-00000-of-00001')
-                move(curr_ckpt_file+'.index', best_ckpt_file+'.index')
-                move(curr_ckpt_file+'.meta', best_ckpt_file+'.meta')
+                copy2(curr_ckpt_file+'.data-00000-of-00001', best_ckpt_file+'.data-00000-of-00001')
+                copy2(curr_ckpt_file+'.index', best_ckpt_file+'.index')
+                copy2(curr_ckpt_file+'.meta', best_ckpt_file+'.meta')
 
             
             if i%5 == 0:
@@ -147,9 +147,9 @@ class Deepchem_IRV:
             
         print('\n\n Training Done: \n\n')
         #copy back best_model_ckpt so deepchem gets best model
-        move(best_ckpt_file+'.data-00000-of-00001', curr_ckpt_file+'.data-00000-of-00001')
-        move(best_ckpt_file+'.index', curr_ckpt_file+'.index')
-        move(best_ckpt_file+'.meta', curr_ckpt_file+'.meta')
+        copy2(best_ckpt_file+'.data-00000-of-00001', curr_ckpt_file+'.data-00000-of-00001')
+        copy2(best_ckpt_file+'.index', curr_ckpt_file+'.index')
+        copy2(best_ckpt_file+'.meta', curr_ckpt_file+'.meta')
         
         self.predict_with_existing(train_data, 
                                    val_data, 
