@@ -214,7 +214,7 @@ if __name__ == '__main__':
         csv_file_list.pop(i%len(csv_file_list))
         train_pd = read_merged_data(csv_file_list)
         
-        labels = [["Keck_Pria_AS_Retest", "Keck_Pria_FP_data", "Keck_RMI_cdd"]]
+        labels = ["Keck_Pria_AS_Retest", "Keck_Pria_FP_data", "Keck_RMI_cdd"]
     
         # extract data, and split training data into training and val
         X_train, y_train = extract_feature_and_label(train_pd,
