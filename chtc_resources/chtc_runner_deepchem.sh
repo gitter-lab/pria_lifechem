@@ -72,7 +72,7 @@ export PYTHONPATH=${PYTHONPATH}:${PWD}/virtual-screening:${HOME}/virtual-screeni
 cd virtual-screening
 
 #set up matplotlib.use('Agg') so no Could not connect to display error occurs
-mkdir $HOME/.confi
+mkdir $HOME/.config
 mkdir $HOME/.config/matplotlib
 echo 'backend: Agg' > $HOME/.config/matplotlib/matplotlibrc
 

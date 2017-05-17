@@ -1,0 +1,13 @@
+{
+  "label_names":["Keck_Pria_AS_Retest"],
+  "params": {
+    "n_estimators": [4000, 8000, 16000],
+    "max_features": ["None", "sqrt", "log2"],
+    "min_samples_leaf": [1, 10, 100, 1000],
+    "class_weight": [None, "balanced_subsample","balanced"]
+  },
+  "enrichment_factor": {
+    "ratio_list": [0.005, 0.01, 0.02, 0.05, 0.1, 0.2]
+  },
+  "useVal": 1
+}
