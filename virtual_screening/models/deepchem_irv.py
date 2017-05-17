@@ -102,7 +102,7 @@ class Deepchem_IRV:
         # DC saves tf models using tf.train.Saver, saving multiple checkpoints.
         # It always saves a checkpoint after training. 
         # We are training for 1 epoch, so model location is logdir+'model.ckpt-1'.        
-        curr_ckpt_file = logdir+'model.ckpt-1'
+        curr_ckpt_file = logdir+'model.ckpt-2'
         best_ckpt_file = logdir+'best_model.ckpt'
         
         self.setup_model(logdir)
