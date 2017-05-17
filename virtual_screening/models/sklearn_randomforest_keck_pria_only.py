@@ -60,9 +60,6 @@ class SKLearn_RandomForest:
     def get_prediction_info(self, X, y_true):
         y_pred = np.zeros(shape=y_true.shape)
         
-        y_true = copy.deepcopy(y_true)
-        y_true[:,2] = y_true[:,0]
-        y_true[:,4] = y_true[:,3]
         
         for i, label in zip(range(len(self.label_names)), self.label_names):     
             model = self.model_dict[label]
@@ -70,11 +67,6 @@ class SKLearn_RandomForest:
             y_true[np.where(np.isnan(y_true[:,i]))[0],i] = -1
             if i in [0,1,3]:                
                 y_pred[:,i] =  model.predict_proba(X)[:,1]
-            else:
-                y_pred[:,i] =  model.predict(X)
-        
-        y_true = np.insert(y_true, 3, y_true[:,1], axis=1)
-        y_pred = np.insert(y_pred, 3, y_pred[:,2], axis=1)
         
         return y_true, y_pred
         
@@ -168,9 +160,8 @@ class SKLearn_RandomForest:
         
         y_true, y_pred = self.get_prediction_info(X, y_true)
         
-        label_list = ['Keck_Pria_AS_Retest', 'Keck_Pria_FP_data', 
-                      'Keck_Pria_Continuous_AS_Retest', 'Keck_Pria_Continuous_FP_data',
-                      'Keck_RMI_cdd', 'FP counts % inhibition']
+        label_list = self.label_names
+        
         evaluate_model(y_true, y_pred, metric_dir, label_list)        
         return
         
@@ -223,7 +214,7 @@ if __name__ == '__main__':
         csv_file_list.pop(i%len(csv_file_list))
         train_pd = read_merged_data(csv_file_list)
         
-        labels = ['Keck_Pria_AS_Retest']
+        labels = [["Keck_Pria_AS_Retest", "Keck_Pria_FP_data", "Keck_RMI_cdd"]]
     
         # extract data, and split training data into training and val
         X_train, y_train = extract_feature_and_label(train_pd,
