@@ -253,6 +253,10 @@ def reshape_data_into_2_dim(data):
     return data
 
 
+def filter_out_missing_values(data_pd, label_list=['Keck_Pria_AS_Retest']):
+    filtered_pd = data_pd.dropna(axis=0, how='any', inplace=False, subset=label_list)
+    return filtered_pd
+
 '''
 Store result
 '''
