@@ -19,7 +19,7 @@ from virtual_screening.models.deep_regression import *
 from virtual_screening.models.vanilla_lstm import *
 
 
-def run_single_classification(running_index):
+def run_single_classification(running_index, use_duplicate=False):
     if running_index >= cross_validation_upper_bound:
         raise ValueError('Process number out of limit. At most {}.'.format(cross_validation_upper_bound-1))
 
@@ -64,6 +64,23 @@ def run_single_classification(running_index):
 
     with open(config_json_file, 'r') as f:
         conf = json.load(f)
+
+    if use_duplicate:
+        X_complement = []
+        y_complement = []
+        pos_count = 0
+        for index in range(y_train.shape[0]):
+            label = y_train[index, 0]
+            if label == 1:
+                pos_count += 1
+                for _ in range(500):
+                    X_complement.append(X_train[index])
+                    y_complement.append(y_train[index])
+        X_complement = np.array(X_complement)
+        y_complement = np.array(y_complement)
+        
+        X_train = np.vstack((X_train, X_complement))
+        y_train = np.vstack((y_train, y_complement))
 
     task = SingleClassification(conf=conf)
     task.train_and_predict(X_train, y_train, X_val, y_val, X_test, y_test, PMTNN_weight_file)
