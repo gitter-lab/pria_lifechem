@@ -65,13 +65,13 @@ class SKLearn_RandomForest:
             model = self.model_dict[label]
             
             y_true[np.where(np.isnan(y_true[:,i]))[0],i] = -1
-            if i in [0,1,3]:                
+            if i in [0,1,2]:                
                 y_pred[:,i] =  model.predict_proba(X)[:,1]
         
         return y_true, y_pred
         
     def setup_model(self):
-        for i in [0]:
+        for i in [0,1,2]:
             self.model_dict[self.label_names[i]] = RandomForestClassifier(n_estimators=self.n_estimators, 
                                            max_features=self.max_features, 
                                            min_samples_leaf=self.min_samples_leaf, 
