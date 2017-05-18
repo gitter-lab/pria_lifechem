@@ -1,5 +1,5 @@
 {
-  "label_names":["Keck_Pria_AS_Retest"],
+  "label_names":["Keck_Pria_AS_Retest", "Keck_Pria_FP_data", "Keck_RMI_cdd"],
   "params": {
     "n_estimators": [4000, 8000, 16000],
     "max_features": ["None", "sqrt", "log2"],
