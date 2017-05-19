@@ -1,12 +1,12 @@
 {
   "layers":[
     {
-      "hidden_units": 2000,
+      "hidden_units": 2048,
       "init": "glorot_normal",
       "activation": "sigmoid",
       "dropout": 0.25
     },{
-      "hidden_units": 2000,
+      "hidden_units": 1024,
       "init": "glorot_normal",
       "activation": "sigmoid",
       "dropout": 0.25
@@ -34,9 +34,9 @@
     }
   },
   "fitting": {
-    "nb_epoch": 10,
+    "nb_epoch": 200,
     "batch_size": 2048,
-    "verbose": 1,
+    "verbose": 0,
     "early_stopping": {
       "option": "auc",
       "patience": 50
