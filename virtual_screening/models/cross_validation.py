@@ -26,6 +26,7 @@ def run_single_classification(running_index, use_duplicate=False):
     with open(config_json_file, 'r') as f:
         conf = json.load(f)
     label_name_list = conf['label_name_list']
+    print 'label_name_list ', label_name_list
 
     # specify dataset
     k = 5
@@ -97,6 +98,7 @@ def run_single_regression(running_index):
     with open(config_json_file, 'r') as f:
         conf = json.load(f)
     label_name_list = conf['label_name_list']
+    print 'label_name_list ', label_name_list
 
     # specify dataset
     k = 5
@@ -162,6 +164,7 @@ def run_vanilla_lstm(running_index):
     with open(config_json_file, 'r') as f:
         conf = json.load(f)
     label_name_list = conf['label_name_list']
+    print 'label_name_list ', label_name_list
 
     # specify dataset
     k = 5
@@ -224,6 +227,7 @@ def run_multiple_classification(running_index):
     with open(config_json_file, 'r') as f:
         conf = json.load(f)
     label_name_list = conf['label_name_list']
+    print 'label_name_list ', label_name_list
 
     # specify dataset
     k = 5
@@ -255,8 +259,9 @@ def run_multiple_classification(running_index):
     test_pd = read_merged_data(test_file_list)
     test_pd.fillna(0, inplace=True)
 
-    multi_name_list = train_pd.columns[-128:].tolist() # Last 128 is PCBA labels
-    multi_name_list.extend(label_name_list) # Add Keck Pria as last label
+    multi_name_list = train_pd.columns[-128:].tolist()
+    multi_name_list.extend(label_name_list)
+    print 'multi_name_list ', multi_name_list
 
     X_train, y_train = extract_feature_and_label(train_pd,
                                                  feature_name='Fingerprints',
