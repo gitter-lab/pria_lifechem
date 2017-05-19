@@ -3,7 +3,7 @@
     {
       "hidden_units": 2000,
       "init": "glorot_normal",
-      "activation": "relu",
+      "activation": "sigmoid",
       "dropout": 0.25
     },{
       "hidden_units": 2000,
@@ -12,11 +12,11 @@
       "dropout": 0.25
     },{
       "init": "glorot_normal",
-      "activation": "sigmoid"
+      "activation": "linear"
     }
   ],
   "compile": {
-    "loss": "binary_crossentropy",
+    "loss": "mse",
     "optimizer": {
       "option":"adam",
       "sgd": {
@@ -26,7 +26,7 @@
         "nestrov": true
       },
       "adam": {
-        "lr": 0.003,
+        "lr": 0.0001,
         "beta_1": 0.9,
         "beta_2": 0.999,
         "epsilon": 1e-8
@@ -34,12 +34,12 @@
     }
   },
   "fitting": {
-    "nb_epoch": 1000,
+    "nb_epoch": 10,
     "batch_size": 2048,
-    "verbose": 0,
+    "verbose": 1,
     "early_stopping": {
-      "option": "precision",
-      "patience": 200
+      "option": "auc",
+      "patience": 50
     }
   },
   "batch": {
@@ -56,5 +56,5 @@
     "ratio_list": [0.02, 0.01, 0.0015, 0.001]
   },
   "class_weight_option": "no_weight",
-  "weight_scaled_param": 10
+  "label_name_list": ["Keck_Pria_AS_Retest", "Keck_Pria_Continuous"]
 }

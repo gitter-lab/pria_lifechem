@@ -23,6 +23,10 @@ def run_single_classification(running_index, use_duplicate=False):
     if running_index >= cross_validation_upper_bound:
         raise ValueError('Process number out of limit. At most {}.'.format(cross_validation_upper_bound-1))
 
+    with open(config_json_file, 'r') as f:
+        conf = json.load(f)
+    label_name_list = conf['label_name_list']
+
     # specify dataset
     k = 5
     directory = '../../dataset/fixed_dataset/fold_{}/'.format(k)
@@ -53,17 +57,14 @@ def run_single_classification(running_index, use_duplicate=False):
     # extract data, and split training data into training and val
     X_train, y_train = extract_feature_and_label(train_pd,
                                                  feature_name='Fingerprints',
-                                                 label_name_list=['Keck_Pria_AS_Retest'])
+                                                 label_name_list=label_name_list)
     X_val, y_val = extract_feature_and_label(val_pd,
                                              feature_name='Fingerprints',
-                                             label_name_list=['Keck_Pria_AS_Retest'])
+                                             label_name_list=label_name_list)
     X_test, y_test = extract_feature_and_label(test_pd,
                                                feature_name='Fingerprints',
-                                               label_name_list=['Keck_Pria_AS_Retest'])
+                                               label_name_list=label_name_list)
     print 'done data preparation'
-
-    with open(config_json_file, 'r') as f:
-        conf = json.load(f)
 
     if use_duplicate:
         X_complement = []
@@ -93,6 +94,10 @@ def run_single_regression(running_index):
     if running_index >= cross_validation_upper_bound:
         raise ValueError('Process number out of limit. At most {}.'.format(cross_validation_upper_bound-1))
 
+    with open(config_json_file, 'r') as f:
+        conf = json.load(f)
+    label_name_list = conf['label_name_list']
+
     # specify dataset
     k = 5
     directory = '../../dataset/fixed_dataset/fold_{}/'.format(k)
@@ -123,13 +128,13 @@ def run_single_regression(running_index):
     # extract data, and split training data into training and val
     X_train, y_train = extract_feature_and_label(train_pd,
                                                  feature_name='Fingerprints',
-                                                 label_name_list=['Keck_Pria_AS_Retest', 'Keck_Pria_Continuous'])
+                                                 label_name_list=label_name_list)
     X_val, y_val = extract_feature_and_label(val_pd,
                                              feature_name='Fingerprints',
-                                             label_name_list=['Keck_Pria_AS_Retest', 'Keck_Pria_Continuous'])
+                                             label_name_list=label_name_list)
     X_test, y_test = extract_feature_and_label(test_pd,
                                                feature_name='Fingerprints',
-                                               label_name_list=['Keck_Pria_AS_Retest', 'Keck_Pria_Continuous'])
+                                               label_name_list=label_name_list)
 
     y_train_classification = reshape_data_into_2_dim(y_train[:, 0])
     y_train_regression = reshape_data_into_2_dim(y_train[:, 1])
@@ -139,8 +144,6 @@ def run_single_regression(running_index):
     y_test_regression = reshape_data_into_2_dim(y_test[:, 1])
     print 'done data preparation'
 
-    with open(config_json_file, 'r') as f:
-        conf = json.load(f)
 
     task = SingleRegression(conf=conf)
     task.train_and_predict(X_train, y_train_regression, y_train_classification,
@@ -155,6 +158,10 @@ def run_single_regression(running_index):
 def run_vanilla_lstm(running_index):
     if running_index >= cross_validation_upper_bound:
         raise ValueError('Process number out of limit. At most {}.'.format(cross_validation_upper_bound-1))
+
+    with open(config_json_file, 'r') as f:
+        conf = json.load(f)
+    label_name_list = conf['label_name_list']
 
     # specify dataset
     k = 5
@@ -187,20 +194,17 @@ def run_vanilla_lstm(running_index):
     # extract data, and split training data into training and val
     X_train, y_train = extract_SMILES_and_label(train_pd,
                                                 feature_name='SMILES',
-                                                label_name_list=['Keck_Pria_AS_Retest'],
+                                                label_name_list=label_name_list,
                                                 SMILES_mapping_json_file=SMILES_mapping_json_file)
     X_val, y_val = extract_SMILES_and_label(val_pd,
                                             feature_name='SMILES',
-                                            label_name_list=['Keck_Pria_AS_Retest'],
+                                            label_name_list=label_name_list,
                                             SMILES_mapping_json_file=SMILES_mapping_json_file)
     X_test, y_test = extract_SMILES_and_label(test_pd,
                                               feature_name='SMILES',
-                                              label_name_list=['Keck_Pria_AS_Retest'],
+                                              label_name_list=label_name_list,
                                               SMILES_mapping_json_file=SMILES_mapping_json_file)
     print 'done data preparation'
-
-    with open(config_json_file, 'r') as f:
-        conf = json.load(f)
 
     task = VanillaLSTM(conf)
     X_train = sequence.pad_sequences(X_train, maxlen=task.padding_length)
@@ -216,6 +220,10 @@ def run_vanilla_lstm(running_index):
 def run_multiple_classification(running_index):
     if running_index >= cross_validation_upper_bound:
         raise ValueError('Process number out of limit. At most {}.'.format(cross_validation_upper_bound-1))
+
+    with open(config_json_file, 'r') as f:
+        conf = json.load(f)
+    label_name_list = conf['label_name_list']
 
     # specify dataset
     k = 5
@@ -247,32 +255,29 @@ def run_multiple_classification(running_index):
     test_pd = read_merged_data(test_file_list)
     test_pd.fillna(0, inplace=True)
 
-    labels_list = train_pd.columns[-128:].tolist() # Last 128 is PCBA labels
-    labels_list.append('Keck_Pria_AS_Retest') # Add Keck Pria as last label
+    multi_name_list = train_pd.columns[-128:].tolist() # Last 128 is PCBA labels
+    multi_name_list.extend(label_name_list) # Add Keck Pria as last label
 
     X_train, y_train = extract_feature_and_label(train_pd,
                                                  feature_name='Fingerprints',
-                                                 label_name_list=labels_list)
+                                                 label_name_list=multi_name_list)
     X_val, y_val = extract_feature_and_label(val_pd,
                                              feature_name='Fingerprints',
-                                             label_name_list=labels_list)
+                                             label_name_list=multi_name_list)
     X_test, y_test = extract_feature_and_label(test_pd,
                                                feature_name='Fingerprints',
-                                               label_name_list=labels_list)
+                                               label_name_list=multi_name_list)
 
     sample_weight_dir = '../../dataset/sample_weights/keck_pcba/fold_5/'
     file_list = []
     for i in range(k):
         file_list.append('sample_weight_{}.csv'.format(i))
     sample_weight_file = [sample_weight_dir + f_ for f_ in file_list]
-    sample_weight_pd = read_merged_data(sample_weight_file[0:3])
+    sample_weight_pd = read_merged_data(sample_weight_file[train_index])
     _, sample_weight = extract_feature_and_label(sample_weight_pd,
                                                  feature_name='Fingerprints',
-                                                 label_name_list=labels_list)
+                                                 label_name_list=multi_name_list)
     print 'done data preparation'
-
-    with open(config_json_file, 'r') as f:
-        conf = json.load(f)
 
     task = MultiClassification(conf=conf)
     task.train_and_predict(X_train, y_train, X_val, y_val, X_test, y_test,

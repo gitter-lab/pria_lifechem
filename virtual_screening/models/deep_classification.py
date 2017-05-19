@@ -576,6 +576,7 @@ def demo_single_classification():
 
     with open(config_json_file, 'r') as f:
         conf = json.load(f)
+    print conf['label_name_list']
     task = SingleClassification(conf=conf)
     task.train_and_predict(X_train, y_train, X_val, y_val, X_test, y_test, PMTNN_weight_file)
     store_data(transform_json_to_csv(config_json_file), config_csv_file)

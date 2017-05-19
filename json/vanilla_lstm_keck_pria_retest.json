@@ -61,5 +61,6 @@
   "enrichment_factor": {
     "ratio_list": [0.02, 0.01, 0.0015, 0.001]
   },
-  "class_weight_option": "no_weight"
+  "class_weight_option": "no_weight",
+  "label_name_list": ["Keck_Pria_AS_Retest"]
 }
