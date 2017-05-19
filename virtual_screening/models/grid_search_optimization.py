@@ -71,6 +71,11 @@ def get_hyperparameter_sets(model):
 
 
 def run_single_classification(hyperparameter_sets, hyperparameter_index):
+    with open(config_json_file, 'r') as f:
+        conf = json.load(f)
+    label_name_list = conf['label_name_list']
+    print 'label_name_list ', label_name_list
+
     # specify dataset
     k = 5
     directory = '../../dataset/fixed_dataset/fold_{}/'.format(k)
@@ -88,18 +93,15 @@ def run_single_classification(hyperparameter_sets, hyperparameter_index):
     # extract data, and split training data into training and val
     X_train, y_train = extract_feature_and_label(train_pd,
                                                  feature_name='Fingerprints',
-                                                 label_name_list=['Keck_Pria_AS_Retest'])
+                                                 label_name_list=label_name_list)
     X_test, y_test = extract_feature_and_label(test_pd,
                                                feature_name='Fingerprints',
-                                               label_name_list=['Keck_Pria_AS_Retest'])
+                                               label_name_list=label_name_list)
     cross_validation_split = StratifiedShuffleSplit(y_train, 1, test_size=test_ratio, random_state=1)
     for t_index, val_index in cross_validation_split:
         X_t, X_val = X_train[t_index], X_train[val_index]
         y_t, y_val = y_train[t_index], y_train[val_index]
     print 'done data preparation'
-
-    with open(config_json_file, 'r') as f:
-        conf = json.load(f)
 
     hyperparameters = ParameterGrid(hyperparameter_sets)
 
@@ -133,6 +135,11 @@ def run_single_classification(hyperparameter_sets, hyperparameter_index):
 
 
 def run_single_regression(hyperparameter_sets, hyperparameter_index):
+    with open(config_json_file, 'r') as f:
+        conf = json.load(f)
+    label_name_list = conf['label_name_list']
+    print 'label_name_list ', label_name_list
+
     # specify dataset
     k = 5
     directory = '../../dataset/fixed_dataset/fold_{}/'.format(k)
@@ -149,10 +156,10 @@ def run_single_regression(hyperparameter_sets, hyperparameter_index):
     # extract data, and split training data into training and val
     X_train, y_train = extract_feature_and_label(train_pd,
                                                  feature_name='Fingerprints',
-                                                 label_name_list=['Keck_Pria_AS_Retest', 'Keck_Pria_Continuous'])
+                                                 label_name_list=label_name_list)
     X_test, y_test = extract_feature_and_label(test_pd,
                                                feature_name='Fingerprints',
-                                               label_name_list=['Keck_Pria_AS_Retest', 'Keck_Pria_Continuous'])
+                                               label_name_list=label_name_list)
     y_train_classification = reshape_data_into_2_dim(y_train[:, 0])
     y_train_regression = reshape_data_into_2_dim(y_train[:, 1])
     y_test_classification = reshape_data_into_2_dim(y_test[:, 0])
@@ -165,9 +172,6 @@ def run_single_regression(hyperparameter_sets, hyperparameter_index):
         y_t_classification, y_val_classification = y_train_classification[t_index], y_train_classification[val_index]
         y_t_regression, y_val_regression = y_train_regression[t_index], y_train_regression[val_index]
     print 'done data preparation'
-
-    with open(config_json_file, 'r') as f:
-        conf = json.load(f)
 
     hyperparameters = ParameterGrid(hyperparameter_sets)
 
@@ -204,6 +208,11 @@ def run_single_regression(hyperparameter_sets, hyperparameter_index):
 
 
 def run_vanilla_lstm(hyperparameter_sets, hyperparameter_index):
+    with open(config_json_file, 'r') as f:
+        conf = json.load(f)
+    label_name_list = conf['label_name_list']
+    print 'label_name_list ', label_name_list
+
     # specify dataset
     k = 5
     directory = '../../dataset/fixed_dataset/fold_{}/'.format(k)
@@ -220,11 +229,11 @@ def run_vanilla_lstm(hyperparameter_sets, hyperparameter_index):
     # extract data, and split training data into training and val
     X_train, y_train = extract_SMILES_and_label(train_pd,
                                                 feature_name='SMILES',
-                                                label_name_list=['Keck_Pria_AS_Retest'],
+                                                label_name_list=label_name_list,
                                                 SMILES_mapping_json_file=SMILES_mapping_json_file)
     X_test, y_test = extract_SMILES_and_label(test_pd,
                                               feature_name='SMILES',
-                                              label_name_list=['Keck_Pria_AS_Retest'],
+                                              label_name_list=label_name_list,
                                               SMILES_mapping_json_file=SMILES_mapping_json_file)
 
     cross_validation_split = StratifiedShuffleSplit(y_train, 1, test_size=test_ratio, random_state=1)
@@ -232,9 +241,6 @@ def run_vanilla_lstm(hyperparameter_sets, hyperparameter_index):
         X_t, X_val = X_train[t_index], X_train[val_index]
         y_t, y_val = y_train[t_index], y_train[val_index]
     print 'done data preparation'
-
-    with open(config_json_file, 'r') as f:
-        conf = json.load(f)
 
     hyperparameters = ParameterGrid(hyperparameter_sets)
 
@@ -273,6 +279,11 @@ def run_vanilla_lstm(hyperparameter_sets, hyperparameter_index):
 
 
 def run_multiple_classification(hyperparameter_sets, hyperparameter_index):
+    with open(config_json_file, 'r') as f:
+        conf = json.load(f)
+    label_name_list = conf['label_name_list']
+    print 'label_name_list ', label_name_list
+
     # specify dataset
     k = 5
     directory = '../../dataset/keck_pcba/fold_{}/'.format(k)
@@ -288,18 +299,19 @@ def run_multiple_classification(hyperparameter_sets, hyperparameter_index):
     test_pd = read_merged_data(output_file_list[4:5])
     test_pd.fillna(0, inplace=True)
 
-    labels_list = train_pd.columns[-128:].tolist() # Last 128 is PCBA labels
-    labels_list.append('Keck_Pria_AS_Retest') # Add Keck Pria as last label
+    multi_name_list = train_pd.columns[-128:].tolist()
+    multi_name_list.extend(label_name_list)
+    print 'multi_name_list ', multi_name_list
 
     X_train, y_train = extract_feature_and_label(train_pd,
                                                  feature_name='Fingerprints',
-                                                 label_name_list=labels_list)
+                                                 label_name_list=multi_name_list)
     X_val, y_val = extract_feature_and_label(val_pd,
                                              feature_name='Fingerprints',
-                                             label_name_list=labels_list)
+                                             label_name_list=multi_name_list)
     X_test, y_test = extract_feature_and_label(test_pd,
                                                feature_name='Fingerprints',
-                                               label_name_list=labels_list)
+                                               label_name_list=multi_name_list)
 
     sample_weight_dir = '../../dataset/sample_weights/keck_pcba/fold_5/'
     file_list = []
@@ -311,9 +323,6 @@ def run_multiple_classification(hyperparameter_sets, hyperparameter_index):
                                                  feature_name='Fingerprints',
                                                  label_name_list=labels_list)
     print 'done data preparation'
-
-    with open(config_json_file, 'r') as f:
-        conf = json.load(f)
 
     hyperparameters = ParameterGrid(hyperparameter_sets)
 
