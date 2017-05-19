@@ -185,6 +185,8 @@ if __name__ == '__main__':
 
     with open(config_json_file, 'r') as f:
         conf = json.load(f)
+    label_name_list = conf['label_name_list']
+    print 'label_name_list ', label_name_list
     task = VanillaLSTM(conf)
 
     # specify dataset
@@ -211,11 +213,11 @@ if __name__ == '__main__':
     # extract data, and split training data into training and val
     X_train, y_train = extract_SMILES_and_label(train_pd,
                                                 feature_name='SMILES',
-                                                label_name_list=['Keck_Pria_AS_Retest'],
+                                                label_name_list=label_name_list,
                                                 SMILES_mapping_json_file=SMILES_mapping_json_file)
     X_test, y_test = extract_SMILES_and_label(test_pd,
                                               feature_name='SMILES',
-                                              label_name_list=['Keck_Pria_AS_Retest'],
+                                              label_name_list=label_name_list,
                                               SMILES_mapping_json_file=SMILES_mapping_json_file)
 
     cross_validation_split = StratifiedShuffleSplit(y_train, 1, test_size=0.15, random_state=1)

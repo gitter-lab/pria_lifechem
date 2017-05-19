@@ -189,6 +189,11 @@ if __name__ == '__main__':
     PMTNN_weight_file = given_args.PMTNN_weight_file
     config_csv_file = given_args.config_csv_file
 
+    with open(config_json_file, 'r') as f:
+        conf = json.load(f)
+    label_name_list = conf['label_name_list']
+    print 'label_name_list ', label_name_list
+
     # specify dataset
     k = 5
     directory = '../../dataset/fixed_dataset/fold_{}/'.format(k)
@@ -213,10 +218,10 @@ if __name__ == '__main__':
     # extract data, and split training data into training and val
     X_train, y_train = extract_feature_and_label(train_pd,
                                                  feature_name='Fingerprints',
-                                                 label_name_list=['Keck_Pria_AS_Retest', 'Keck_Pria_Continuous'])
+                                                 label_name_list=label_name_list)
     X_test, y_test = extract_feature_and_label(test_pd,
                                                feature_name='Fingerprints',
-                                               label_name_list=['Keck_Pria_AS_Retest', 'Keck_Pria_Continuous'])
+                                               label_name_list=label_name_list)
     y_train_classification = reshape_data_into_2_dim(y_train[:, 0])
     y_train_regression = reshape_data_into_2_dim(y_train[:, 1])
     y_test_classification = reshape_data_into_2_dim(y_test[:, 0])
@@ -230,8 +235,6 @@ if __name__ == '__main__':
         y_t_regression, y_val_regression = y_train_regression[t_index], y_train_regression[val_index]
     print 'done data preparation'
 
-    with open(config_json_file, 'r') as f:
-        conf = json.load(f)
     task = SingleRegression(conf=conf)
     task.train_and_predict(X_t, y_t_regression, y_t_classification,
                            X_val, y_val_regression, y_val_classification,

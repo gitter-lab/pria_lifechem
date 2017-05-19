@@ -540,6 +540,11 @@ class MultiClassification:
 
 
 def demo_single_classification():
+    with open(config_json_file, 'r') as f:
+        conf = json.load(f)
+    label_name_list = conf['label_name_list']
+    print 'label_name_list ', label_name_list
+
     # specify dataset
     k = 5
     directory = '../../dataset/fixed_dataset/fold_{}/'.format(k)
@@ -564,18 +569,16 @@ def demo_single_classification():
     # extract data, and split training data into training and val
     X_train, y_train = extract_feature_and_label(train_pd,
                                                  feature_name='Fingerprints',
-                                                 label_name_list=['Keck_Pria_AS_Retest'])
+                                                 label_name_list=label_name_list)
     X_test, y_test = extract_feature_and_label(test_pd,
                                                feature_name='Fingerprints',
-                                               label_name_list=['Keck_Pria_AS_Retest'])
+                                               label_name_list=label_name_list)
     cross_validation_split = StratifiedShuffleSplit(y_train, 1, test_size=0.2, random_state=1)
     for t_index, val_index in cross_validation_split:
         X_t, X_val = X_train[t_index], X_train[val_index]
         y_t, y_val = y_train[t_index], y_train[val_index]
     print 'done data preparation'
 
-    with open(config_json_file, 'r') as f:
-        conf = json.load(f)
     print conf['label_name_list']
     task = SingleClassification(conf=conf)
     task.train_and_predict(X_train, y_train, X_val, y_val, X_test, y_test, PMTNN_weight_file)
@@ -585,6 +588,11 @@ def demo_single_classification():
 
 
 def demo_multi_classification():
+    with open(config_json_file, 'r') as f:
+        conf = json.load(f)
+    label_name_list = conf['label_name_list']
+    print 'label_name_list ', label_name_list
+
     # specify dataset
     k = 5
     directory = '../../dataset/keck_pcba/fold_{}/'.format(k)
@@ -600,18 +608,19 @@ def demo_multi_classification():
     test_pd = read_merged_data(output_file_list[4:5])
     test_pd.fillna(0, inplace=True)
 
-    labels_list = train_pd.columns[-128:].tolist() # Last 128 is PCBA labels
-    labels_list.append('Keck_Pria_AS_Retest') # Add Keck Pria as last label
+    multi_name_list = train_pd.columns[-128:].tolist()
+    multi_name_list.extend(label_name_list)
+    print 'multi_name_list ', multi_name_list
 
     X_train, y_train = extract_feature_and_label(train_pd,
                                                  feature_name='Fingerprints',
-                                                 label_name_list=labels_list)
+                                                 label_name_list=multi_name_list)
     X_val, y_val = extract_feature_and_label(val_pd,
                                              feature_name='Fingerprints',
-                                             label_name_list=labels_list)
+                                             label_name_list=multi_name_list)
     X_test, y_test = extract_feature_and_label(test_pd,
                                                feature_name='Fingerprints',
-                                               label_name_list=labels_list)
+                                               label_name_list=multi_name_list)
 
     sample_weight_dir = '../../dataset/sample_weights/keck_pcba/fold_5/'
     file_list = []
@@ -624,8 +633,6 @@ def demo_multi_classification():
                                                  label_name_list=labels_list)
     print 'done data preparation'
 
-    with open(config_json_file, 'r') as f:
-        conf = json.load(f)
     task = MultiClassification(conf=conf)
     task.train_and_predict(X_train, y_train, X_val, y_val, X_test, y_test,
                            sample_weight=sample_weight,
