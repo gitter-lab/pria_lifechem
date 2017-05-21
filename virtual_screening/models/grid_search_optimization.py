@@ -318,6 +318,7 @@ def run_multiple_classification(hyperparameter_sets, hyperparameter_index):
     for i in range(k):
         file_list.append('sample_weight_{}.csv'.format(i))
     sample_weight_file = [sample_weight_dir + f_ for f_ in file_list]
+    sample_weight_file = np.array(sample_weight_file)
     sample_weight_pd = read_merged_data(sample_weight_file[0:3])
     _, sample_weight = extract_feature_and_label(sample_weight_pd,
                                                  feature_name='Fingerprints',
