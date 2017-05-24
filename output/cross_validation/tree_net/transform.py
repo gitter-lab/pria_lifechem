@@ -18,11 +18,11 @@ for i in range(20):
         if flag >= 0:
             flag += 1
             content.append(line)
-        if flag >= 17:
+        if flag >= 18:
             break
 
     out = open(file_name, 'w')
-    for i in range(16):
+    for i in range(17):
         print >> out, content[i]
     out.flush()
     out.close()
