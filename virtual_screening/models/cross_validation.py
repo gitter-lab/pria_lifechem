@@ -226,7 +226,6 @@ def run_tree_net(running_index):
 
     with open(config_json_file, 'r') as f:
         conf = json.load(f)
-    conf['fitting']['nb_epoch'] = 2
     label_name_list = conf['label_name_list']
     print 'label_name_list ', label_name_list
 
