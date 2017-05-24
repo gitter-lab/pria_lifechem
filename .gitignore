@@ -1,4 +1,7 @@
 .gitignore
+*.err
+*.log
+*.out
 *ipynb_checkpoints
 *.pyc
 *.gz
