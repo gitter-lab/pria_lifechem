@@ -428,7 +428,7 @@ def fetch_one_model(dir_path, number, evaluation_list, model):
     return evaluation_column, value_column, model_column
 
 
-def plot_cross_validation(dir_path_list, evaluation_list, model_list, title):
+def plot_cross_validation(dir_path_list, evaluation_list, model_list, title, plot_mode='show'):
     evaluation_column = []
     value_column = []
     model_column = []
@@ -445,11 +445,17 @@ def plot_cross_validation(dir_path_list, evaluation_list, model_list, title):
     data_pd = pd.DataFrame({'evaluation method': evaluation_column,
                             'value': value_column,
                             'model': model_column})
-
-    sns.boxplot(x="evaluation method", y="value", hue="model", data=data_pd, palette="PRGn")
-    # sns.violinplot(x="evaluation method", y="value", hue="model", data=data_pd, palette="PRGn", inner=None)
-    sns.swarmplot(x="evaluation method", y="value", hue="model", data=data_pd, palette="YlOrBr", split=True, size=3)
-    sns.despine(offset=20, trim=True)
-    sns.plt.title(title)
+    
+    if plot_mode == 'show':
+        boxplot = sns.boxplot(x="evaluation method", y="value", hue="model", data=data_pd, palette="PRGn")
+        # sns.violinplot(x="evaluation method", y="value", hue="model", data=data_pd, palette="PRGn", inner=None)
+        sns.swarmplot(x="evaluation method", y="value", hue="model", data=data_pd, palette="YlOrBr", split=True, size=3)
+        sns.despine(offset=20, trim=True)
+        sns.plt.title(title)
+    elif plot_mode == 'save':
+        boxplot = sns.boxplot(x="evaluation method", y="value", hue="model", data=data_pd, palette="PRGn")
+        sns.despine(offset=20, trim=True)
+        fig = boxplot.get_figure()
+        fig.savefig(title)
 
     return
