@@ -2,6 +2,7 @@
 *.err
 *.log
 *.out
+*.txt
 *ipynb_checkpoints
 *.pyc
 *.gz
