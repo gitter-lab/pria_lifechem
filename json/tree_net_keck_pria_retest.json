@@ -39,7 +39,7 @@
     "verbose": 0,
     "early_stopping": {
       "option": "auc",
-      "patience": 50
+      "patience": 100
     }
   },
   "batch": {

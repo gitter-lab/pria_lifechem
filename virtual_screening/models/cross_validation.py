@@ -17,6 +17,7 @@ from virtual_screening.models.CallBacks import *
 from virtual_screening.models.deep_classification import *
 from virtual_screening.models.deep_regression import *
 from virtual_screening.models.vanilla_lstm import *
+from virtual_screening.models.tree_net import *
 
 
 def run_single_classification(running_index, use_duplicate=False):
@@ -146,7 +147,6 @@ def run_single_regression(running_index):
     y_test_regression = reshape_data_into_2_dim(y_test[:, 1])
     print 'done data preparation'
 
-
     task = SingleRegression(conf=conf)
     task.train_and_predict(X_train, y_train_regression, y_train_classification,
                            X_val, y_val_regression, y_val_classification,
@@ -216,6 +216,70 @@ def run_vanilla_lstm(running_index):
 
     task.train_and_predict(X_train, y_train, X_val, y_val, X_test, y_test, PMTNN_weight_file)
     store_config(conf, config_csv_file)
+
+    return
+
+
+def run_tree_net(running_index):
+    if running_index >= cross_validation_upper_bound:
+        raise ValueError('Process number out of limit. At most {}.'.format(cross_validation_upper_bound-1))
+
+    with open(config_json_file, 'r') as f:
+        conf = json.load(f)
+    conf['fitting']['nb_epoch'] = 2
+    label_name_list = conf['label_name_list']
+    print 'label_name_list ', label_name_list
+
+    k = 5
+    directory = '../../dataset/fixed_dataset/fold_{}/'.format(k)
+    file_list = []
+    for i in range(k):
+        file_list.append('{}file_{}.csv'.format(directory, i))
+    file_list = np.array(file_list)
+
+    # read data
+    test_index = running_index / 4
+    val_index = running_index % 4 + (running_index % 4 >= test_index)
+    complete_index = np.arange(k)
+    train_index = np.where((complete_index != test_index) & (complete_index != val_index))[0]
+    print train_index
+
+    train_file_list = file_list[train_index]
+    val_file_list = file_list[val_index:val_index+1]
+    test_file_list = file_list[test_index:test_index+1]
+
+    print 'train files ', train_file_list
+    print 'val files ', val_file_list
+    print 'test files ', test_file_list
+
+    train_pd = read_merged_data(train_file_list)
+    val_pd = read_merged_data(val_file_list)
+    test_pd = read_merged_data(test_file_list)
+
+    # extract data, and split training data into training and val
+    X_train, y_train = extract_feature_and_label(train_pd,
+                                                 feature_name='Fingerprints',
+                                                 label_name_list=label_name_list)
+    X_val, y_val = extract_feature_and_label(val_pd,
+                                             feature_name='Fingerprints',
+                                             label_name_list=label_name_list)
+    X_test, y_test = extract_feature_and_label(test_pd,
+                                               feature_name='Fingerprints',
+                                               label_name_list=label_name_list)
+
+    y_train_classification = reshape_data_into_2_dim(y_train[:, 0])
+    y_train_regression = reshape_data_into_2_dim(y_train[:, 1])
+    y_val_classification = reshape_data_into_2_dim(y_val[:, 0])
+    y_val_regression = reshape_data_into_2_dim(y_val[:, 1])
+    y_test_classification = reshape_data_into_2_dim(y_test[:, 0])
+    y_test_regression = reshape_data_into_2_dim(y_test[:, 1])
+    print 'done data preparation'
+
+    task = TreeNet(conf)
+    task.train_and_predict_ensemble(X_train, y_train_regression, y_train_classification,
+                                    X_val, y_val_regression, y_val_classification,
+                                    X_test, y_test_regression, y_test_classification,
+                                    PMTNN_weight_file)
 
     return
 
@@ -295,7 +359,6 @@ def run_multiple_classification(running_index):
     return
 
 
-
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--config_json_file', dest="config_json_file",
@@ -333,10 +396,13 @@ if __name__ == '__main__':
     elif model == 'multi_classification':
         score_file = given_args.score_file
         run_multiple_classification(process_num)
+    elif model == 'tree_net':
+        run_tree_net(process_num)
     else:
-        raise Exception('No such model! Should be among [{}, {}, {}, {}].'.format(
+        raise Exception('No such model! Should be among [{}, {}, {}, {}, {}].'.format(
             'single_classification',
             'single_regression',
             'vanilla_lstm',
-            'multi_classification'
+            'multi_classification',
+            'tree_net'
         ))
