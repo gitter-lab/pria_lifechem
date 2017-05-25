@@ -51,9 +51,37 @@
     - training on some tasks, and test on other tasks
     - no mention of missing values
     - main contribution is building up a pipeline, DeepChem
+    
+- Grammar Variational Autoencoder
+    - extract grammar feature from a parsing tree, which is built based on SMILES
+    - compare grammar-level LSTM to SMILES-level LSTM
+    
+- Influence Relevance Voting: An Accurate And Interpretable Virtual High Throughput Screening Methods
+    
+ - Other
+    - The Relationship Between Precision-Recall and ROC Curves: PR curve has interpolation problem, we solve it by R package instead of sklearn
+    - The Marginal Value of Adaptive Gradient Methods in Machine Learning: Adaptive method like Adam, cannot perform better than SGD
 
 
 All of them use median AUC as evaluation metrics, and stanford group also uses enrichment scores. But as the paper The Relationship Between Precision-Recall and ROC Curves demonstrates, PR can be a better metrics, and maybe we can use this to give another explanation for stanford group's dataset-dependent result. And also using enrichment factor can help.
+
+## References
+
+NIPS 2013, Multi-Task Bayesian Optimization
+
+NIPS 2012, Practical Bayesian Optimization of Machine Learning Algorithms
+
+NIPS 2014，Generative Adversarial Nets
+
+ArXiv 2016, Matching Networks for One Shot Learning
+
+ICLR 2016, Order Matters: Sequence To Sequence For Sets
+
+ArXiv 2016, Not Just A Black Box: Learning Important Features Through Propagating Activation Differences
+
+NIPS 2016, Weight Normalization: A Simple Reparameterization to Accelerate Training of Deep Neural Network
+
+ICLR 2015, Adam: A Method For Stochastic Optimization
 
 ## split pcba into folds
 
