@@ -52,6 +52,11 @@
     - no mention of missing values
     - main contribution is building up a pipeline, DeepChem
     
+- DeepCCI:End-to-end Deep Learning for Chemical-Chemical Interaction Prediction
+    - Chemical-chemical interaction (CCI)
+    - SMILES as feature
+    - takes SMILES strings as inputs for two objects, and produce interaction probability
+    
 - Grammar Variational Autoencoder
     - extract grammar feature from a parsing tree, which is built based on SMILES
     - compare grammar-level LSTM to SMILES-level LSTM
