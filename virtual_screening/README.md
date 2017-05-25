@@ -50,6 +50,9 @@
     - no mention of missing values
     - main contribution is building up a pipeline, DeepChem
     
+- The cornucopia of meaningful leads: Applying deep adversarial autoencoders for new molecule development in oncology
+    - GAN model
+    
 - Learning to SMILE(S)
     - textual representation, SMILES
     - and two baseline fingerprint comopund, MACCS and KRFP
