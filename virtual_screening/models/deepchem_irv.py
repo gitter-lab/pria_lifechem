@@ -103,7 +103,7 @@ class Deepchem_IRV:
         # It always saves a checkpoint after training. 
         # We are training for 1 epoch, so model location is logdir+'model.ckpt-1'.        
         curr_ckpt_file = logdir+'model.ckpt-2'
-        best_ckpt_file = logdir+'best_model.ckpt'
+        best_ckpt_file = logdir+'best.ckpt'
         
         self.setup_model(logdir)
         
@@ -118,7 +118,7 @@ class Deepchem_IRV:
             curr_pr = precision_auc_multi(y_val, y_pred_on_val, 
                                           [0], np.mean)
             if curr_pr < best_pr:
-                if counter >= patience:
+                if counter >= self.early_stopping_patience:
                     break
                 counter += 1
             else:
