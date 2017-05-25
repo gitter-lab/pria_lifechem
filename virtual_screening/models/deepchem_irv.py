@@ -139,7 +139,7 @@ class Deepchem_IRV:
                 train_pr = precision_auc_multi(y_train, y_pred_on_train, 
                                       range(y_train.shape[1]), np.mean)
 
-                print('Epoch {}/{}'.format(i + 1, self.nb_epoch))
+                print('Epoch {}/{}'.format(i + 1, self.nb_epochs))
                 print 'Train\tAUC[ROC]: %.6f\tAUC[PR]: %.6f' % \
                         (train_roc, train_pr)
                 print 'Val\tAUC[ROC]: %.6f\tAUC[PR]: %.6f' % \
