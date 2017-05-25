@@ -1,6 +1,4 @@
-# data_preparation
-
-## Related Works
+# Related Works
 
 - DeepTox: Toxicity Prediction using Deep Learning
     - all ReLU layers except the output layer using sigmoid, cross-entropy as loss function(logistic loss)
@@ -56,12 +54,18 @@
     - Chemical-chemical interaction (CCI)
     - SMILES as feature
     - takes SMILES strings as inputs for two objects, and produce interaction probability
+    - applies CNN
+    - no context information for SMILES embedding
+    - CCI data, downloaded from STITCH
+    - evaluation: ROC AUC, ACC, TPR, TNR, PPV, NPV, F1
     
 - Grammar Variational Autoencoder
     - extract grammar feature from a parsing tree, which is built based on SMILES
     - compare grammar-level LSTM to SMILES-level LSTM
     
-- Influence Relevance Voting: An Accurate And Interpretable Virtual High Throughput Screening Methods
+- IRV:
+    - Influence Relevance Voting: An Accurate And Interpretable Virtual High Throughput Screening Methods
+    - Accurate and efficient target prediction using a potency-sensitive influence-relevance voter
     
  - Other
     - The Relationship Between Precision-Recall and ROC Curves: PR curve has interpolation problem, we solve it by R package instead of sklearn
@@ -87,6 +91,8 @@ ArXiv 2016, Not Just A Black Box: Learning Important Features Through Propagatin
 NIPS 2016, Weight Normalization: A Simple Reparameterization to Accelerate Training of Deep Neural Network
 
 ICLR 2015, Adam: A Method For Stochastic Optimization
+
+# data_preparation
 
 ## split pcba into folds
 
