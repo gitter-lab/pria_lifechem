@@ -50,6 +50,14 @@
     - no mention of missing values
     - main contribution is building up a pipeline, DeepChem
     
+- Learning to SMILE(S)
+    - textual representation, SMILES
+    - and two baseline fingerprint comopund, MACCS and KRFP
+    - model comparison, SVM, NB, RF, CNN, RNNLM(RNN Language Model)
+    - Log-loss
+    - 5 sampled targetes
+    - Showed RNN and CNN can outperform classical classifier, but no comparison with simple NN
+    
 - DeepCCI:End-to-end Deep Learning for Chemical-Chemical Interaction Prediction
     - Chemical-chemical interaction (CCI)
     - SMILES as feature
@@ -74,7 +82,7 @@
 
 All of them use median AUC as evaluation metrics, and stanford group also uses enrichment scores. But as the paper The Relationship Between Precision-Recall and ROC Curves demonstrates, PR can be a better metrics, and maybe we can use this to give another explanation for stanford group's dataset-dependent result. And also using enrichment factor can help.
 
-## References
+## Other References
 
 NIPS 2013, Multi-Task Bayesian Optimization
 
