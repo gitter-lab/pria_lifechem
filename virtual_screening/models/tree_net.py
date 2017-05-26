@@ -150,8 +150,14 @@ class TreeNet:
                 input_layer = Input(shape=[self.input_layer_dimension], name='input_layer')
                 M = Dense(hidden_units, init=init, name='layer ' + str(i))(input_layer)
                 M = Dropout(dropout, name='drop out ' + str(i))(M)
+
                 classification_output_layer = Activation('relu', name='activation classification')(M)
+                # classification_output_layer = Dropout(dropout,
+                #                                       name='classification drop out ' + str(i))(classification_output_layer)
+
                 regression_output_layer = Activation('sigmoid', name='activation regression')(M)
+                # regression_output_layer = Dropout(dropout,
+                #                                   name='regression drop out ' + str(i))(regression_output_layer)
             elif i == layer_number - 1:
                 classification_output_layer = Dense(self.output_layer_dimension,
                                                     init=init,
@@ -361,6 +367,9 @@ if __name__ == '__main__':
         y_t_classification, y_val_classification = y_train_classification[t_index], y_train_classification[val_index]
         y_t_regression, y_val_regression = y_train_regression[t_index], y_train_regression[val_index]
     print 'done data preparation'
+
+    # TODO: remove
+    conf['fitting']['nb_epoch'] = 200
 
     task = TreeNet(conf=conf)
 
