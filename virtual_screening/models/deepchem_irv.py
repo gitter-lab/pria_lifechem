@@ -175,12 +175,15 @@ class Deepchem_IRV:
         print('test precision: {}'.format(precision_auc_multi(y_test, y_pred_on_test, range(y_test.shape[1]), np.mean)))
         print('test roc: {}'.format(roc_auc_multi(y_test, y_pred_on_test, range(y_test.shape[1]), np.mean)))
         print
-        
-        nef_auc_mean = np.mean(np.array(nef_auc(y_train, y_pred_on_train, self.EF_ratio_list, self.label_names))) 
+
+        label_list = ['Keck_Pria_AS_Retest', 'Keck_Pria_FP_data', 
+                      'Keck_Pria_Continuous_AS_Retest', 'Keck_Pria_Continuous_FP_data',
+                      'Keck_RMI_cdd', 'FP counts % inhibition']        
+        nef_auc_mean = np.mean(np.array(nef_auc(y_train, y_pred_on_train, self.EF_ratio_list, label_list))) 
         print('train nef auc: {}'.format(nef_auc_mean))
-        nef_auc_mean = np.mean(np.array(nef_auc(y_val, y_pred_on_val, self.EF_ratio_list, self.label_names))) 
+        nef_auc_mean = np.mean(np.array(nef_auc(y_val, y_pred_on_val, self.EF_ratio_list, label_list))) 
         print('val nef auc: {}'.format(nef_auc_mean))
-        nef_auc_mean = np.mean(np.array(nef_auc(y_test, y_pred_on_test, self.EF_ratio_list, self.label_names))) 
+        nef_auc_mean = np.mean(np.array(nef_auc(y_test, y_pred_on_test, self.EF_ratio_list, label_list))) 
         print('test nef auc: {}'.format(nef_auc_mean))
         return
 
