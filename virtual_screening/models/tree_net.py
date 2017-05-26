@@ -6,7 +6,7 @@ import json
 import keras
 import sys
 from keras.models import Sequential, Model
-from keras.layers import Dense, Dropout, Input, Dense
+from keras.layers import Dense, Dropout, Input, Dense, Activation
 from keras.layers.normalization import BatchNormalization
 from keras.optimizers import SGD, Adam
 from sklearn.cross_validation import StratifiedShuffleSplit
@@ -61,6 +61,7 @@ class TreeNet:
                                                        beta_init=batch_normalizer_beta_init,
                                                        gamma_init=batch_normalizer_gamma_init)
         self.EF_ratio_list = conf['enrichment_factor']['ratio_list']
+        self.weight_schema = conf['class_weight_option']
 
         return
 
@@ -143,13 +144,14 @@ class TreeNet:
         layer_number = len(layers)
         for i in range(layer_number):
             init = layers[i]['init']
-            activation = layers[i]['activation']
             if i == 0:
                 hidden_units = int(layers[i]['hidden_units'])
                 dropout = float(layers[i]['dropout'])
                 input_layer = Input(shape=[self.input_layer_dimension], name='input_layer')
-                M = Dense(hidden_units, init=init, activation=activation, name='layer ' + str(i))(input_layer)
+                M = Dense(hidden_units, init=init, name='layer ' + str(i))(input_layer)
                 M = Dropout(dropout, name='drop out ' + str(i))(M)
+                classification_output_layer = Activation('relu', name='activation classification')(M)
+                regression_output_layer = Activation('sigmoid', name='activation regression')(M)
             elif i == layer_number - 1:
                 classification_output_layer = Dense(self.output_layer_dimension,
                                                     init=init,
@@ -165,14 +167,14 @@ class TreeNet:
                 classification_output_layer = Dense(hidden_units,
                                                     init=init,
                                                     activation='relu',
-                                                    name='classification layer ' + str(i))(M)
+                                                    name='classification layer ' + str(i))(classification_output_layer)
                 classification_output_layer = Dropout(dropout,
                                                       name='classification drop out ' + str(i))(classification_output_layer)
 
                 regression_output_layer = Dense(hidden_units,
                                                 init=init,
                                                 activation='sigmoid',
-                                                name='regression layer ' + str(i))(M)
+                                                name='regression layer ' + str(i))(regression_output_layer)
                 regression_output_layer = Dropout(dropout,
                                                   name='regression drop out ' + str(i))(regression_output_layer)
 
@@ -186,11 +188,19 @@ class TreeNet:
                                    X_test, y_test_regression, y_test_classification,
                                    PMTNN_weight_file):
         model = self.setup_model_ensemble()
+        # TODO: remove
+        print model.summary()
+
+        if self.weight_schema == 'weighted':
+            loss_weight = {'classification_output_layer': 1., 'regression_output_layer': 100.}
+        elif self.weight_schema == 'no_weight':
+            loss_weight = {'classification_output_layer': 1., 'regression_output_layer': 1.}
+        else:
+            raise ValueError('Wrong weight schema. Should be no_weight, or weighted.')
 
         model.compile(optimizer=self.compile_optimizer,
-                      loss={'classification_output_layer': 'binary_crossentropy', 'regression_output_layer':'mse'},
-                      loss_weights={'classification_output_layer': 1., 'regression_output_layer': 1.})
-        # print model.summary()
+                      loss={'classification_output_layer': 'binary_crossentropy', 'regression_output_layer': 'mse'},
+                      loss_weights=loss_weight)
 
         model.fit({'input_layer': X_train},
                   {'classification_output_layer': y_train_classification,
