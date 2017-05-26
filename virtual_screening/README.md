@@ -51,8 +51,12 @@
     - main contribution is building up a pipeline, DeepChem
     
 - The cornucopia of meaningful leads: Applying deep adversarial autoencoders for new molecule development in oncology
-    - GAN model
-    
+    - GAN model, generative adversarial autoencoders(AAE)
+    - binary fingerprints and log concentration as input
+    - introduce Growth Inhibition percentage(GI) in latent layer
+    - PCBA, anticancer activity
+    - use latent layer for distriminator
+    
 - Learning to SMILE(S)
     - textual representation, SMILES
     - and two baseline fingerprint comopund, MACCS and KRFP
