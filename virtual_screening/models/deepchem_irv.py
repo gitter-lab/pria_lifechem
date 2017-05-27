@@ -307,7 +307,7 @@ if __name__ == '__main__':
         task.train_and_predict(train_data, val_data, test_data, model_file)
         
         #Undo transfromations and get metrics
-        train_data = dc.data.NumpyDataset(train_data.X, train_data.y, train_data.w, train_data.ids)
+        train_data = orig_train_data
         train_data = dc.trans.BalancingTransformer(transform_w=True, dataset=train_data).transform(train_data)
         transformers = [dc.trans.IRVTransformer(K_neighbors, len(labels), train_data)]
         for transformer in transformers:
