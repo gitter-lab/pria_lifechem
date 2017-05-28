@@ -1,6 +1,7 @@
 #!/bing/bash
 
-old=45779329/
+old=45795555/
+#old=45779329/
 
 dir_=classification/
 if [ ! -d "$dir_" ]; then

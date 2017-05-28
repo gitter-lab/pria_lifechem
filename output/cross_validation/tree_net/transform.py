@@ -1,6 +1,10 @@
 import sys
 
 mode = sys.argv[1]
+if mode == 'classification':
+    mode = 'TreeNet classification'
+else:
+    mode = 'TreeNet regression'
 print mode
 
 for i in range(20):
