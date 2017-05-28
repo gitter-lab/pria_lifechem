@@ -27,6 +27,8 @@ def check_result_completeness(dir_, file_path, number):
 
 
 def get_number(string):
+    if 'nan' in string:
+        return 0
     m = re.search('\d+\.\d+', string)
     return float(m.group())
 
@@ -95,13 +97,13 @@ def action(dir_name, k):
                     test_roc_list.append(get_number(line))
                 if 'test bedroc' in line:
                     test_bedroc_list.append(get_number(line))
-                if 'ratio: 0.02,' in line:
+                if 'ratio: 0.02,' in line or 'ratio 0.02,' in line:
                     EF_2_list.append(get_EF_number(line))
-                if 'ratio: 0.01,' in line:
+                if 'ratio: 0.01,' in line or 'ratio 0.01,' in line:
                     EF_1_list.append(get_EF_number(line))
-                if 'ratio: 0.0015,' in line:
+                if 'ratio: 0.0015,' in line or 'ratio 0.0015,' in line:
                     EF_015_list.append(get_EF_number(line))
-                if 'ratio: 0.001,' in line:
+                if 'ratio: 0.001,' in line or 'ratio 0.001,' in line:
                     EF_01_list.append(get_EF_number(line))
 
     train_prec_list = np.array(train_prec_list)
@@ -175,13 +177,13 @@ def action_ignore(dir_name, k):
                     test_roc_list.append(get_number(line))
                 if 'test bedroc' in line:
                     test_bedroc_list.append(get_number(line))
-                if 'ratio: 0.02,' in line:
+                if 'ratio: 0.02,' in line or 'ratio 0.02,' in line:
                     EF_2_list.append(get_EF_number(line))
-                if 'ratio: 0.01,' in line:
+                if 'ratio: 0.01,' in line or 'ratio 0.01,' in line:
                     EF_1_list.append(get_EF_number(line))
-                if 'ratio: 0.0015,' in line:
+                if 'ratio: 0.0015,' in line or 'ratio 0.0015,' in line:
                     EF_015_list.append(get_EF_number(line))
-                if 'ratio: 0.001,' in line:
+                if 'ratio: 0.001,' in line or 'ratio 0.001,' in line:
                     EF_01_list.append(get_EF_number(line))
 
     train_prec_list = np.array(train_prec_list)
@@ -407,7 +409,7 @@ def fetch_one_model(dir_path, number, evaluation_list, model):
         evaluation_column.extend(['test bedroc' for _ in test_bedroc_list])
         value_column.extend(list(test_bedroc_list))
         model_column.extend([model for _ in test_bedroc_list])
-
+    
     if 'EF_2' in evaluation_list:
         evaluation_column.extend(['EF_2' for _ in EF_2_list])
         value_column.extend(list(EF_2_list[:,1]))
