@@ -42,21 +42,23 @@
     - temporal validation vs. random cross-validation (LB1, LB2, LB3 have temporal relation?)
     - info leaky: training set for one task is unrealistically related to training set for another task
 
-
 - Low Data Drug Discovery with One-shot Learning
     - one-shot learning
     - Residual LSTM
     - training on some tasks, and test on other tasks
     - no mention of missing values
     - main contribution is building up a pipeline, DeepChem
-    
+
+- Generating Focussed Molecule Libraries for Drug Discovery with Recurrent Neural Networks
+
 - The cornucopia of meaningful leads: Applying deep adversarial autoencoders for new molecule development in oncology
     - GAN model, generative adversarial autoencoders(AAE)
     - binary fingerprints and log concentration as input
     - introduce Growth Inhibition percentage(GI) in latent layer
     - PCBA, anticancer activity
     - use latent layer for distriminator
-    
+
+
 - Learning to SMILE(S)
     - textual representation, SMILES
     - and two baseline fingerprint comopund, MACCS and KRFP
