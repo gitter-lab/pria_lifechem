@@ -49,7 +49,24 @@
     - no mention of missing values
     - main contribution is building up a pipeline, DeepChem
 
+- Boosting Docking-Based Virtual Screening with Deep Learning
+    - introduction worth reading
+    - DeepVS(Deepp virtual screening)
+    - take data describing structure of protein-compound complex as first-layer feature
+    - then to convolutional layer
+    - Directory of Useful Decoys(UDU) as benchmark
+    - evaluate on AUC[ROC] and EF
+
 - Generating Focussed Molecule Libraries for Drug Discovery with Recurrent Neural Networks
+    - one-hot representation for SMILES
+    - RNN language model
+    - fine-tuning(transfer learning), first train on large dataset, then move to smaller one
+    - use a discriminative model to predict active/inactive for generated molecules, use a hard-threshold
+    - EFCP as feature for discriminator
+    - dataset ChEMLB
+    - EOE (enrichment over random) as evaluation method
+    - can redesign 28% of the unseen molecules of the test set
+    - difference with GAN: no negative sampling
 
 - The cornucopia of meaningful leads: Applying deep adversarial autoencoders for new molecule development in oncology
     - GAN model, generative adversarial autoencoders(AAE)
@@ -57,7 +74,6 @@
     - introduce Growth Inhibition percentage(GI) in latent layer
     - PCBA, anticancer activity
     - use latent layer for distriminator
-
 
 - Learning to SMILE(S)
     - textual representation, SMILES
