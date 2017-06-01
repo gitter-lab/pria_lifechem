@@ -247,83 +247,88 @@ if __name__ == '__main__':
                   'Keck_RMI_cdd': np.float64}
     output_file_list = [directory + f_ for f_ in file_list]
     
-    for i in range(k*4):    
-        csv_file_list = output_file_list[:]
-        test_files = [csv_file_list[i]]
-        csv_file_list.pop(i)
-        val_files = [csv_file_list[i%len(csv_file_list)]]
-        csv_file_list.pop(i%len(csv_file_list))
-        train_files = csv_file_list
-        
-        labels = ['Keck_Pria_AS_Retest', 'Keck_Pria_FP_data', 'Keck_Pria_Continuous',
-                  'Keck_RMI_cdd', 'FP counts % inhibition']
-        #        labels = ['Keck_Pria_AS_Retest', 'Keck_Pria_FP_data', 'Keck_Pria_Continuous',
-        #                  'Keck_RMI_cdd', 'FP counts % inhibition']
-        
-        featurizer='ECFP'
-        if featurizer == 'ECFP':
-            featurizer_func = dc.feat.CircularFingerprint(size=1024)
-        elif featurizer == 'GraphConv':
-            featurizer_func = dc.feat.ConvMolFeaturizer()
+    for ti in range(k):
+        for vi in [j for j in range(k) if j != ti]:
+            i=ti+vi 
             
-        loader = dc.data.CSVLoader(tasks=labels, 
-                                   smiles_field="SMILES", 
-                                   featurizer=featurizer_func,
-                                   verbose=False)
-
-        # extract data, and split training data into training and val
-        orig_train_data = loader.featurize(train_files, shard_size=2**15)
-        orig_val_data = loader.featurize(val_files, shard_size=2**15)
-        orig_test_data = loader.featurize(test_files, shard_size=2**15)
-        
-        train_data = loader.featurize(train_files, shard_size=2**15)
-        val_data = loader.featurize(val_files, shard_size=2**15)
-        test_data = loader.featurize(test_files, shard_size=2**15)
-        
-        orig_train_data = dc.data.NumpyDataset(orig_train_data.X, orig_train_data.y, orig_train_data.w, orig_train_data.ids)
-        orig_val_data = dc.data.NumpyDataset(orig_val_data.X, orig_val_data.y, orig_val_data.w, orig_val_data.ids)
-        orig_test_data = dc.data.NumpyDataset(orig_test_data.X, orig_test_data.y, orig_test_data.w, orig_test_data.ids)
-
-        train_data = dc.data.NumpyDataset(train_data.X, train_data.y, train_data.w, train_data.ids)
-        val_data = dc.data.NumpyDataset(val_data.X, val_data.y, val_data.w, val_data.ids)
-        test_data = dc.data.NumpyDataset(test_data.X, test_data.y, test_data.w, test_data.ids)
-        
-        train_data = dc.trans.BalancingTransformer(transform_w=True, dataset=train_data).transform(train_data)
-        val_data = dc.trans.BalancingTransformer(transform_w=True, dataset=val_data).transform(val_data)
-        test_data = dc.trans.BalancingTransformer(transform_w=True, dataset=test_data).transform(test_data)
-           
-        
-        with open(config_json_file, 'r') as f:
-            conf = json.load(f)
-        task = Deepchem_IRV(conf=conf)
-        K_neighbors = task.K
-        transformers = [dc.trans.IRVTransformer(K_neighbors, len(labels), train_data)]
-        for transformer in transformers:
-            train_data = transformer.transform(train_data)
-            val_data = transformer.transform(val_data)
-            test_data = transformer.transform(test_data)        
-        
-        #train model
-        task.train_and_predict(train_data, val_data, test_data, model_file)
-        
-        #Undo transfromations and get metrics
-        train_data = orig_train_data
-        train_data = dc.trans.BalancingTransformer(transform_w=True, dataset=train_data).transform(train_data)
-        transformers = [dc.trans.IRVTransformer(K_neighbors, len(labels), train_data)]
-        for transformer in transformers:
-            train_data = transformer.transform(orig_train_data)
-            val_data = transformer.transform(orig_val_data)
-            test_data = transformer.transform(orig_test_data)       
-        
-        task.predict_with_existing(train_data, val_data, test_data)                                         
-        task.save_model_evaluation_metrics(train_data, model_file,
-                                          model_dir+'fold_'+str(i)+'/train_metrics/',
-                                          label_names=labels)
-        task.save_model_evaluation_metrics(val_data, model_file,
-                                          model_dir+'fold_'+str(i)+'/val_metrics/',
-                                          label_names=labels)
-        task.save_model_evaluation_metrics(test_data, model_file,
-                                          model_dir+'fold_'+str(i)+'/test_metrics/',
-                                          label_names=labels)
-        
-        task.save_model_params(config_csv_file)
+            csv_file_list = output_file_list[:]
+            test_files = [csv_file_list[ti]]
+            val_files = [csv_file_list[vi]]
+            
+            csv_file_list.pop(ti)
+            csv_file_list.pop(vi)
+            
+            train_files = csv_file_list
+            
+            labels = ['Keck_Pria_AS_Retest', 'Keck_Pria_FP_data', 'Keck_Pria_Continuous',
+                      'Keck_RMI_cdd', 'FP counts % inhibition']
+            #        labels = ['Keck_Pria_AS_Retest', 'Keck_Pria_FP_data', 'Keck_Pria_Continuous',
+            #                  'Keck_RMI_cdd', 'FP counts % inhibition']
+            
+            featurizer='ECFP'
+            if featurizer == 'ECFP':
+                featurizer_func = dc.feat.CircularFingerprint(size=1024)
+            elif featurizer == 'GraphConv':
+                featurizer_func = dc.feat.ConvMolFeaturizer()
+                
+            loader = dc.data.CSVLoader(tasks=labels, 
+                                       smiles_field="SMILES", 
+                                       featurizer=featurizer_func,
+                                       verbose=False)
+    
+            # extract data, and split training data into training and val
+            orig_train_data = loader.featurize(train_files, shard_size=2**15)
+            orig_val_data = loader.featurize(val_files, shard_size=2**15)
+            orig_test_data = loader.featurize(test_files, shard_size=2**15)
+            
+            train_data = loader.featurize(train_files, shard_size=2**15)
+            val_data = loader.featurize(val_files, shard_size=2**15)
+            test_data = loader.featurize(test_files, shard_size=2**15)
+            
+            orig_train_data = dc.data.NumpyDataset(orig_train_data.X, orig_train_data.y, orig_train_data.w, orig_train_data.ids)
+            orig_val_data = dc.data.NumpyDataset(orig_val_data.X, orig_val_data.y, orig_val_data.w, orig_val_data.ids)
+            orig_test_data = dc.data.NumpyDataset(orig_test_data.X, orig_test_data.y, orig_test_data.w, orig_test_data.ids)
+    
+            train_data = dc.data.NumpyDataset(train_data.X, train_data.y, train_data.w, train_data.ids)
+            val_data = dc.data.NumpyDataset(val_data.X, val_data.y, val_data.w, val_data.ids)
+            test_data = dc.data.NumpyDataset(test_data.X, test_data.y, test_data.w, test_data.ids)
+            
+            train_data = dc.trans.BalancingTransformer(transform_w=True, dataset=train_data).transform(train_data)
+            val_data = dc.trans.BalancingTransformer(transform_w=True, dataset=val_data).transform(val_data)
+            test_data = dc.trans.BalancingTransformer(transform_w=True, dataset=test_data).transform(test_data)
+               
+            
+            with open(config_json_file, 'r') as f:
+                conf = json.load(f)
+            task = Deepchem_IRV(conf=conf)
+            K_neighbors = task.K
+            transformers = [dc.trans.IRVTransformer(K_neighbors, len(labels), train_data)]
+            for transformer in transformers:
+                train_data = transformer.transform(train_data)
+                val_data = transformer.transform(val_data)
+                test_data = transformer.transform(test_data)        
+            
+            #train model
+            task.train_and_predict(train_data, val_data, test_data, model_file)
+            
+            #Undo transfromations and get metrics
+            train_data = orig_train_data
+            train_data = dc.trans.BalancingTransformer(transform_w=True, dataset=train_data).transform(train_data)
+            transformers = [dc.trans.IRVTransformer(K_neighbors, len(labels), train_data)]
+            for transformer in transformers:
+                train_data = transformer.transform(orig_train_data)
+                val_data = transformer.transform(orig_val_data)
+                test_data = transformer.transform(orig_test_data)       
+            
+            task.predict_with_existing(train_data, val_data, test_data)                                         
+            task.save_model_evaluation_metrics(train_data, model_file,
+                                              model_dir+'fold_'+str(i)+'/train_metrics/',
+                                              label_names=labels)
+            task.save_model_evaluation_metrics(val_data, model_file,
+                                              model_dir+'fold_'+str(i)+'/val_metrics/',
+                                              label_names=labels)
+            task.save_model_evaluation_metrics(test_data, model_file,
+                                              model_dir+'fold_'+str(i)+'/test_metrics/',
+                                              label_names=labels)
+            
+            task.save_model_params(config_csv_file)

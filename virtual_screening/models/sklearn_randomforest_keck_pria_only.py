@@ -106,6 +106,8 @@ class SKLearn_RandomForest:
             y = np.delete(y, indexes, axis=0)
             X = np.delete(X_train, indexes, axis=0)
             self.model_dict[label].fit(X, y)
+            
+            joblib.dump(self.model_dict[label], model_file+'_'+label+'.pkl', compress = 1)
         return
 
     def predict_with_existing(self,
