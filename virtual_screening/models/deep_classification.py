@@ -5,6 +5,7 @@ import numpy as np
 import json
 import keras
 import sys
+import math
 from keras.models import Sequential
 from keras.layers import Dense, Dropout
 from keras.layers.normalization import BatchNormalization
@@ -53,16 +54,34 @@ def get_class_weight(task, y_data, reference=None):
             share = 0.01 * ones_sum / w['1']
             zero_weight = 1.0 * share
             one_weight = zero_weight * w['0'] / w['1'] * share
-            ones_sum += w['1']
             # this corresponds to Keck Pria
             if i + 1 == task.output_layer_dimension:
                 # TODO: generalize this part
                 zero_weight *= task.conf['weight_scaled_param']
-                ones_sum *= task.conf['weight_scaled_param']
+                one_weight *= task.conf['weight_scaled_param']
+            cw.append({-1: 0.0, 0: zero_weight, 1: one_weight})
+    elif task.weight_schema == 'weighted_task_log':
+        cw = []
+        ones_sum = 0
+        w_list = []
+        for i in range(task.output_layer_dimension):
+            w = reference[i]
+            w_list.append(w)
+            ones_sum += w['1']
+        for i in range(task.output_layer_dimension):
+            w = w_list[i]
+            share = math.log(ones_sum / w['1'])
+            zero_weight = 1.0 * share
+            one_weight = zero_weight * w['0'] / w['1'] * share
+            # this corresponds to Keck Pria
+            if i + 1 == task.output_layer_dimension:
+                # TODO: generalize this part
+                zero_weight *= task.conf['weight_scaled_param']
+                one_weight *= task.conf['weight_scaled_param']
             cw.append({-1: 0.0, 0: zero_weight, 1: one_weight})
     else:
-        raise ValueError('Weight schema not included. Should be among [{}, {}, {}].'.
-                         format('no_weight', 'weighted_sample', 'weighted_task'))
+        raise ValueError('Weight schema not included. Should be among [{}, {}, {}, {}].'.
+                         format('no_weight', 'weighted_sample', 'weighted_task', 'weighted_task_log'))
 
     return cw
 
