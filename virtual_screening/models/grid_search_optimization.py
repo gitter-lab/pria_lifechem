@@ -322,7 +322,7 @@ def run_multiple_classification(hyperparameter_sets, hyperparameter_index):
     sample_weight_pd = read_merged_data(sample_weight_file[0:3])
     _, sample_weight = extract_feature_and_label(sample_weight_pd,
                                                  feature_name='Fingerprints',
-                                                 label_name_list=labels_list)
+                                                 label_name_list=multi_name_list)
     print 'done data preparation'
 
     hyperparameters = ParameterGrid(hyperparameter_sets)
