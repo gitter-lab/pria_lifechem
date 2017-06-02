@@ -52,8 +52,8 @@ def get_class_weight(task, y_data, reference=None):
         for i in range(task.output_layer_dimension):
             w = w_list[i]
             share = 0.01 * ones_sum / w['1']
-            zero_weight = 1.0 * share
-            one_weight = zero_weight * w['0'] / w['1'] * share
+            zero_weight = share * 1.0
+            one_weight = share * w['0'] / w['1']
             # this corresponds to Keck Pria
             if i + 1 == task.output_layer_dimension:
                 # TODO: generalize this part
@@ -71,8 +71,8 @@ def get_class_weight(task, y_data, reference=None):
         for i in range(task.output_layer_dimension):
             w = w_list[i]
             share = math.log(ones_sum / w['1'])
-            zero_weight = 1.0 * share
-            one_weight = zero_weight * w['0'] / w['1'] * share
+            zero_weight = share * 1.0
+            one_weight = share * w['0'] / w['1']
             # this corresponds to Keck Pria
             if i + 1 == task.output_layer_dimension:
                 # TODO: generalize this part
