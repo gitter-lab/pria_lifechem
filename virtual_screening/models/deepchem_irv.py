@@ -248,17 +248,15 @@ if __name__ == '__main__':
     output_file_list = [directory + f_ for f_ in file_list]
     
     for ti in range(k):
-        for vi in [j for j in range(k) if j != ti]:
-            i=ti+vi 
+        for vi in in [(ti+1)%k]:
+            i=ti 
             
             csv_file_list = output_file_list[:]
             test_files = [csv_file_list[ti]]
             val_files = [csv_file_list[vi]]
             
-            csv_file_list.pop(ti)
-            csv_file_list.pop(vi)
             
-            train_files = csv_file_list
+            train_files = [q for j, q in enumerate(csv_file_list) if j not in [ti, vi]]
             
             labels = ['Keck_Pria_AS_Retest', 'Keck_Pria_FP_data', 'Keck_Pria_Continuous',
                       'Keck_RMI_cdd', 'FP counts % inhibition']

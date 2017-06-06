@@ -6,12 +6,12 @@
   },
   "fitting": {
     "nb_epochs": 5000,
-    "batch_size": 512,
-	"learning_rate": 0.001,
+    "batch_size": 8192,
+	"learning_rate": 0.1,
     "penalty": 0.05,
 	"early_stopping": {
       "option": "precision",
-      "patience": 50
+      "patience": 20
     }
   },
   "enrichment_factor": {
