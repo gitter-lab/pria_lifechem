@@ -61,6 +61,7 @@ def action(dir_name, k):
         file_path = dir_name + '{}.out'.format(x)
         
         if not os.path.isfile(file_path):
+            print 'file ', file_path, ' not exist'
             train_prec_list.append(0)
             train_roc_list.append(0)
             train_bedroc_list.append(0)
@@ -354,6 +355,7 @@ def get_ranked_analysis(dir_path, k, evaluation_list, fetch_top_num):
         sorted_y = [i[0] for i in sorted(enumerate(Y), key=lambda x:x[1], reverse=True)]
         print 'Top {} rankings: '.format(fetch_top_num),
         print sorted_y[:fetch_top_num]
+        print Y[sorted_y]
 
         print
 
