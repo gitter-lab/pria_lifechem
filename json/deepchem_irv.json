@@ -2,12 +2,12 @@
   "label_names":["Keck_Pria_AS_Retest", "Keck_Pria_FP_data", "Keck_Pria_Continuous",
               "Keck_RMI_cdd", "FP counts % inhibition"],
   "params": {
-    "K": [5, 10, 20, 40, 80, 160]
+    "K": [5, 10, 20, 40, 80]
   },
   "fitting": {
     "nb_epochs": 5000,
     "batch_size": 8192,
-	"learning_rate": 0.1,
+	"learning_rate": 0.01,
     "penalty": 0.05,
 	"early_stopping": {
       "option": "precision",
