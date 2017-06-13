@@ -207,8 +207,11 @@ if __name__ == '__main__':
                   'Keck_RMI_cdd': np.float64}
     output_file_list = [directory + f_ for f_ in file_list]
     
-    for i in range(k):          
+    for i in range(k):  
+        if not os.path.exists(model_dir):
+            os.makedirs(model_dir+'fold_'+str(i))         
         model_file = model_dir+'fold_'+str(i)+'/rf_clf'
+        
         csv_file_list = output_file_list[:]
         test_pd = read_merged_data([csv_file_list[i]])
         csv_file_list.pop(i)
