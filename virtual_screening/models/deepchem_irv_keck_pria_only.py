@@ -276,10 +276,7 @@ if __name__ == '__main__':
             val_data = dc.data.NumpyDataset(val_data.X, val_data.y, val_data.w, val_data.ids)
             test_data = dc.data.NumpyDataset(test_data.X, test_data.y, test_data.w, test_data.ids)
             
-            train_data = dc.trans.BalancingTransformer(transform_w=True, dataset=train_data).transform(train_data)
-            val_data = dc.trans.BalancingTransformer(transform_w=True, dataset=val_data).transform(val_data)
-            test_data = dc.trans.BalancingTransformer(transform_w=True, dataset=test_data).transform(test_data)
-               
+            train_data = dc.trans.BalancingTransformer(transform_w=True, dataset=train_data).transform(train_data)               
             
             with open(config_json_file, 'r') as f:
                 conf = json.load(f)
