@@ -88,7 +88,7 @@ def get_class_weight(task, y_data, reference=None):
     return cw
 
 
-class SingleClassification:
+class DNN_RF:
     def __init__(self, conf):
         self.conf = conf
         self.input_layer_dimension = 1024
@@ -291,7 +291,49 @@ class SingleClassification:
         rf = RandomForestClassifier(n_estimators=n_estimators,
                                     max_features=max_features,
                                     min_samples_leaf=min_samples_leaf,
-                                    n_jobs=-1,
+                                    n_jobs=3,
+                                    class_weight=class_weight,
+                                    random_state=rnd_state,
+                                    oob_score=False,
+                                    verbose=1)
+        rf.fit(X_train, y_train)
+
+        y_pred_on_train = reshape_data_into_2_dim(rf.predict(X_train))
+        y_pred_on_val = reshape_data_into_2_dim(rf.predict(X_val))
+        y_pred_on_test = reshape_data_into_2_dim(rf.predict(X_test))
+
+        print('train precision: {}'.format(precision_auc_single(y_train, y_pred_on_train)))
+        print('train roc: {}'.format(roc_auc_single(y_train, y_pred_on_train)))
+        print('train bedroc: {}'.format(bedroc_auc_single(y_train, y_pred_on_train)))
+        print
+        print('validation precision: {}'.format(precision_auc_single(y_val, y_pred_on_val)))
+        print('validation roc: {}'.format(roc_auc_single(y_val, y_pred_on_val)))
+        print('validation bedroc: {}'.format(bedroc_auc_single(y_val, y_pred_on_val)))
+        print
+        print('test precision: {}'.format(precision_auc_single(y_test, y_pred_on_test)))
+        print('test roc: {}'.format(roc_auc_single(y_test, y_pred_on_test)))
+        print('test bedroc: {}'.format(bedroc_auc_single(y_test, y_pred_on_test)))
+        print
+
+        for EF_ratio in self.EF_ratio_list:
+            n_actives, ef, ef_max = enrichment_factor_single(y_test, y_pred_on_test, EF_ratio)
+            print('ratio: {}, EF: {},\tactive: {}'.format(EF_ratio, ef, n_actives))
+
+        return rf
+
+
+    def get_dnn_rf(self, X_train, y_train, X_val, y_val, X_test, y_test):
+        max_features = 'log2'
+        n_estimators = 4000
+        min_samples_leaf = 1
+        class_weight = 'balanced'
+        rnd_state = 1337
+        np.random.seed(seed=rnd_state)
+
+        rf = RandomForestClassifier(n_estimators=n_estimators,
+                                    max_features=max_features,
+                                    min_samples_leaf=min_samples_leaf,
+                                    n_jobs=3,
                                     class_weight=class_weight,
                                     random_state=rnd_state,
                                     oob_score=False,
@@ -312,10 +354,6 @@ class SingleClassification:
         y_pred_on_val = reshape_data_into_2_dim(rf.predict(X_val_secondary))
         X_test_secondary = self.intermediate_layer_model.predict(X_test)
         y_pred_on_test = reshape_data_into_2_dim(rf.predict(X_test_secondary))
-
-        print X_test.shape
-        print y_pred_on_test.shape
-        print y_test.shape
 
         print('train precision: {}'.format(precision_auc_single(y_train, y_pred_on_train)))
         print('train roc: {}'.format(roc_auc_single(y_train, y_pred_on_train)))
@@ -339,6 +377,10 @@ class SingleClassification:
 def demo():
     with open(config_json_file, 'r') as f:
         conf = json.load(f)
+
+    # TODO: debug
+    conf['fitting']['nb_epoch'] = 200
+    conf['fitting']['early_stopping']['patience'] = 50
 
     label_name_list = conf['label_name_list']
     print 'label_name_list ', label_name_list
@@ -370,8 +412,8 @@ def demo():
     print 'done data preparation'
 
     print conf['label_name_list']
-    task = SingleClassification(conf=conf)
-    task.train_and_predict(X_train, y_train, X_val, y_val, X_test, y_test, PMTNN_weight_file)
+    task = DNN_RF(conf=conf)
+    # task.train_and_predict(X_train, y_train, X_val, y_val, X_test, y_test, PMTNN_weight_file)
 
     # loading and then pop doesn't work
     # https://stackoverflow.com/questions/41668813/how-to-add-and-remove-new-layers-in-keras-after-loading-weights
@@ -390,6 +432,7 @@ def demo():
 
 
     # Start RF
+    # rf = task.get_dnn_rf(X_train, y_train, X_val, y_val, X_test, y_test)
     rf = task.get_rf(X_train, y_train, X_val, y_val, X_test, y_test)
 
     return
