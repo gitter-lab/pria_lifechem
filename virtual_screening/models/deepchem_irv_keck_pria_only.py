@@ -24,7 +24,7 @@ class Deepchem_IRV:
     def __init__(self, conf):
         self.conf = conf
         self.input_layer_dimension = 1024
-        self.label_names = conf['label_names']
+        self.label_names = ["Keck_Pria_AS_Retest", "Keck_Pria_FP_data", "Keck_RMI_cdd"]
         self.EF_ratio_list = conf['enrichment_factor']['ratio_list']
         
         self.process_id = int(os.environ.get('process'))        
@@ -65,19 +65,11 @@ class Deepchem_IRV:
         y_pred = self.model.predict_proba(data)[:,:,1]
         
         y_true = copy.deepcopy(data.y)
-        w_true = copy.deepcopy(data.w)
-        
-        y_true[:,2] = y_true[:,0]
-        y_true[:,4] = y_true[:,3]
-        w_true[:,2] = w_true[:,0]
-        w_true[:,4] = w_true[:,3]
+        w_true = copy.deepcopy(data.w)    
         
         for i, label in zip(range(len(self.label_names)), self.label_names): 
             y_true[np.where(w_true[:,i] == 0)[0],i] = -1
-        
-        y_true = np.insert(y_true, 3, y_true[:,1], axis=1)
-        y_pred = np.insert(y_pred, 3, y_pred[:,2], axis=1)
-        
+                
         return y_true, y_pred
         
     def setup_model(self, logdir):
@@ -176,9 +168,7 @@ class Deepchem_IRV:
         print('test roc: {}'.format(roc_auc_multi(y_test, y_pred_on_test, range(y_test.shape[1]), np.mean)))
         print
 
-        label_list = ['Keck_Pria_AS_Retest', 'Keck_Pria_FP_data', 
-                      'Keck_Pria_Continuous_AS_Retest', 'Keck_Pria_Continuous_FP_data',
-                      'Keck_RMI_cdd', 'FP counts % inhibition']        
+        label_list = ["Keck_Pria_AS_Retest", "Keck_Pria_FP_data", "Keck_RMI_cdd"]       
         nef_auc_mean = np.mean(np.array(nef_auc(y_train, y_pred_on_train, self.EF_ratio_list, label_list))) 
         print('train nef auc: {}'.format(nef_auc_mean))
         nef_auc_mean = np.mean(np.array(nef_auc(y_val, y_pred_on_val, self.EF_ratio_list, label_list))) 
@@ -198,9 +188,7 @@ class Deepchem_IRV:
         
         y_true, y_pred = self.get_prediction_info(data)
         
-        label_list = ['Keck_Pria_AS_Retest', 'Keck_Pria_FP_data', 
-                      'Keck_Pria_Continuous_AS_Retest', 'Keck_Pria_Continuous_FP_data',
-                      'Keck_RMI_cdd', 'FP counts % inhibition']
+        label_list = ["Keck_Pria_AS_Retest", "Keck_Pria_FP_data", "Keck_RMI_cdd"]
         evaluate_model(y_true, y_pred, metric_dir, label_list)        
         return
         
@@ -258,10 +246,7 @@ if __name__ == '__main__':
             
             train_files = [q for j, q in enumerate(csv_file_list) if j not in [ti, vi]]
             
-            labels = ['Keck_Pria_AS_Retest', 'Keck_Pria_FP_data', 'Keck_Pria_Continuous',
-                      'Keck_RMI_cdd', 'FP counts % inhibition']
-            #        labels = ['Keck_Pria_AS_Retest', 'Keck_Pria_FP_data', 'Keck_Pria_Continuous',
-            #                  'Keck_RMI_cdd', 'FP counts % inhibition']
+            labels = ["Keck_Pria_AS_Retest", "Keck_Pria_FP_data", "Keck_RMI_cdd"]
             
             featurizer='ECFP'
             if featurizer == 'ECFP':
