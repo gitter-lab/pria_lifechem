@@ -211,6 +211,7 @@ class DNN_RF:
 
         if self.early_stopping_option == 'auc' or self.early_stopping_option == 'precision':
             model = early_stopping.get_best_model()
+
         y_pred_on_train = model.predict(X_train)
         y_pred_on_val = model.predict(X_val)
         y_pred_on_test = model.predict(X_test)
@@ -450,5 +451,5 @@ if __name__ == '__main__':
     config_csv_file = given_args.config_csv_file
     mode = given_args.mode
 
-    if mode == 'single_classification':
+    if mode == 'single_dnn_rf':
         demo()
