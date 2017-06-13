@@ -14,7 +14,7 @@ import deepchem as dc
 from sklearn.externals import joblib
 from sklearn.grid_search import ParameterGrid
 from deepchem.trans import undo_transforms
-from shutil import move, copy2
+from shutil import move, copy2, rmtree
 import copy
 
 rnd_state=1337
@@ -315,3 +315,12 @@ if __name__ == '__main__':
                                               label_names=labels)
             
             task.save_model_params(config_csv_file)
+            
+            #save best_model for each fold 
+            best_ckpt_file = model_file+'best.ckpt'
+            dest_ckpt_file = model_dir+'fold_'+str(i)+'/best.ckpt'
+            copy2(best_ckpt_file+'.data-00000-of-00001', dest_ckpt_file+'.data-00000-of-00001')
+            copy2(best_ckpt_file+'.index', dest_ckpt_file+'.index')
+            copy2(best_ckpt_file+'.meta', dest_ckpt_file+'.meta')
+            
+            rmtree(model_file)

@@ -11,7 +11,7 @@ from function import *
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.externals import joblib
 from sklearn.grid_search import ParameterGrid
-import copy
+from shutil import move
 
 rnd_state=1337
 np.random.seed(seed=rnd_state)
@@ -184,7 +184,6 @@ if __name__ == '__main__':
     model_dir = given_args.model_dir
     dataset_dir = given_args.dataset_dir
     #####
-    model_file = model_dir+'rf_clf'
     config_csv_file = model_dir+'model_config.csv'
     #####
     scratch_dir = os.environ.get('_CONDOR_JOB_IWD')
@@ -208,7 +207,8 @@ if __name__ == '__main__':
                   'Keck_RMI_cdd': np.float64}
     output_file_list = [directory + f_ for f_ in file_list]
     
-    for i in range(k):    
+    for i in range(k):          
+        model_file = model_dir+'fold_'+str(i)+'/rf_clf'
         csv_file_list = output_file_list[:]
         test_pd = read_merged_data([csv_file_list[i]])
         csv_file_list.pop(i)
@@ -237,7 +237,8 @@ if __name__ == '__main__':
         with open(config_json_file, 'r') as f:
             conf = json.load(f)
         task = SKLearn_RandomForest(conf=conf)
-        task.train_and_predict(X_train, y_train, X_val, y_val, X_test, y_test, model_file)
+        task.train_and_predict(X_train, y_train, X_val, y_val, X_test, y_test, 
+                               model_file)
         task.save_model_params(config_csv_file)
         
         #####
@@ -257,3 +258,8 @@ if __name__ == '__main__':
         task.save_model_evaluation_metrics(X_test, y_test, model_file,
                                           model_dir+'fold_'+str(i)+'/test_metrics/',
                                           label_names=labels)
+                                          
+        #save best_model for each fold 
+        for j, label in zip(range(len(labels)), labels):
+                move('rf_clf_'+label+'.pkl', )
+                                    
