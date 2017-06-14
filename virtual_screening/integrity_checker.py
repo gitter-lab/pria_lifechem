@@ -114,3 +114,18 @@ def fold_5_keys(dataset_name='keck'):
                  ('file_4.csv', ')\xb9\x1e\xbdHY\xfe\x93\xdf\xde\xbfT\x13\xa2<e')]
     }
     return hash_dict[dataset_name]
+
+
+if __name__ == '__main__':
+    
+    check_keck_fold_integrity('../dataset/fixed_dataset/fold_3/')
+    check_keck_fold_integrity('../dataset/fixed_dataset/fold_4/')
+    check_keck_fold_integrity('../dataset/fixed_dataset/fold_5/')
+    
+    check_keck_fold_integrity('../dataset/pcba/fold_3/', dataset_name='pcba')
+    check_keck_fold_integrity('../dataset/pcba/fold_4/', dataset_name='pcba')
+    check_keck_fold_integrity('../dataset/pcba/fold_5/', dataset_name='pcba')
+    
+    check_keck_fold_integrity('../dataset/keck_pcba/fold_3/', dataset_name='keck_pcba')
+    check_keck_fold_integrity('../dataset/keck_pcba/fold_4/', dataset_name='keck_pcba')
+    check_keck_fold_integrity('../dataset/keck_pcba/fold_5/', dataset_name='keck_pcba')
