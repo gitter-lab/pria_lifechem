@@ -262,7 +262,4 @@ if __name__ == '__main__':
                                           model_dir+'fold_'+str(i)+'/test_metrics/',
                                           label_names=labels)
                                           
-        #save best_model for each fold 
-        for j, label in zip(range(len(labels)), labels):
-                move('rf_clf_'+label+'.pkl', )
                                     
