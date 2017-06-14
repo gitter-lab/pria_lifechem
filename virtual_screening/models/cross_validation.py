@@ -53,9 +53,9 @@ def run_single_classification(running_index, use_duplicate=False):
     print 'val files ', val_file_list
     print 'test files ', test_file_list
 
-    train_pd = read_merged_data(train_file_list)
-    val_pd = read_merged_data(val_file_list)
-    test_pd = read_merged_data(test_file_list)
+    train_pd = filter_out_missing_values(read_merged_data(train_file_list), label_list=label_name_list)
+    val_pd = filter_out_missing_values(read_merged_data(val_file_list), label_list=label_name_list)
+    test_pd = filter_out_missing_values(read_merged_data(test_file_list), label_list=label_name_list)
 
     # extract data, and split training data into training and val
     X_train, y_train = extract_feature_and_label(train_pd,
@@ -67,6 +67,7 @@ def run_single_classification(running_index, use_duplicate=False):
     X_test, y_test = extract_feature_and_label(test_pd,
                                                feature_name='Fingerprints',
                                                label_name_list=label_name_list)
+
     print 'done data preparation'
 
     if use_duplicate:
@@ -125,9 +126,9 @@ def run_single_regression(running_index):
     print 'val files ', val_file_list
     print 'test files ', test_file_list
 
-    train_pd = read_merged_data(train_file_list)
-    val_pd = read_merged_data(val_file_list)
-    test_pd = read_merged_data(test_file_list)
+    train_pd = filter_out_missing_values(read_merged_data(train_file_list), label_list=label_name_list)
+    val_pd = filter_out_missing_values(read_merged_data(val_file_list), label_list=label_name_list)
+    test_pd = filter_out_missing_values(read_merged_data(test_file_list), label_list=label_name_list)
 
     # extract data, and split training data into training and val
     X_train, y_train = extract_feature_and_label(train_pd,
