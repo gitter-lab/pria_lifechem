@@ -106,12 +106,53 @@ def mapping_SMILES(data_pd, json_file=fixed_SMILES_mapping_json_file):
     return
 
 
+def generate_keck_extended(keck_dir, keck_extended_dir, k):
+    """
+    :param keck_dir: source keck directory
+    :param keck_extended_dir: target keck_extended directory
+    :param k: the number of files/splits
+    :return: None
+
+    Example run can be:
+    ```
+        k = 3
+        keck_dir = '../dataset/fixed_dataset/fold_{}/'.format(k)
+        keck_extended_dir = keck_dir.replace('fixed_dataset', 'keck_extended')
+        generate_keck_extended(keck_dir, keck_extended_dir, k)
+    ```
+    """
+    file_list = []
+    for i in range(k):
+        file_list.append('file_{}.csv'.format(i))
+
+    keck_file_list = [keck_dir + f_ for f_ in file_list]
+    keck_extended_file_list = [keck_extended_dir + f_ for f_ in file_list]
+    for i in range(k):
+        file_ = keck_file_list[i]
+        print file_
+        neo_pd = read_merged_data([file_])
+        neo_pd.insert(5, "Keck_Pria_Hard_Thresholded",
+                      neo_pd.apply(lambda row: (1 if row['Keck_Pria_Continuous'] >= 35 else 0), axis=1))
+
+        print neo_pd['Keck_Pria_AS_Retest'].value_counts()
+        print neo_pd['Keck_Pria_FP_data'].value_counts()
+        print neo_pd['Keck_Pria_Hard_Thresholded'].value_counts()
+
+        neo_file = keck_extended_file_list[i]
+        print neo_file
+
+        neo_pd.to_csv(neo_file, index=None)
+
+        print min(neo_pd[neo_pd.Keck_Pria_AS_Retest == 1].Keck_Pria_Continuous)
+        print min(neo_pd[neo_pd.Keck_Pria_FP_data == 1].Keck_Pria_Continuous)
+        print
+
+        return
+
 """
     splits pcba dataset into k folds using a greedy, smallest actives first
     approach that achieves good splitting across labels.
 """
-
-
 def split_pcba_into_folds(data_dir, k, dest_dir):
     nb_classes = 128
 
@@ -230,6 +271,7 @@ def split_pcba_into_folds(data_dir, k, dest_dir):
 
     for i in range(k):
         pcba_df.iloc[fold_indexes[i], :].to_csv(file_list[i], index=None)
+    return
 
 
 """
@@ -302,6 +344,7 @@ def merge_keck_pcba(keck_dir, pcba_dir, k, dest_dir):
             s_size = s_size + fold_sizes[i]
             s_overlap = s_overlap + overlap_counts[i]
         f.write('sum :,' + str(s_size) + ',' + str(s_overlap))
+    return
 
 
 if __name__ == '__main__':
