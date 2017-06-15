@@ -10,6 +10,7 @@ Under this folder, we have two folders and one cvs file.
     * Fingerprints, 1024 FPs, used for canonical NN feature
     * Keck_Pria_AS_Retest, 1st Pria binary label
     * Keck_Pria_FP_data, 2nd Pria binary label
+    * Keck_Pria_Hard_Thresholded, 3rd Pria binary label, hard thresholded on 35
     * Keck_Pria_Continuous, Pria continuous label
     * Keck_RMI_cdd, RMI binary label
     * FP counts % inhibition, RMI continuous label
