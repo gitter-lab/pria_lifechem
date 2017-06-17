@@ -5,7 +5,7 @@ sys.path.insert(0, '.')  # Add path from current folder
 from evaluation import *
 from all_models_loader import *
 
-model_directory = './rf_irv_results/'
+model_directory = './job_results/'
 data_directory = '../dataset/keck/fold_5/'
 s1 = stage_1_results(model_directory, data_directory)
 

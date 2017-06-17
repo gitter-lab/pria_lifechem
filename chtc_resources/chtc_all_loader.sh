@@ -1,6 +1,7 @@
 #!/bin/bash
 wget –q –retry–connrefused –waitretry=10 http://proxy.chtc.wisc.edu/SQUID/alnammi/Anaconda2-4.3.1-Linux-x86_64.sh #here I get the anaconda file from squid
 wget -r -nH --cut-dirs=2 -np -R index.html* -q â€“retry-connrefused â€“waitretry=10 http://proxy.chtc.wisc.edu/SQUID/alnammi/dataset/ #here I get the dataset 
+wget -r -nH --cut-dirs=2 -np -R index.html* -q â€“retry-connrefused â€“waitretry=10 http://proxy.chtc.wisc.edu/SQUID/alnammi/job_results/ #here I get the dataset 
 
 chmod 777 * #wget does strange things
 
