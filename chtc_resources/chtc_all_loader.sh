@@ -1,7 +1,7 @@
 #!/bin/bash
 wget –q –retry–connrefused –waitretry=10 http://proxy.chtc.wisc.edu/SQUID/alnammi/Anaconda2-4.3.1-Linux-x86_64.sh #here I get the anaconda file from squid
 wget -r -nH --cut-dirs=2 -np -R index.html* -q â€“retry-connrefused â€“waitretry=10 http://proxy.chtc.wisc.edu/SQUID/alnammi/dataset/ #here I get the dataset 
-wget -r -nH --cut-dirs=2 -np -R index.html* -q â€“retry-connrefused â€“waitretry=10 http://proxy.chtc.wisc.edu/SQUID/alnammi/job_results/ #here I get the dataset 
+wget -r -nH --cut-dirs=2 -np -R index.html* -q â€“retry-connrefused â€“waitretry=10 http://proxy.chtc.wisc.edu/SQUID/alnammi/job_results/ 
 
 chmod 777 * #wget does strange things
 
@@ -59,12 +59,22 @@ rm -f virtual-screening-master.zip
 mv chao* virtual-screening
 rm -rf ./virtual-screening/dataset
 mv ./dataset/ ./virtual-screening/dataset/
+mkdir ./virtual-screening/analysis/job_results/
+mv ./job_results/ ./virtual-screening/virtual_screening/analysis/job_results/
 export PYTHONPATH=${PYTHONPATH}:${PWD}/virtual-screening:${HOME}/virtual-screening/virtual_screening:${HOME}/virtual-screening/virtual_screening/models
 
-cd virtual-screening/analysis
+cd virtual-screening/virtual_screening/analysis
 
 
 #run python job
 python all_loader_tester.py
+
+
+rm -f Anaconda*
+rm -R -f virtual-screening*
+rm -R -f deepchem*
+rm -rf ./anaconda*
+rm -rf ./tmp*
+
 
 echo 'Done running job'

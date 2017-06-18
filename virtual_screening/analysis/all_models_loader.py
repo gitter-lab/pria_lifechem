@@ -14,6 +14,8 @@ from sklearn.externals import joblib
 from deepchem.trans import undo_transforms
 from sklearn.externals import joblib
 from sklearn.ensemble import RandomForestClassifier
+from shutil import copy2
+import copy
 
 
 """
@@ -48,6 +50,9 @@ model_name -> fold_# -> labels, y_train, y_val, y_test, y_pred_on_train, y_pred_
 """  
 def get_rf_results(model_directory, data_directory, k=5):
     model_list = {}
+    if not os.path.exists(model_directory):
+        return model_list
+        
     model_names = os.listdir(model_directory)
     
     #load data
@@ -103,6 +108,9 @@ model_name -> fold_# -> labels, y_train, y_val, y_test, y_pred_on_train, y_pred_
 """
 def get_irv_results(model_directory, data_directory, k=5):
     model_list = {}
+    if not os.path.exists(model_directory):
+        return model_list
+        
     model_names = os.listdir(model_directory)
     K_neighbors = [5, 10, 20, 40, 80]    
     
@@ -203,6 +211,9 @@ model_name -> fold_# -> labels, y_train, y_val, y_test, y_pred_on_train, y_pred_
 """
 def get_lightchem_results(model_directory, data_directory, k=5):
     model_list = {}
+    if not os.path.exists(model_directory):
+        return model_list
+        
     model_names = os.listdir(model_directory)
     
     #load data
@@ -217,6 +228,9 @@ model_name -> fold_# -> labels, y_train, y_val, y_test, y_pred_on_train, y_pred_
 """
 def get_nn_results(model_directory, data_directory, k=20):
     model_list = {}
+    if not os.path.exists(model_directory):
+        return model_list
+        
     model_names = os.listdir(model_directory)
     
     #load data
