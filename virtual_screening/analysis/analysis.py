@@ -453,7 +453,7 @@ def plot_cross_validation(dir_path_list, evaluation_list, model_list, title, plo
     if plot_mode == 'show':
         boxplot = sns.boxplot(x="evaluation method", y="value", hue="model", data=data_pd, palette="PRGn")
         # sns.violinplot(x="evaluation method", y="value", hue="model", data=data_pd, palette="PRGn", inner=None)
-        sns.swarmplot(x="evaluation method", y="value", hue="model", data=data_pd, palette="YlOrBr", split=True, size=3)
+        # sns.swarmplot(x="evaluation method", y="value", hue="model", data=data_pd, palette="YlOrBr", split=True, size=3)
         sns.despine(offset=20, trim=True)
         sns.plt.title(title)
     elif plot_mode == 'save':
@@ -463,3 +463,56 @@ def plot_cross_validation(dir_path_list, evaluation_list, model_list, title, plo
         fig.savefig(title)
 
     return
+
+
+def get_content(grouped_data, evaluation_list, mode, evaluation_mode):
+    title = '## Model comparison\n### {} of {}'.format(mode, evaluation_mode)
+    header = '| model |'
+    for evaluation in evaluation_list:
+        header = '{} {} |'.format(header, evaluation)
+    
+    split = '| --- |'
+    for _ in evaluation_list:
+        split = '{} --- |'.format(split)
+        
+    content = ''
+    model_list = grouped_data['model'].unique()
+    for model in model_list:
+        row = '| {} |'.format(model)
+        for evaluation in evaluation_list:
+            matched_series = grouped_data[(grouped_data['evaluation method'] == evaluation) & (grouped_data['model'] == model )][mode]
+            value = matched_series.tolist()[0]
+            row = '{} {:.3f} |'.format(row, value)
+        content = '{}{}\n'.format(content, row)
+    
+    content = '{}\n{}\n{}\n{}'.format(title, header, split, content)
+    return content
+
+
+def table_cross_validation(dir_path_list, evaluation_list, model_list, evaluation_mode):
+    evaluation_column = []
+    value_column = []
+    model_column = []
+
+    for i in range(len(dir_path_list)):
+        dir_ = dir_path_list[i]
+        model = model_list[i]
+
+        c1, c2, c3 = fetch_one_model(dir_, 20, evaluation_list=evaluation_list, model=model)
+        evaluation_column.extend(c1)
+        value_column.extend(c2)
+        model_column.extend(c3)
+        
+    data_pd = pd.DataFrame({'evaluation method': evaluation_column,
+                            'value': value_column,
+                            'model': model_column})
+    
+    
+    grouped_pd = data_pd.groupby(['evaluation method', 'model'], as_index=False, sort=False).agg([np.median, np.mean, np.std])
+    grouped_pd = grouped_pd['value'].reset_index()
+    
+    mean_content = get_content(grouped_pd, evaluation_list, mode='mean', evaluation_mode=evaluation_mode)
+    median_content = get_content(grouped_pd, evaluation_list, mode='median', evaluation_mode=evaluation_mode)
+    std_content = get_content(grouped_pd, evaluation_list, mode='std', evaluation_mode=evaluation_mode)
+    
+    return mean_content, median_content, std_content
