@@ -2,7 +2,7 @@ import pandas as pd
 from virtual_screening.evaluation import enrichment_factor_single
 
 
-docking_methods = ['dockscore_ad4', 'dockscore_dock6', 'dockscore_fred', 'dockscore_hybrid', 'dockscore_plants', 'dockscore_rdockint', 'dockscore_smina', 'dockscore_surflex']
+docking_methods = ['dockscore_ad4', 'dockscore_dock6', 'dockscore_fred', 'dockscore_hybrid', 'dockscore_plants', 'dockscore_rdockint', 'dockscore_smina', 'dockscore_surflex', 'consensus_dockscore_mean','consensus_dockscore_STD','consensus_dockscore_median','consensus_dockscore_max','consensus_dockscore_min']
 
 def get_ef_table(file_path='../../output/docking_result/lc123-pria-dockdata-qnorm.csv.gz',
                  efr_list = [0.02, 0.01, 0.0015, 0.001],
