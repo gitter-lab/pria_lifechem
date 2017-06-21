@@ -1,24 +1,83 @@
 import pandas as pd
-from virtual_screening.evaluation import enrichment_factor_single
+import numpy as np
+from virtual_screening.evaluation import precision_auc_single, roc_auc_single, bedroc_auc_single, \
+    enrichment_factor_single
+from virtual_screening.function import reshape_data_into_2_dim
+from sklearn import metrics
 
 
-docking_methods = ['dockscore_ad4', 'dockscore_dock6', 'dockscore_fred', 'dockscore_hybrid', 'dockscore_plants', 'dockscore_rdockint', 'dockscore_smina', 'dockscore_surflex', 'consensus_dockscore_mean','consensus_dockscore_STD','consensus_dockscore_median','consensus_dockscore_max','consensus_dockscore_min']
+function_mapping = {'precision_auc_single': precision_auc_single,
+                    'roc_auc_single': roc_auc_single,
+                    'bedroc_auc_single': bedroc_auc_single}
 
-def get_ef_table(file_path='../../output/docking_result/lc123-pria-dockdata-qnorm.csv.gz',
-                 efr_list = [0.02, 0.01, 0.0015, 0.001],
-                 title=''):
+docking_methods = ['dockscore_ad4', 'dockscore_dock6', 'dockscore_fred', 'dockscore_hybrid',
+                   'dockscore_plants', 'dockscore_rdockint', 'dockscore_smina', 'dockscore_surflex',
+                   'consensus_dockscore_mean', 'consensus_dockscore_STD', 'consensus_dockscore_median',
+                   'consensus_dockscore_max', 'consensus_dockscore_min']
+
+
+def get_auc_table(file_path, target_name, auc_list, auc_header, title):
     pria_pd = pd.read_csv(file_path)
     title = '## {}'.format(title)
-    header = '| docking method | EF_2 | EF_1 | EF_015 | EF_01 |'
+
+    header = '| docking method |'
+    for name in auc_header:
+        header = '{} {} |'.format(header, name)
+
+    splitter = '| --- |'
+    for _ in auc_header:
+        splitter = '{} {} |'.format(splitter, '---')
+
+    content = ''
+    for docking_method in docking_methods:
+        temp_pd = pria_pd[['Unnamed: 0', target_name, docking_method]]
+        filtered_pd = temp_pd.dropna()
+        true_label_list = filtered_pd[target_name].tolist()
+        docking_ranked_list = filtered_pd[docking_method].tolist()
+        true_label_array = reshape_data_into_2_dim(np.array(true_label_list))
+        docking_ranked_array = reshape_data_into_2_dim(np.array(docking_ranked_list))
+        row = '| {} |'.format(docking_method)
+
+        for auc_method_name in auc_list:
+            auc_method = function_mapping[auc_method_name]
+            auc = auc_method(true_label_array, docking_ranked_array)
+            row = '{} {:.6f} |'.format(row, auc)
+        content = '{}{}\n'.format(content, row)
+    content = '{}\n{}\n{}\n{}'.format(title, header, splitter, content)
+
+    return content
+
+
+def get_ef_table(file_path, target_name, efr_list, ef_header, title):
+    """
+    :param file_path: Docking results
+    :param efr_list: EF ratio list
+    :param ef_header: Table header
+    :param title: Markdown Table caption
+    :return: the markdown content
+
+    example run: get_ef_table(file_path='../../output/docking_result/lc123-pria-dockdata-qnorm.csv.gz',
+                              target_name='Keck_Pria_AS_Retest',
+                              efr_list=[0.02, 0.01, 0.0015, 0.001],
+                              ef_header=['EF_2', 'EF_1', 'EF_015', 'EF_01'],
+                              title='Enrichment Factor for Docking Methods')
+    """
+    pria_pd = pd.read_csv(file_path)
+    title = '## {}'.format(title)
+
+    header = '| docking method |'
+    for name in ef_header:
+        header = '{} {} |'.format(header, name)
+
     splitter = '| --- |'
     for _ in efr_list:
         splitter = '{} {} |'.format(splitter, '---')
 
     content = ''
     for docking_method in docking_methods:
-        temp_pd = pria_pd[['Unnamed: 0', 'Keck_Pria_AS_Retest', docking_method]]
+        temp_pd = pria_pd[['Unnamed: 0', target_name, docking_method]]
         filtered_pd = temp_pd.dropna()
-        true_label_list = filtered_pd['Keck_Pria_AS_Retest']
+        true_label_list = filtered_pd[target_name]
         docking_ranked_list = filtered_pd[docking_method]
         row = '| {} |'.format(docking_method)
         for ratio in efr_list:
