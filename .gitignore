@@ -1,4 +1,5 @@
 .gitignore
+*.png
 *.err
 *.log
 *.out
