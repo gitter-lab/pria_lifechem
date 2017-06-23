@@ -11,7 +11,7 @@ function_mapping = {'precision_auc_single': precision_auc_single,
                     'bedroc_auc_single': bedroc_auc_single}
 
 docking_methods = ['dockscore_ad4', 'dockscore_dock6', 'dockscore_fred', 'dockscore_hybrid',
-                   'dockscore_plants', 'dockscore_rdockint', 'dockscore_smina', 'dockscore_surflex',
+                   'dockscore_plants', 'dockscore_rdockint', 'dockscore_rdocktot', 'dockscore_smina', 'dockscore_surflex',
                    'consensus_dockscore_mean', 'consensus_dockscore_STD', 'consensus_dockscore_median',
                    'consensus_dockscore_max', 'consensus_dockscore_min']
 
@@ -77,8 +77,11 @@ def get_ef_table(file_path, target_name, efr_list, ef_header, title):
     for docking_method in docking_methods:
         temp_pd = pria_pd[['Unnamed: 0', target_name, docking_method]]
         filtered_pd = temp_pd.dropna()
-        true_label_list = filtered_pd[target_name]
-        docking_ranked_list = filtered_pd[docking_method]
+        # TODO: may find the difference with panda.series for EF calculation
+        # true_label_list = filtered_pd[target_name]
+        # docking_ranked_list = filtered_pd[docking_method]
+        true_label_list = np.array(filtered_pd[target_name].tolist())
+        docking_ranked_list = np.array(filtered_pd[docking_method].tolist())
         row = '| {} |'.format(docking_method)
         for ratio in efr_list:
             n_actives, ef, ef_max = enrichment_factor_single(true_label_list, docking_ranked_list, ratio)
