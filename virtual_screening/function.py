@@ -210,18 +210,35 @@ This function is used for extracting SMILES
 in order to form sequential data
 for use in RNN models, like LSTM
 '''
+
+
 def extract_SMILES_and_label(data_pd,
                              feature_name,
                              label_name_list,
                              SMILES_mapping_json_file):
+    special_characters = ['Br', 'Cl', 'Si', '[nH]']
+
     y_data = np.zeros(shape=(data_pd.shape[0], len(label_name_list)))
     X_data = []
     with open(SMILES_mapping_json_file, 'r') as f:
         dictionary = json.load(f)
-    print 'alphabet set size {}'.format(len(dictionary))
+    print 'Character set size {}'.format(len(dictionary))
 
-    for smile in data_pd['SMILES']:
-        X_data.append([dictionary[s] for s in smile])
+    for SMILES in data_pd['SMILES']:
+        row = []
+        n = len(SMILES)
+        i = 0
+        while i < n:
+            if SMILES[i:i + 2] in special_characters:  # Check 2-alphabet special character
+                row.append(dictionary[SMILES[i:i + 2]])
+                i = i + 2
+            elif SMILES[i:i + 4] in special_characters:  # Check 4-alphabet special character
+                row.append(dictionary[SMILES[i:i + 4]])
+                i = i + 4
+            else:  # Check 1-alphabet special character
+                row.append(dictionary[SMILES[i:i + 1]])
+                i = i + 1
+        X_data.append(row)
     X_data = np.array(X_data)
 
     index = 0
