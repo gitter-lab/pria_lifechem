@@ -89,9 +89,17 @@ Pre-train this for only once
 '''
 fixed_SMILES_mapping_json_file = '../json/SMILES_mapping.json'
 def mapping_SMILES(data_pd, json_file=fixed_SMILES_mapping_json_file):
+    # TODO: May add [O-], [S-], [N+], [NH-], [Si], [n+]
+    special_characters = ['Br', 'Cl', 'Si', '[nH]']
     dictionary_set = set()
-    for smile in data_pd['SMILES']:
-        dictionary_set = dictionary_set | set(list(smile))
+
+    for special_character in special_characters:
+        dictionary_set.add(special_character)
+    for SMILES in SMILES_list:
+        for special_character in special_characters:
+            SMILES = SMILES.replace(special_character, '')
+        dictionary_set = dictionary_set | set(list(SMILES))
+
     index = 1
     dictionary = {}
     for element in dictionary_set:
@@ -100,11 +108,10 @@ def mapping_SMILES(data_pd, json_file=fixed_SMILES_mapping_json_file):
     print dictionary
     print 'alphabet set size {}'.format(len(dictionary))
 
-    with open(json_file, 'w') as f:
+    with open(SMILES_mapping_json_file, 'w') as f:
         json.dump(dictionary, f)
 
     return
-
 
 def generate_keck_extended(keck_dir, keck_extended_dir, k):
     """
