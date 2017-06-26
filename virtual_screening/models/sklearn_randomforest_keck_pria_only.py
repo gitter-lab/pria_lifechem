@@ -51,6 +51,7 @@ class SKLearn_RandomForest:
         
         self.model_dict = {}
         self.useVal = bool(conf['useVal'])
+        self.stage = conf['stage']
         return
     
     @property    
@@ -58,8 +59,7 @@ class SKLearn_RandomForest:
         return self.useVal
         
     def get_prediction_info(self, X, y_true):
-        y_pred = np.zeros(shape=y_true.shape)
-        
+        y_pred = np.zeros(shape=y_true.shape)        
         
         for i, label in zip(range(len(self.label_names)), self.label_names):     
             model = self.model_dict[label]
@@ -91,9 +91,12 @@ class SKLearn_RandomForest:
                               
         self.setup_model()
         
-        if not self.useVal:
+        if self.stage == 1 and not self.useVal:
             X_train = np.concatenate((X_train, X_val))
             y_train = np.concatenate((y_train, y_val))
+        elif self.stage == 2:
+            X_train = np.concatenate((X_train, X_val, X_test))
+            y_train = np.concatenate((y_train, y_val, y_test))
         
         p = np.random.permutation(len(X_train))
         X_train = X_train[p,:]
@@ -115,40 +118,45 @@ class SKLearn_RandomForest:
                               X_val, y_val,
                               X_test, y_test,
                               model_file):  
-        if self.useVal:
-            y_val, y_pred_on_val = self.get_prediction_info(X_val, y_val)
-        else:                          
-            X_train = np.concatenate((X_train, X_val))
-            y_train = np.concatenate((y_train, y_val))
+        if self.stage == 1:
+            if self.useVal:
+                y_val, y_pred_on_val = self.get_prediction_info(X_val, y_val)
+            else:                          
+                X_train = np.concatenate((X_train, X_val))
+                y_train = np.concatenate((y_train, y_val))
+            
+            y_test, y_pred_on_test = self.get_prediction_info(X_test, y_test)
+        elif self.stage == 2:
+            X_train = np.concatenate((X_train, X_val, X_test))
+            y_train = np.concatenate((y_train, y_val, y_test))
         
         y_train, y_pred_on_train = self.get_prediction_info(X_train, y_train)        
-        y_test, y_pred_on_test = self.get_prediction_info(X_test, y_test)
         
         print
         print('train precision: {}'.format(precision_auc_multi(y_train, y_pred_on_train, range(y_train.shape[1]), np.mean)))
         print('train roc: {}'.format(roc_auc_multi(y_train, y_pred_on_train, range(y_train.shape[1]), np.mean)))
         print('train bedroc: {}'.format(bedroc_auc_multi(y_train, y_pred_on_train, range(y_train.shape[1]), np.mean)))
         print
-        if self.useVal:
-            print('val precision: {}'.format(precision_auc_multi(y_val, y_pred_on_val, range(y_val.shape[1]), np.mean)))
-            print('val roc: {}'.format(roc_auc_multi(y_val, y_pred_on_val, range(y_val.shape[1]), np.mean)))
-            print('val bedroc: {}'.format(bedroc_auc_multi(y_val, y_pred_on_val, range(y_val.shape[1]), np.mean)))
+        if self.stage == 1:
+            if self.useVal:
+                print('val precision: {}'.format(precision_auc_multi(y_val, y_pred_on_val, range(y_val.shape[1]), np.mean)))
+                print('val roc: {}'.format(roc_auc_multi(y_val, y_pred_on_val, range(y_val.shape[1]), np.mean)))
+                print('val bedroc: {}'.format(bedroc_auc_multi(y_val, y_pred_on_val, range(y_val.shape[1]), np.mean)))
+                print
+            print('test precision: {}'.format(precision_auc_multi(y_test, y_pred_on_test, range(y_test.shape[1]), np.mean)))
+            print('test roc: {}'.format(roc_auc_multi(y_test, y_pred_on_test, range(y_test.shape[1]), np.mean)))
+            print('test bedroc: {}'.format(bedroc_auc_multi(y_test, y_pred_on_test, range(y_test.shape[1]), np.mean)))
             print
-        print('test precision: {}'.format(precision_auc_multi(y_test, y_pred_on_test, range(y_test.shape[1]), np.mean)))
-        print('test roc: {}'.format(roc_auc_multi(y_test, y_pred_on_test, range(y_test.shape[1]), np.mean)))
-        print('test bedroc: {}'.format(bedroc_auc_multi(y_test, y_pred_on_test, range(y_test.shape[1]), np.mean)))
-        print
         
-        label_list = ['Keck_Pria_AS_Retest', 'Keck_Pria_FP_data', 
-                      'Keck_Pria_Continuous_AS_Retest', 'Keck_Pria_Continuous_FP_data',
-                      'Keck_RMI_cdd', 'FP counts % inhibition']
+        label_list = self.label_names
         nef_auc_mean = np.mean(np.array(nef_auc(y_train, y_pred_on_train, self.EF_ratio_list, label_list))) 
         print('train nef auc: {}'.format(nef_auc_mean))
-        if self.useVal:
-            nef_auc_mean = np.mean(np.array(nef_auc(y_val, y_pred_on_val, self.EF_ratio_list, label_list))) 
-            print('val nef auc: {}'.format(nef_auc_mean))
-        nef_auc_mean = np.mean(np.array(nef_auc(y_test, y_pred_on_test, self.EF_ratio_list, label_list))) 
-        print('test nef auc: {}'.format(nef_auc_mean))
+        if self.stage == 1:
+            if self.useVal:
+                nef_auc_mean = np.mean(np.array(nef_auc(y_val, y_pred_on_val, self.EF_ratio_list, label_list))) 
+                print('val nef auc: {}'.format(nef_auc_mean))
+            nef_auc_mean = np.mean(np.array(nef_auc(y_test, y_pred_on_test, self.EF_ratio_list, label_list))) 
+            print('test nef auc: {}'.format(nef_auc_mean))
         return
 
     def save_model_evaluation_metrics(self,
@@ -207,59 +215,97 @@ if __name__ == '__main__':
                   'Keck_RMI_cdd': np.float64}
     output_file_list = [directory + f_ for f_ in file_list]
     
-    for i in range(k):  
-        if not os.path.exists(model_dir+'fold_'+str(i)):
-            os.makedirs(model_dir+'fold_'+str(i))         
-        model_file = model_dir+'fold_'+str(i)+'/rf_clf'
+    with open(config_json_file, 'r') as f:
+            conf = json.load(f)
+    stage = conf['stage']
+            
+    if stage == 1:
+        for i in range(k):  
+            if not os.path.exists(model_dir+'fold_'+str(i)):
+                os.makedirs(model_dir+'fold_'+str(i))         
+            model_file = model_dir+'fold_'+str(i)+'/rf_clf'
+            
+            csv_file_list = output_file_list[:]
+            test_pd = read_merged_data([csv_file_list[i]])
+            csv_file_list.pop(i)
+            val_pd = read_merged_data([csv_file_list[i%len(csv_file_list)]])
+            csv_file_list.pop(i%len(csv_file_list))
+            train_pd = read_merged_data(csv_file_list)
+            
+            labels = ["Keck_Pria_AS_Retest", "Keck_Pria_FP_data", "Keck_RMI_cdd"]
         
-        csv_file_list = output_file_list[:]
-        test_pd = read_merged_data([csv_file_list[i]])
-        csv_file_list.pop(i)
-        val_pd = read_merged_data([csv_file_list[i%len(csv_file_list)]])
-        csv_file_list.pop(i%len(csv_file_list))
-        train_pd = read_merged_data(csv_file_list)
-        
-        labels = ["Keck_Pria_AS_Retest", "Keck_Pria_FP_data", "Keck_RMI_cdd"]
-    
-        # extract data, and split training data into training and val
-        X_train, y_train = extract_feature_and_label(train_pd,
+            # extract data, and split training data into training and val
+            X_train, y_train = extract_feature_and_label(train_pd,
+                                                         feature_name='Fingerprints',
+                                                         label_name_list=labels)
+            
+            X_val, y_val = extract_feature_and_label(val_pd,
                                                      feature_name='Fingerprints',
                                                      label_name_list=labels)
+                                                       
+            X_test, y_test = extract_feature_and_label(test_pd,
+                                                       feature_name='Fingerprints',
+                                                       label_name_list=labels)
+            print('done data preparation')
+            
+            task = SKLearn_RandomForest(conf=conf)
+            task.train_and_predict(X_train, y_train, X_val, y_val, X_test, y_test, 
+                                   model_file)
+            task.save_model_params(config_csv_file)
+            
+            #####
+            if task.useVal:
+                task.save_model_evaluation_metrics(X_train, y_train, model_file,
+                                              model_dir+'fold_'+str(i)+'/train_metrics/',
+                                              label_names=labels)
+                task.save_model_evaluation_metrics(X_val, y_val, model_file,
+                                              model_dir+'fold_'+str(i)+'/val_metrics/',
+                                              label_names=labels)
+            else:
+                task.save_model_evaluation_metrics(np.concatenate((X_train, X_val)), 
+                                               np.concatenate((y_train, y_val)), model_file,
+                                              model_dir+'fold_'+str(i)+'/train_metrics/',
+                                              label_names=labels)
+            
+            task.save_model_evaluation_metrics(X_test, y_test, model_file,
+                                              model_dir+'fold_'+str(i)+'/test_metrics/',
+                                              label_names=labels)
+                                              
+    elif stage == 2:
+        for i in range(0):  
+            if not os.path.exists(model_dir+'fold_'+str(i)):
+                os.makedirs(model_dir+'fold_'+str(i))         
+            model_file = model_dir+'fold_'+str(i)+'/rf_clf'
+            
+            csv_file_list = output_file_list[:]
+            test_pd = read_merged_data([csv_file_list[i]])
+            csv_file_list.pop(i)
+            val_pd = read_merged_data([csv_file_list[i%len(csv_file_list)]])
+            csv_file_list.pop(i%len(csv_file_list))
+            train_pd = read_merged_data(csv_file_list)
+            
+            labels = ["Keck_Pria_AS_Retest", "Keck_Pria_FP_data", "Keck_RMI_cdd"]
         
-        X_val, y_val = extract_feature_and_label(val_pd,
-                                                 feature_name='Fingerprints',
-                                                 label_name_list=labels)
-                                                   
-        X_test, y_test = extract_feature_and_label(test_pd,
-                                                   feature_name='Fingerprints',
-                                                   label_name_list=labels)
-        print('done data preparation')
-        
-        
-    
-        with open(config_json_file, 'r') as f:
-            conf = json.load(f)
-        task = SKLearn_RandomForest(conf=conf)
-        task.train_and_predict(X_train, y_train, X_val, y_val, X_test, y_test, 
-                               model_file)
-        task.save_model_params(config_csv_file)
-        
-        #####
-        if task.useVal:
-            task.save_model_evaluation_metrics(X_train, y_train, model_file,
+            # extract data, and split training data into training and val
+            X_train, y_train = extract_feature_and_label(train_pd,
+                                                         feature_name='Fingerprints',
+                                                         label_name_list=labels)
+            
+            X_val, y_val = extract_feature_and_label(val_pd,
+                                                     feature_name='Fingerprints',
+                                                     label_name_list=labels)
+                                                       
+            X_test, y_test = extract_feature_and_label(test_pd,
+                                                       feature_name='Fingerprints',
+                                                       label_name_list=labels)
+            print('done data preparation')
+            
+            task = SKLearn_RandomForest(conf=conf)
+            task.train_and_predict(X_train, y_train, X_val, y_val, X_test, y_test, 
+                                   model_file)
+            task.save_model_params(config_csv_file)
+            
+            task.save_model_evaluation_metrics(np.concatenate((X_train, X_val, X_test)), 
+                                           np.concatenate((y_train, y_val, y_test)), model_file,
                                           model_dir+'fold_'+str(i)+'/train_metrics/',
                                           label_names=labels)
-            task.save_model_evaluation_metrics(X_val, y_val, model_file,
-                                          model_dir+'fold_'+str(i)+'/val_metrics/',
-                                          label_names=labels)
-        else:
-            task.save_model_evaluation_metrics(np.concatenate((X_train, X_val)), 
-                                           np.concatenate((y_train, y_val)), model_file,
-                                          model_dir+'fold_'+str(i)+'/train_metrics/',
-                                          label_names=labels)
-        
-        task.save_model_evaluation_metrics(X_test, y_test, model_file,
-                                          model_dir+'fold_'+str(i)+'/test_metrics/',
-                                          label_names=labels)
-                                          
-                                    
