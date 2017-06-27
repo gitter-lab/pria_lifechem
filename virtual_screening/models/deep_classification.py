@@ -511,6 +511,11 @@ class MultiClassification:
         print('test bedroc: {}'.format(get_model_bedroc_auc(y_test, y_pred_on_test)))
         print
 
+        # Just print last target EF into output file.
+        for EF_ratio in self.EF_ratio_list:
+            n_actives, ef, ef_max = enrichment_factor_single(y_test[:, -1], y_pred_on_test[:, -1], EF_ratio)
+            print('ratio: {}, EF: {},\tactive: {}'.format(EF_ratio, ef, n_actives))
+            
         out = open(score_file, 'w')
         print >> out, "EF"
         for EF_ratio in self.EF_ratio_list:
