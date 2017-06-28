@@ -5,6 +5,7 @@ import numpy as np
 import json
 import keras
 import sys
+from itertools import groupby
 from keras.models import Sequential
 from keras.layers import Dense, Dropout
 from keras.layers.normalization import BatchNormalization
@@ -14,6 +15,27 @@ from virtual_screening.function import read_merged_data, extract_feature_and_lab
     reshape_data_into_2_dim, store_data, transform_json_to_csv
 from virtual_screening.evaluation import roc_auc_single, bedroc_auc_single, \
     precision_auc_single, enrichment_factor_single
+
+
+def get_sample_weight(task, y_data):
+    if task.weight_schema == 'no_weight':
+        sw = [1.0 for t in y_data]
+    elif task.weight_schema == 'weighted_sample':
+        values = set(map(lambda x: int(x), y_data))
+        values = dict.fromkeys(values, 0)
+
+        data = sorted(y_data)
+        for k,g in groupby(data, key=lambda x: int(x[0])):
+            temp_group = [t[0] for t in g]
+            values[k] = len(temp_group)
+        sum_ = reduce(lambda x, y: x + y, values.values())
+        sw = map(lambda x: 1.0 * sum_ / values[int(x[0])], y_data)
+    else:
+        raise ValueError('Weight schema not included. Should be among [{}, {}].'.
+                         format('no_weight', 'weighted_sample'))
+    sw = np.array(sw)
+    sw = reshape_data_into_2_dim(sw)
+    return sw
 
 
 class SingleRegression:
