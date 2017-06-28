@@ -34,7 +34,8 @@ def get_sample_weight(task, y_data):
         raise ValueError('Weight schema not included. Should be among [{}, {}].'.
                          format('no_weight', 'weighted_sample'))
     sw = np.array(sw)
-    sw = reshape_data_into_2_dim(sw)
+    # Only accept 1D sample weights
+    # sw = reshape_data_into_2_dim(sw)
     return sw
 
 
@@ -83,6 +84,7 @@ class SingleRegression:
                                                        beta_init=batch_normalizer_beta_init,
                                                        gamma_init=batch_normalizer_gamma_init)
         self.EF_ratio_list = conf['enrichment_factor']['ratio_list']
+        self.weight_schema = conf['class_weight_option']
 
         return
 
@@ -118,12 +120,15 @@ class SingleRegression:
                           X_test, y_test_regression, y_test_classification,
                           PMTNN_weight_file):
         model = self.setup_model()
+        sw = get_sample_weight(self, y_train_regression)
+        print 'Sample Weight\t', sw
 
         model.compile(loss=self.compile_loss, optimizer=self.compile_optimizer)
         model.fit(x=X_train, y=y_train_regression,
                   nb_epoch=self.fit_nb_epoch,
                   batch_size=self.fit_batch_size,
                   verbose=self.fit_verbose,
+                  sample_weight=sw,
                   validation_data=[X_val, y_val_regression],
                   shuffle=True)
         model.save_weights(PMTNN_weight_file)
