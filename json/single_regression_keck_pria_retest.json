@@ -34,7 +34,7 @@
     }
   },
   "fitting": {
-    "nb_epoch": 10,
+    "nb_epoch": 200,
     "batch_size": 2048,
     "verbose": 1,
     "early_stopping": {
@@ -55,6 +55,6 @@
   "enrichment_factor": {
     "ratio_list": [0.02, 0.01, 0.0015, 0.001]
   },
-  "class_weight_option": "no_weight",
+  "class_weight_option": "weighted_sample",
   "label_name_list": ["Keck_Pria_AS_Retest", "Keck_Pria_Continuous"]
 }
