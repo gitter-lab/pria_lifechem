@@ -1,5 +1,7 @@
 .gitignore
+output
 *.png
+*.xls
 *.err
 *.log
 *.out
