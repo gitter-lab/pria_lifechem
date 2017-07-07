@@ -192,9 +192,9 @@ def run_vanilla_lstm(running_index):
     print 'test files ', test_file_list
 
     # TODO: No validation set for LSTM, may merge with train set
-    train_pd = read_merged_data(train_file_list)
-    val_pd = read_merged_data(val_file_list)
-    test_pd = read_merged_data(test_file_list)
+    train_pd = filter_out_missing_values(read_merged_data(train_file_list), label_list=label_name_list)
+    val_pd = filter_out_missing_values(read_merged_data(val_file_list), label_list=label_name_list)
+    test_pd = filter_out_missing_values(read_merged_data(test_file_list), label_list=label_name_list)
 
     # extract data, and split training data into training and val
     X_train, y_train = extract_SMILES_and_label(train_pd,
