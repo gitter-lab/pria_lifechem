@@ -321,6 +321,7 @@ def run_multiple_classification(running_index):
     train_pd.fillna(0, inplace=True)
     val_pd = read_merged_data(val_file_list)
     val_pd.fillna(0, inplace=True)
+    # TODO: may only consider Keck label
     test_pd = read_merged_data(test_file_list)
     test_pd.fillna(0, inplace=True)
 
