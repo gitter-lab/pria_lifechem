@@ -90,7 +90,7 @@ def extract_feature_and_label(data_pd,
 
 
 
-def transform(old_dir, neo_dir, json_file):
+def transform(old_dir, neo_eval_keck_dir, neo_eval_keck_pcba_dir, json_file):
     number = 20
     k = 5
     directory = '../../dataset/keck_pcba/fold_{}/'.format(k)
@@ -120,7 +120,8 @@ def transform(old_dir, neo_dir, json_file):
         val_file_list = file_list[val_index:val_index + 1]
         test_file_list = file_list[test_index:test_index + 1]
 
-        neo_file = neo_dir + 'old_{}.out'.format(running_index)
+        # eval on keck_pcba, which is zero-out all the missing values
+        neo_file = neo_eval_keck_pcba_dir + '{}.out'.format(running_index)
         if not os.path.exists(neo_file):
             # load data, zero-out missing values
             train_pd = read_merged_data(train_file_list, usecols=extractor)
@@ -145,7 +146,8 @@ def transform(old_dir, neo_dir, json_file):
                                   PMTNN_weight_file,
                                   neo_file)
 
-        neo_file = neo_dir + '{}.out'.format(running_index)
+        # eval only on keck, which is remove all the missing values
+        neo_file = neo_eval_keck_pcba_dir + '{}.out'.format(running_index)
         if not os.path.exists(neo_file):
             # load data, remove missing values
             train_pd = read_merged_data(train_file_list, usecols=extractor)
