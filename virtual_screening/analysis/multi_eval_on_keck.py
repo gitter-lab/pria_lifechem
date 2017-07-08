@@ -90,8 +90,7 @@ def extract_feature_and_label(data_pd,
 
 
 
-def transform(old_dir, neo_eval_keck_dir, neo_eval_keck_pcba_dir, json_file):
-    number = 20
+def transform(old_dir, neo_eval_keck_dir, neo_eval_keck_pcba_dir, json_file, number=20):
     k = 5
     directory = '../../dataset/keck_pcba/fold_{}/'.format(k)
     file_list = []
