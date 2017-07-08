@@ -120,50 +120,52 @@ def transform(old_dir, neo_dir, json_file):
         val_file_list = file_list[val_index:val_index + 1]
         test_file_list = file_list[test_index:test_index + 1]
 
-        # load data, zero-out missing values
-        train_pd = read_merged_data(train_file_list, usecols=extractor)
-        train_pd.fillna(0, inplace=True)
-        val_pd = read_merged_data(val_file_list, usecols=extractor)
-        val_pd.fillna(0, inplace=True)
-        test_pd = read_merged_data(test_file_list, usecols=extractor)
-        test_pd.fillna(0, inplace=True)
-        X_train, y_train = extract_feature_and_label(train_pd,
-                                                     feature_name='Fingerprints',
-                                                     label_name_list=multi_name_list)
-        X_val, y_val = extract_feature_and_label(val_pd,
-                                                 feature_name='Fingerprints',
-                                                 label_name_list=multi_name_list)
-        X_test, y_test = extract_feature_and_label(test_pd,
-                                                   feature_name='Fingerprints',
-                                                   label_name_list=multi_name_list)
         neo_file = neo_dir + 'old_{}.out'.format(running_index)
-        predict_with_existing(multi_task,
-                              X_train, y_train,
-                              X_val, y_val,
-                              X_test, y_test,
-                              PMTNN_weight_file,
-                              neo_file)
-
-        # load data, remove missing values
-        train_pd = read_merged_data(train_file_list, usecols=extractor)
-        train_pd.dropna(axis=0, subset=multi_name_list, how='any', inplace=True)
-        val_pd = read_merged_data(val_file_list, usecols=extractor)
-        val_pd.dropna(axis=0, subset=multi_name_list, how='any', inplace=True)
-        test_pd = read_merged_data(test_file_list, usecols=extractor)
-        test_pd.dropna(axis=0, subset=multi_name_list, how='any', inplace=True)
-        X_train, y_train = extract_feature_and_label(train_pd,
+        if not os.path.exists(neo_file):
+            # load data, zero-out missing values
+            train_pd = read_merged_data(train_file_list, usecols=extractor)
+            train_pd.fillna(0, inplace=True)
+            val_pd = read_merged_data(val_file_list, usecols=extractor)
+            val_pd.fillna(0, inplace=True)
+            test_pd = read_merged_data(test_file_list, usecols=extractor)
+            test_pd.fillna(0, inplace=True)
+            X_train, y_train = extract_feature_and_label(train_pd,
+                                                         feature_name='Fingerprints',
+                                                         label_name_list=multi_name_list)
+            X_val, y_val = extract_feature_and_label(val_pd,
                                                      feature_name='Fingerprints',
                                                      label_name_list=multi_name_list)
-        X_val, y_val = extract_feature_and_label(val_pd,
-                                                 feature_name='Fingerprints',
-                                                 label_name_list=multi_name_list)
-        X_test, y_test = extract_feature_and_label(test_pd,
-                                                   feature_name='Fingerprints',
-                                                   label_name_list=multi_name_list)
+            X_test, y_test = extract_feature_and_label(test_pd,
+                                                       feature_name='Fingerprints',
+                                                       label_name_list=multi_name_list)
+            predict_with_existing(multi_task,
+                                  X_train, y_train,
+                                  X_val, y_val,
+                                  X_test, y_test,
+                                  PMTNN_weight_file,
+                                  neo_file)
+
         neo_file = neo_dir + '{}.out'.format(running_index)
-        predict_with_existing(multi_task,
-                              X_train, y_train,
-                              X_val, y_val,
-                              X_test, y_test,
-                              PMTNN_weight_file,
-                              neo_file)
+        if not os.path.exists(neo_file):
+            # load data, remove missing values
+            train_pd = read_merged_data(train_file_list, usecols=extractor)
+            train_pd.dropna(axis=0, subset=multi_name_list, how='any', inplace=True)
+            val_pd = read_merged_data(val_file_list, usecols=extractor)
+            val_pd.dropna(axis=0, subset=multi_name_list, how='any', inplace=True)
+            test_pd = read_merged_data(test_file_list, usecols=extractor)
+            test_pd.dropna(axis=0, subset=multi_name_list, how='any', inplace=True)
+            X_train, y_train = extract_feature_and_label(train_pd,
+                                                         feature_name='Fingerprints',
+                                                         label_name_list=multi_name_list)
+            X_val, y_val = extract_feature_and_label(val_pd,
+                                                     feature_name='Fingerprints',
+                                                     label_name_list=multi_name_list)
+            X_test, y_test = extract_feature_and_label(test_pd,
+                                                       feature_name='Fingerprints',
+                                                       label_name_list=multi_name_list)
+            predict_with_existing(multi_task,
+                                  X_train, y_train,
+                                  X_val, y_val,
+                                  X_test, y_test,
+                                  PMTNN_weight_file,
+                                  neo_file)
