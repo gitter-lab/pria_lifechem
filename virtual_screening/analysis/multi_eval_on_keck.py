@@ -127,7 +127,6 @@ def transform(old_dir, neo_dir, json_file):
         val_pd.fillna(0, inplace=True)
         test_pd = read_merged_data(test_file_list, usecols=extractor)
         test_pd.fillna(0, inplace=True)
-        print train_pd.shape
         X_train, y_train = extract_feature_and_label(train_pd,
                                                      feature_name='Fingerprints',
                                                      label_name_list=multi_name_list)
@@ -152,7 +151,6 @@ def transform(old_dir, neo_dir, json_file):
         val_pd.dropna(axis=0, subset=multi_name_list, how='any', inplace=True)
         test_pd = read_merged_data(test_file_list, usecols=extractor)
         test_pd.dropna(axis=0, subset=multi_name_list, how='any', inplace=True)
-        print train_pd.shape
         X_train, y_train = extract_feature_and_label(train_pd,
                                                      feature_name='Fingerprints',
                                                      label_name_list=multi_name_list)
