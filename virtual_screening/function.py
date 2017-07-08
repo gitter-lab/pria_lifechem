@@ -156,10 +156,10 @@ def split_data(input_file, output_file_list, k):
 Read the data from all files in input_file_list
 And merged into one dataset
 '''
-def read_merged_data(input_file_list):
+def read_merged_data(input_file_list, usecols=None):
     whole_pd = pd.DataFrame()
     for input_file in input_file_list:
-        data_pd = pd.read_csv(input_file)
+        data_pd = pd.read_csv(input_file, usecols=usecols)
         whole_pd = whole_pd.append(data_pd)
     return whole_pd
 
