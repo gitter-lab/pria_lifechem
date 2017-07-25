@@ -36,6 +36,7 @@ def get_EF_values_multi_task(task, X_test, y_test, model_weight, EF_ratio_list):
     model = task.setup_model()
     model.load_weights(model_weight)
     y_pred_on_test = model.predict(X_test)
+    print 'predicted shape\t', y_pred_on_test.shape
     y_test = reshape_data_into_2_dim(y_test[:, -1])
     y_pred_on_test = reshape_data_into_2_dim(y_pred_on_test[:, -1])
 
@@ -53,13 +54,21 @@ def get_EF_values_multi_task(task, X_test, y_test, model_weight, EF_ratio_list):
     return ef_values, ef_max_values
 
 
-
 def get_EF_scores_single_classification(config_json_file, PMTNN_weight_file_path, EF_ratio_list, model_name):
     file_list = ['../../dataset/fixed_dataset/fold_5/file_{}.csv'.format(i) for i in range(5)]
+
+    with open(config_json_file, 'r') as f:
+        conf = json.load(f)
+    label_name_list = conf['label_name_list']
+    print 'Testing name_list: ', label_name_list
+    extractor = ['Fingerprints']
+    extractor.extend(label_name_list)
+
     data_pd_list = []
     for i in range(5):
         temp_file_list = file_list[i:i + 1]
-        temp = read_merged_data(temp_file_list)
+        temp = read_merged_data(temp_file_list, usecols=extractor)
+        temp.dropna(axis=0, subset=label_name_list, how='any', inplace=True) # Need to remove all the missing values
         data_pd_list.append(temp)
 
     EF_values_list = []
@@ -72,14 +81,11 @@ def get_EF_scores_single_classification(config_json_file, PMTNN_weight_file_path
         print 'running index ', running_index
         PMTNN_weight_file = PMTNN_weight_file_path + '{}.weight'.format(running_index)
         test_index = running_index / 4
-
         test_pd = data_pd_list[test_index]
 
-        with open(config_json_file, 'r') as f:
-            conf = json.load(f)
         X_test, y_test = extract_feature_and_label(test_pd,
                                                    feature_name='Fingerprints',
-                                                   label_name_list=['Keck_Pria_AS_Retest'])
+                                                   label_name_list=label_name_list)
 
         task = SingleClassification(conf=conf)
         EF_scores, EF_max = get_EF_values_single_task(task, X_test, y_test, PMTNN_weight_file, EF_ratio_list)
@@ -95,10 +101,19 @@ def get_EF_scores_single_classification(config_json_file, PMTNN_weight_file_path
 
 def get_EF_scores_single_regression(config_json_file, PMTNN_weight_file_path, EF_ratio_list, model_name):
     file_list = ['../../dataset/fixed_dataset/fold_5/file_{}.csv'.format(i) for i in range(5)]
+
+    with open(config_json_file, 'r') as f:
+        conf = json.load(f)
+    label_name_list = conf['label_name_list']
+    print 'Testing name_list: ', label_name_list
+    extractor = ['Fingerprints']
+    extractor.extend(label_name_list)
+
     data_pd_list = []
     for i in range(5):
         temp_file_list = file_list[i:i + 1]
-        temp = read_merged_data(temp_file_list)
+        temp = read_merged_data(temp_file_list, usecols=extractor)
+        temp.dropna(axis=0, subset=label_name_list, how='any', inplace=True) # Need to remove all the missing values
         data_pd_list.append(temp)
 
     EF_values_list = []
@@ -111,15 +126,11 @@ def get_EF_scores_single_regression(config_json_file, PMTNN_weight_file_path, EF
         print 'running index ', running_index
         PMTNN_weight_file = PMTNN_weight_file_path + '{}.weight'.format(running_index)
         test_index = running_index / 4
-
         test_pd = data_pd_list[test_index]
-
-        with open(config_json_file, 'r') as f:
-            conf = json.load(f)
 
         X_test, y_test = extract_feature_and_label(test_pd,
                                                    feature_name='Fingerprints',
-                                                   label_name_list=['Keck_Pria_AS_Retest', 'Keck_Pria_Continuous'])
+                                                   label_name_list=label_name_list)
 
         y_test_classification = reshape_data_into_2_dim(y_test[:, 0])
 
@@ -138,11 +149,19 @@ def get_EF_scores_single_regression(config_json_file, PMTNN_weight_file_path, EF
 
 def get_EF_score_multi_task(config_json_file, PMTNN_weight_file_path, EF_ratio_list, model_name):
     file_list = ['../../dataset/keck_pcba/fold_5/file_{}.csv'.format(i) for i in range(5)]
+
+    with open(config_json_file, 'r') as f:
+        conf = json.load(f)
+    label_name_list = conf['label_name_list']
+    print 'Testing name_list: ', label_name_list
+    extractor = ['Fingerprints']
+    extractor.extend(label_name_list)
+
     data_pd_list = []
     for i in range(5):
         temp_file_list = file_list[i:i + 1]
-        temp = read_merged_data(temp_file_list)
-        temp.fillna(0, inplace=True)
+        temp = read_merged_data(temp_file_list, usecols=extractor)
+        temp.dropna(axis=0, subset=label_name_list, how='any', inplace=True) # Need to remove all the missing values
         data_pd_list.append(temp)
 
     EF_values_list = []
@@ -151,23 +170,17 @@ def get_EF_score_multi_task(config_json_file, PMTNN_weight_file_path, EF_ratio_l
     running_process_list = []
     model_name_list = []
 
-    labels_list = data_pd_list[0].columns[-128:].tolist() # Last 128 is PCBA labels
-    labels_list.append('Keck_Pria_AS_Retest') # Add Keck Pria as last label
-
     for running_index in range(20):
         print 'running index ', running_index
         PMTNN_weight_file = PMTNN_weight_file_path + '{}.weight'.format(running_index)
         test_index = running_index / 4
         test_pd = data_pd_list[test_index]
 
-        with open(config_json_file, 'r') as f:
-            conf = json.load(f)
-
         X_test, y_test = extract_feature_and_label(test_pd,
                                                    feature_name='Fingerprints',
-                                                   label_name_list=labels_list)
+                                                   label_name_list=label_name_list)
 
-        task = SingleClassification(conf=conf)
+        task = MultiClassification(conf=conf)
         EF_scores, EF_max = get_EF_values_multi_task(task, X_test, y_test, PMTNN_weight_file,
                                                      EF_ratio_list)
 
@@ -180,8 +193,8 @@ def get_EF_score_multi_task(config_json_file, PMTNN_weight_file_path, EF_ratio_l
     return EF_values_list, EF_max_values_list, EF_ratio_values_list, running_process_list, model_name_list
 
 
-def get_EF_curve_in_pd(EF_ratio_list, weight_dir, config_json_file, model_name, regenerate=False):
-    save_pd_path = './temp/{}.csv'.format(model_name)
+def get_EF_curve_in_pd(EF_ratio_list, data_set_name, weight_dir, config_json_file, model_name, regenerate=False):
+    save_pd_path = './EF_curve_preparation/{}/{}.csv'.format(data_set_name, model_name)
 
     if os.path.isfile(save_pd_path) and not regenerate:
         data_pd = pd.read_csv(save_pd_path)
@@ -201,6 +214,7 @@ def get_EF_curve_in_pd(EF_ratio_list, weight_dir, config_json_file, model_name, 
             'multi_classification'
         ))
 
+    print 'running {}'.format(model_name)
     EF_values_list, EF_max_values_list, EF_ratio_values_list, \
     running_process_list, model_name_list = func(config_json_file=config_json_file,
                                                  PMTNN_weight_file_path=weight_dir,
