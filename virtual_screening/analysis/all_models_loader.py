@@ -32,7 +32,7 @@ class_name -> model_name -> fold_# -> labels, y_train, y_val, y_test, y_pred_on_
 """
 def stage_1_results(model_directory, data_directory):
     #define folders for each class    
-    class_dirs = [model_directory+'/random_forest/390014/',
+    class_dirs = [model_directory+'/random_forest/stage_1/',
                   model_directory+'/irv/390010/',
                   model_directory+'/lightchem/',
                   model_directory+'/neural_networks/',]
