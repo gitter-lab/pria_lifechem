@@ -150,7 +150,8 @@ class VanillaLSTM:
             model = early_stopping.get_best_model()
         y_pred_on_train = model.predict(X_train)
         y_pred_on_val = model.predict(X_val)
-        y_pred_on_test = model.predict(X_test)
+        if x_test:
+            y_pred_on_test = model.predict(X_test)
 
         print('train precision: {}'.format(precision_auc_single(y_train, y_pred_on_train)))
         print('train roc: {}'.format(roc_auc_single(y_train, y_pred_on_train)))
@@ -160,14 +161,16 @@ class VanillaLSTM:
         print('validation roc: {}'.format(roc_auc_single(y_val, y_pred_on_val)))
         print('validation bedroc: {}'.format(bedroc_auc_single(y_val, y_pred_on_val)))
         print
-        print('test precision: {}'.format(precision_auc_single(y_test, y_pred_on_test)))
-        print('test roc: {}'.format(roc_auc_single(y_test, y_pred_on_test)))
-        print('test bedroc: {}'.format(bedroc_auc_single(y_test, y_pred_on_test)))
-        print
+        if x_test:
+            print('test precision: {}'.format(precision_auc_single(y_test, y_pred_on_test)))
+            print('test roc: {}'.format(roc_auc_single(y_test, y_pred_on_test)))
+            print('test bedroc: {}'.format(bedroc_auc_single(y_test, y_pred_on_test)))
+            print
 
-        for EF_ratio in self.EF_ratio_list:
-            n_actives, ef, ef_max = enrichment_factor_single(y_test, y_pred_on_test, EF_ratio)
-            print('ratio: {}, EF: {},\tactive: {}'.format(EF_ratio, ef, n_actives))
+        if x_test:
+            for EF_ratio in self.EF_ratio_list:
+                n_actives, ef, ef_max = enrichment_factor_single(y_test, y_pred_on_test, EF_ratio)
+                print('ratio: {}, EF: {},\tactive: {}'.format(EF_ratio, ef, n_actives))
         return
 
 
