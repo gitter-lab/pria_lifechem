@@ -270,7 +270,6 @@ if __name__ == '__main__':
     config_csv_file = given_args.config_csv_file
     cross_validation_upper_bound = given_args.cross_validation_upper_bound
 
-    process_num = int(given_args.process_num)
     model = given_args.model
 
     if model == 'single_classification':
