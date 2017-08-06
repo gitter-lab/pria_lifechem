@@ -135,7 +135,8 @@ class SingleRegression:
 
         y_pred_on_train = model.predict(X_train)
         y_pred_on_val = model.predict(X_val)
-        y_pred_on_test = model.predict(X_test)
+        if X_test:
+            y_pred_on_test = model.predict(X_test)
 
         print
         print('train precision: {}'.format(precision_auc_single(y_train_classification, y_pred_on_train)))
@@ -146,28 +147,31 @@ class SingleRegression:
         print('validation roc: {}'.format(roc_auc_single(y_val_classification, y_pred_on_val)))
         print('validation bedroc: {}'.format(bedroc_auc_single(y_val_classification, y_pred_on_val)))
         print
-        print('test precision: {}'.format(precision_auc_single(y_test_classification, y_pred_on_test)))
-        print('test roc: {}'.format(roc_auc_single(y_test_classification, y_pred_on_test)))
-        print('test bedroc: {}'.format(bedroc_auc_single(y_test_classification, y_pred_on_test)))
-        print
+        if X_test:
+            print('test precision: {}'.format(precision_auc_single(y_test_classification, y_pred_on_test)))
+            print('test roc: {}'.format(roc_auc_single(y_test_classification, y_pred_on_test)))
+            print('test bedroc: {}'.format(bedroc_auc_single(y_test_classification, y_pred_on_test)))
+            print
 
-        for EF_ratio in self.EF_ratio_list:
-            n_actives, ef, ef_max = enrichment_factor_single(y_test_classification, y_pred_on_test, EF_ratio)
-            print('ratio: {}, EF: {},\tactive: {}'.format(EF_ratio, ef, n_actives))
+        if X_test:
+            for EF_ratio in self.EF_ratio_list:
+                n_actives, ef, ef_max = enrichment_factor_single(y_test_classification, y_pred_on_test, EF_ratio)
+                print('ratio: {}, EF: {},\tactive: {}'.format(EF_ratio, ef, n_actives))
 
         return
 
     def predict_with_existing(self,
-                          X_train, y_train_regression, y_train_classification,
-                          X_val, y_val_regression, y_val_classification,
-                          X_test, y_test_regression, y_test_classification,
-                          PMTNN_weight_file):
+                              X_train, y_train_regression, y_train_classification,
+                              X_val, y_val_regression, y_val_classification,
+                              X_test, y_test_regression, y_test_classification,
+                              PMTNN_weight_file):
         model = self.setup_model()
         model.load_weights(PMTNN_weight_file)
 
         y_pred_on_train = model.predict(X_train)
         y_pred_on_val = model.predict(X_val)
-        y_pred_on_test = model.predict(X_test)
+        if X_test:
+            y_pred_on_test = model.predict(X_test)
 
         print
         print('train precision: {}'.format(precision_auc_single(y_train_classification, y_pred_on_train)))
@@ -178,14 +182,16 @@ class SingleRegression:
         print('validation roc: {}'.format(roc_auc_single(y_val_classification, y_pred_on_val)))
         print('validation bedroc: {}'.format(bedroc_auc_single(y_val_classification, y_pred_on_val)))
         print
-        print('test precision: {}'.format(precision_auc_single(y_test_classification, y_pred_on_test)))
-        print('test roc: {}'.format(roc_auc_single(y_test_classification, y_pred_on_test)))
-        print('test bedroc: {}'.format(bedroc_auc_single(y_test_classification, y_pred_on_test)))
-        print
+        if X_test:
+            print('test precision: {}'.format(precision_auc_single(y_test_classification, y_pred_on_test)))
+            print('test roc: {}'.format(roc_auc_single(y_test_classification, y_pred_on_test)))
+            print('test bedroc: {}'.format(bedroc_auc_single(y_test_classification, y_pred_on_test)))
+            print
 
-        for EF_ratio in self.EF_ratio_list:
-            n_actives, ef, ef_max = enrichment_factor_single(y_test_classification, y_pred_on_test, EF_ratio)
-            print('ratio: {}, EF: {},\tactive: {}'.format(EF_ratio, ef, n_actives))
+        if X_test:
+            for EF_ratio in self.EF_ratio_list:
+                n_actives, ef, ef_max = enrichment_factor_single(y_test_classification, y_pred_on_test, EF_ratio)
+                print('ratio: {}, EF: {},\tactive: {}'.format(EF_ratio, ef, n_actives))
 
         return
 
