@@ -181,26 +181,17 @@ Get the fingerprints, with feature_name specified, and label_name specified
 def extract_feature_and_label(data_pd,
                               feature_name,
                               label_name_list):
-    X_data = np.zeros(shape=(data_pd.shape[0], 1024))
-    y_data = np.zeros(shape=(data_pd.shape[0], len(label_name_list)))
-    index = 0
-    for _, row in data_pd.iterrows():
-        feature = list(row[feature_name])
-        labels = row[label_name_list]
-        X_data[index] = np.array(feature)
-        y_data[index] = np.array(labels)
-        index += 1
+    # By default, feature should be fingerprints
+    X_data = data_pd[feature_name].tolist()
+    X_data = map(lambda x: list(x), X_data)
+    X_data = np.array(X_data)
+
+    y_data = data_pd[label_name_list].values.tolist()
+    y_data = np.array(y_data)
+    y_data = reshape_data_into_2_dim(y_data)
+
     X_data = X_data.astype(float)
     y_data = y_data.astype(float)
-
-    # In case we just train on one target
-    # y would be (n,) vector
-    # then we should change it to (n,1) 1D matrix
-    # to keep consistency
-    print y_data.shape
-    if y_data.ndim == 1:
-        n = y_data.shape[0]
-        y_data = y_data.reshape(n, 1)
 
     return X_data, y_data
 
