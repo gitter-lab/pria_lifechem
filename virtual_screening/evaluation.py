@@ -414,6 +414,22 @@ def enrichment_factor(y_true, y_pred, perc_vec, label_names=None):
     return ef_pd
 
 
+def confident_hit_ratio(y_true, y_pred, cut_off=0.1):
+    """
+    This function return the hit ratio of the true-positive for confident molecules.
+    Confident molecules are defined as confidence values that are higher than the cutoff.
+    :param y_true:
+    :param y_pred:
+    :param cut_off: confident value that defines if a prediction are considered confident
+    :return:
+    """
+    actual_indexes = np.where(y_true==1)[0]
+    confident_indexes = np.where(y_pred>cut_off)[0]
+    confident_hit = np.intersect1d(actual_indexes, confident_indexes)
+    ratio = 1.0 * len(confident_hit) / len(actual_indexes)
+    return ratio
+
+
 def max_enrichment_factor(y_true, y_pred, perc_vec, label_names=None): 
     """
     Calculates max enrichment factor vector at the percentile vectors. This returns
