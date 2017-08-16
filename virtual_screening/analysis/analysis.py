@@ -14,10 +14,10 @@ evaluations = {0: 'train prec', 1: 'train roc', 2: 'train bedroc',
 facecolors = ['r', 'g', 'b', 'y', 'm', 'c', 'k', 'b']
 
 
-def check_result_completeness(dir_, file_path, number):
+def check_result_completeness(file_path, number):
     cnt = 0
     for i in range(number):
-        whole_path = dir_ + file_path + '{}.out'.format(i)
+        whole_path = file_path + '{}.out'.format(i)
         if not os.path.isfile(whole_path):
             cnt += 1
             print 'Missing hyperparameter set result: {}'.format(i)
