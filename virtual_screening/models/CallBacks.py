@@ -1,6 +1,7 @@
 import keras
 import sys
-from virtual_screening.evaluation import *
+import time
+from evaluation import *
 
 
 # define custom classes
@@ -26,6 +27,7 @@ class KeckCallBackOnROC(keras.callbacks.Callback):
         self.curr_roc = roc_auc_single(self.y_val, self.model.predict(self.X_val))
         self.best_roc = self.curr_roc
         self.model.save_weights(self.file_path)
+        self.time = time.time()
 
     def on_epoch_end(self, epoch, logs={}):
         self.curr_roc = roc_auc_single(self.y_val, self.model.predict(self.X_val))
@@ -53,6 +55,9 @@ class KeckCallBackOnROC(keras.callbacks.Callback):
               (train_roc, train_pr)
         print 'Val\tAUC[ROC]: %.6f\tAUC[PR]: %.6f' % \
               (self.curr_roc, curr_pr)
+        end_time = time.time()
+        print('Duration: {}'.format(end_time-self.time))
+        self.time = end_time
         print
 
     def get_best_model(self):
@@ -86,6 +91,7 @@ class KeckCallBackOnPrecision(keras.callbacks.Callback):
         self.curr_pr = precision_auc_single(self.y_val, self.model.predict(self.X_val))
         self.best_pr = self.curr_pr
         self.model.save_weights(self.file_path)
+        self.time = time.time()
 
     def on_epoch_end(self, epoch, logs={}):
         self.curr_pr = precision_auc_single(self.y_val, self.model.predict(self.X_val))
@@ -113,6 +119,9 @@ class KeckCallBackOnPrecision(keras.callbacks.Callback):
               (train_roc, train_pr)
         print 'Val\tAUC[ROC]: %.6f\tAUC[PR]: %.6f' % \
               (curr_roc, self.curr_pr)
+        end_time = time.time()
+        print('Duration: {}'.format(end_time-self.time))
+        self.time = end_time
         print
 
     def get_best_model(self):
@@ -147,6 +156,7 @@ class MultiCallBackOnROC(keras.callbacks.Callback):
         self.curr_roc = self.get_model_roc_auc(self.y_val, self.model.predict(self.X_val))
         self.best_roc = self.curr_roc
         self.model.save_weights(self.file_path)
+        self.time = time.time()
 
     def on_epoch_end(self, epoch, logs={}):
         y_pred_val = self.model.predict(self.X_val)
@@ -176,6 +186,10 @@ class MultiCallBackOnROC(keras.callbacks.Callback):
               (train_roc, train_pr)
         print 'Val\tAUC[ROC]: %.6f\tAUC[PR]: %.6f' % \
               (self.curr_roc, curr_pr)
+        end_time = time.time()
+        print('Duration: {}'.format(end_time-self.time))
+        self.time = end_time
+        print
 
     def get_best_model(self):
         self.model.load_weights(self.file_path)
@@ -220,6 +234,7 @@ class MultiCallBackOnPR(keras.callbacks.Callback):
         self.curr_pr = self.get_model_precision_auc(self.y_val, self.model.predict(self.X_val))
         self.best_pr = self.curr_pr
         self.model.save_weights(self.file_path)
+        self.time = time.time()
 
     def on_epoch_end(self, epoch, logs={}):
         y_pred_val = self.model.predict(self.X_val)
@@ -250,6 +265,10 @@ class MultiCallBackOnPR(keras.callbacks.Callback):
               (train_roc, train_pr)
         print 'Val\tAUC[ROC]: %.6f\tAUC[PR]: %.6f' % \
               (curr_roc, self.curr_pr)
+        end_time = time.time()
+        print('Duration: {}'.format(end_time-self.time))
+        self.time = end_time
+        print
 
     def get_best_model(self):
         self.model.load_weights(self.file_path)
