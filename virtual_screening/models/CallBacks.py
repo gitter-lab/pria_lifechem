@@ -1,7 +1,7 @@
 import keras
 import sys
 import time
-from evaluation import *
+from virtual_screening.evaluation import *
 
 
 # define custom classes
