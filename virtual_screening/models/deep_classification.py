@@ -196,7 +196,7 @@ class SingleClassification:
             model = early_stopping.get_best_model()
         y_pred_on_train = model.predict(X_train)
         y_pred_on_val = model.predict(X_val)
-        if X_test:
+        if X_test is not None:
             y_pred_on_test = model.predict(X_test)
 
         print
@@ -208,13 +208,13 @@ class SingleClassification:
         print('validation roc: {}'.format(roc_auc_single(y_val, y_pred_on_val)))
         print('validation bedroc: {}'.format(bedroc_auc_single(y_val, y_pred_on_val)))
         print
-        if X_test:
+        if X_test is not None:
             print('test precision: {}'.format(precision_auc_single(y_test, y_pred_on_test)))
             print('test roc: {}'.format(roc_auc_single(y_test, y_pred_on_test)))
             print('test bedroc: {}'.format(bedroc_auc_single(y_test, y_pred_on_test)))
             print
 
-        if X_test:
+        if X_test is not None:
             for EF_ratio in self.EF_ratio_list:
                 n_actives, ef, ef_max = enrichment_factor_single(y_test, y_pred_on_test, EF_ratio)
                 print('ratio: {}, EF: {},\tactive: {}'.format(EF_ratio, ef, n_actives))
@@ -231,7 +231,7 @@ class SingleClassification:
 
         y_pred_on_train = model.predict(X_train)
         y_pred_on_val = model.predict(X_val)
-        if X_test:
+        if X_test is not None:
             y_pred_on_test = model.predict(X_test)
 
         print
@@ -243,13 +243,13 @@ class SingleClassification:
         print('validation roc: {}'.format(roc_auc_single(y_val, y_pred_on_val)))
         print('validation bedroc: {}'.format(bedroc_auc_single(y_val, y_pred_on_val)))
         print
-        if X_test:
+        if X_test is not None:
             print('test precision: {}'.format(precision_auc_single(y_test, y_pred_on_test)))
             print('test roc: {}'.format(roc_auc_single(y_test, y_pred_on_test)))
             print('test bedroc: {}'.format(bedroc_auc_single(y_test, y_pred_on_test)))
             print
 
-        if X_test:
+        if X_test is not None:
             for EF_ratio in self.EF_ratio_list:
                 n_actives, ef, ef_max = enrichment_factor_single(y_test, y_pred_on_test, EF_ratio)
                 print('ratio: {}, EF: {},\tactive: {}'.format(EF_ratio, ef, n_actives))
@@ -441,7 +441,7 @@ class MultiClassification:
             model = early_stopping.get_best_model()
         y_pred_on_train = model.predict(X_train)
         y_pred_on_val = model.predict(X_val)
-        if X_test:
+        if X_test is not None:
             y_pred_on_test = model.predict(X_test)
 
         print('train precision: {}'.format(get_model_precision_auc(y_train, y_pred_on_train)))
@@ -452,14 +452,14 @@ class MultiClassification:
         print('validation roc: {}'.format(get_model_roc_auc(y_val, y_pred_on_val)))
         print('validation bedroc: {}'.format(get_model_bedroc_auc(y_val, y_pred_on_val)))
         print
-        if X_test:
+        if X_test is not None:
             print('test precision: {}'.format(get_model_precision_auc(y_test, y_pred_on_test)))
             print('test roc: {}'.format(get_model_roc_auc(y_test, y_pred_on_test)))
             print('test bedroc: {}'.format(get_model_bedroc_auc(y_test, y_pred_on_test)))
             print
 
 
-        if X_test:
+        if X_test is not None:
         # Just print last target EF into output file.
             for EF_ratio in self.EF_ratio_list:
                 n_actives, ef, ef_max = enrichment_factor_single(y_test[:, -1], y_pred_on_test[:, -1], EF_ratio)
@@ -506,7 +506,7 @@ class MultiClassification:
 
         y_pred_on_train = model.predict(X_train)
         y_pred_on_val = model.predict(X_val)
-        if X_test:
+        if X_test is not None:
             y_pred_on_test = model.predict(X_test)
 
         print('train precision: {}'.format(get_model_precision_auc(y_train, y_pred_on_train)))
@@ -517,13 +517,13 @@ class MultiClassification:
         print('validation roc: {}'.format(get_model_roc_auc(y_val, y_pred_on_val)))
         print('validation bedroc: {}'.format(get_model_bedroc_auc(y_val, y_pred_on_val)))
         print
-        if X_test:
+        if X_test is not None:
             print('test precision: {}'.format(get_model_precision_auc(y_test, y_pred_on_test)))
             print('test roc: {}'.format(get_model_roc_auc(y_test, y_pred_on_test)))
             print('test bedroc: {}'.format(get_model_bedroc_auc(y_test, y_pred_on_test)))
             print
 
-        if X_test:
+        if X_test is not None:
             # Just print last target EF into output file.
             for EF_ratio in self.EF_ratio_list:
                 n_actives, ef, ef_max = enrichment_factor_single(y_test[:, -1], y_pred_on_test[:, -1], EF_ratio)
