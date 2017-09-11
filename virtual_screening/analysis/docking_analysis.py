@@ -15,6 +15,12 @@ docking_methods = ['dockscore_ad4', 'dockscore_dock6', 'dockscore_fred', 'docksc
                    'consensus_dockscore_mean', 'consensus_dockscore_STD', 'consensus_dockscore_median',
                    'consensus_dockscore_max', 'consensus_dockscore_min']
 
+docking_methods = ['consensus_bcs_efr1_opt', 'consensus_bcs_rocauc_opt',
+                   'consensus_dockscore_max', 'consensus_dockscore_mean', 'consensus_dockscore_median',
+                   'dockscore_ad4', 'dockscore_dock6', 'dockscore_fred', 'dockscore_hybrid',
+                   'dockscore_plants', 'dockscore_rdockint', 'dockscore_rdocktot',
+                   'dockscore_smina', 'dockscore_surflex']
+
 
 def get_auc_table(file_path, target_name, auc_list, auc_header, title):
     pria_pd = pd.read_csv(file_path)
@@ -29,8 +35,17 @@ def get_auc_table(file_path, target_name, auc_list, auc_header, title):
         splitter = '{} {} |'.format(splitter, '---')
 
     content = ''
+
+    ground = '../../output/docking/stage_1/lc123-pria-dockdata-qnorm.csv.gz'
+    ground_pd = pd.read_csv(ground)
+    ground_pd = ground_pd[['Unnamed: 0', target_name]]
+    ground_pd.columns = ['molid', target_name]
+    pria_pd = pd.merge(pria_pd, ground_pd, on='molid', how='outer')
+
+
     for docking_method in docking_methods:
-        temp_pd = pria_pd[['Unnamed: 0', target_name, docking_method]]
+        # temp_pd = pria_pd[['Unnamed: 0', target_name, docking_method]]
+        temp_pd = pria_pd[['molid', target_name, docking_method]]
         filtered_pd = temp_pd.dropna()
         true_label_list = filtered_pd[target_name].tolist()
         docking_ranked_list = filtered_pd[docking_method].tolist()
@@ -73,9 +88,16 @@ def get_ef_table(file_path, target_name, efr_list, ef_header, title):
     for _ in efr_list:
         splitter = '{} {} |'.format(splitter, '---')
 
+    ground = '../../output/docking/stage_1/lc123-pria-dockdata-qnorm.csv.gz'
+    ground_pd = pd.read_csv(ground)
+    ground_pd = ground_pd[['Unnamed: 0', target_name]]
+    ground_pd.columns = ['molid', target_name]
+    pria_pd = pd.merge(pria_pd, ground_pd, on='molid', how='outer')
+
     content = ''
     for docking_method in docking_methods:
-        temp_pd = pria_pd[['Unnamed: 0', target_name, docking_method]]
+        # temp_pd = pria_pd[['Unnamed: 0', target_name, docking_method]]
+        temp_pd = pria_pd[['molid', target_name, docking_method]]
         filtered_pd = temp_pd.dropna()
         # TODO: may find the difference with panda.series for EF calculation
         # true_label_list = filtered_pd[target_name]
