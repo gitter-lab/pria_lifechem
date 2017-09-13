@@ -55,7 +55,13 @@ def roc_auc_multi(y_true, y_pred, eval_indices, eval_mean_or_median,
         return eval_mean_or_median(auc)
     
 def roc_auc_single(actual, predicted):
-    return roc_auc_score(actual, predicted)
+    auc_ret = np.nan  
+    try:
+        auc_ret = roc_auc_score(actual, predicted)
+    except ValueError:
+        auc_ret = np.nan
+    
+    return auc_ret
 
 
 '''
@@ -97,10 +103,13 @@ def bedroc_auc_multi(y_true, y_pred, eval_indices, eval_mean_or_median,
 
 
 def bedroc_auc_single(actual, predicted, alpha=10):
-    data = np.hstack((predicted, actual))
-    data = ScoredData(data)
-    results = BEDROC(data, alpha)
-    return results['area']
+    try:
+        data = np.hstack((predicted, actual))
+        data = ScoredData(data)
+        results = BEDROC(data, alpha)
+        return results['area']
+    except ValueError:
+        return np.nan
 
 
 '''
@@ -151,13 +160,19 @@ the mode can be either 'auc.integral', 'auc.davis.goadrich', or 'auc.sklearn'
 '''
 def precision_auc_single(actual, predicted, mode='auc.integral'):
     if mode == 'auc.sklearn':
-        prec_auc = average_precision_score(actual, predicted)
+        try:
+            prec_auc = average_precision_score(actual, predicted)
+        except ValueError:
+            prec_auc = np.nan
     else:
-        prroc = rpackages.importr('PRROC')
-        x = robjects.FloatVector(actual)
-        y = robjects.FloatVector(predicted)
-        pr = prroc.pr_curve(weights_class0=x, scores_class0=y, curve=False)
-        prec_auc = pr.rx2(mode)[0]
+        try:
+            prroc = rpackages.importr('PRROC')
+            x = robjects.FloatVector(actual)
+            y = robjects.FloatVector(predicted)
+            pr = prroc.pr_curve(weights_class0=x, scores_class0=y, curve=False)
+            prec_auc = pr.rx2(mode)[0]
+        except ValueError:
+            prec_auc = np.nan
     return prec_auc
 
 
@@ -331,17 +346,15 @@ def enrichment_factor_single_perc(y_true, y_pred, percentile):
         y_true = y_true.reshape((y_true.shape[0], 1))
         y_pred = y_pred.reshape((y_pred.shape[0], 1)) 
     
-    non_missing_indices = np.argwhere(y_true!=-1)[:, 0]
-    y_true = y_true[non_missing_indices,:]
-    y_pred = y_pred[non_missing_indices,:]
-    
     ef = np.zeros(nb_classes)
     sample_size = int(y_true.shape[0] * percentile)
     
     for i in range(len(ef)):
-        true_labels = y_true[:, i]
-        pred = np.sort(y_pred[:, i], axis=0)[::-1][:sample_size]
-        indices = np.argsort(y_pred[:, i], axis=0)[::-1][:sample_size]
+        non_missing_indices = np.argwhere(y_true[:, i] != -1)[:, 0]
+        true_labels = y_true[non_missing_indices, i]
+        pred = y_pred[non_missing_indices, i]
+    
+        indices = np.argsort(pred, axis=0)[::-1][:sample_size]
         
         n_actives = np.nansum(true_labels) 
         n_experimental = np.nansum( true_labels[indices] )
@@ -374,7 +387,8 @@ def max_enrichment_factor_single_perc(y_true, y_pred, percentile):
     sample_size = int(y_true.shape[0] * percentile)
     
     for i in range(len(max_ef)):
-        true_labels = y_true[:, i]        
+        non_missing_indices = np.argwhere(y_true[:, i] != -1)[:, 0]
+        true_labels = y_true[non_missing_indices, i]    
         n_actives = np.nansum(true_labels) 
         
         try:
@@ -394,6 +408,8 @@ def enrichment_factor(y_true, y_pred, perc_vec, label_names=None):
     nb_classes = 1    
     if len(y_true.shape) == 2:
         nb_classes = y_true.shape[1]
+    if label_names == None:
+        label_names = ['label ' + str(i) for i in range(nb_classes)]
         
     ef_mat = np.zeros((p_count, nb_classes))
     
@@ -434,11 +450,14 @@ def max_enrichment_factor(y_true, y_pred, perc_vec, label_names=None):
     """
     Calculates max enrichment factor vector at the percentile vectors. This returns
     2D panda matrix where the rows are the percentile.
-    """       
-    p_count = len(perc_vec)    
+    """   
+    p_count = len(perc_vec)        
     nb_classes = 1    
     if len(y_true.shape) == 2:
         nb_classes = y_true.shape[1]
+        
+    if label_names == None:
+        label_names = ['label ' + str(i) for i in range(nb_classes)]
         
     max_ef_mat = np.zeros((p_count, nb_classes))
     
@@ -466,6 +485,13 @@ def norm_enrichment_factor(y_true, y_pred, perc_vec, label_names=None):
     This returns three 2D panda matrices (norm_ef, ef, max_ef) where the rows 
     are the percentile.
     """       
+    nb_classes = 1    
+    if len(y_true.shape) == 2:
+        nb_classes = y_true.shape[1]
+        
+    if label_names == None:
+        label_names = ['label ' + str(i) for i in range(nb_classes)]
+        
     ef_pd = enrichment_factor(y_true, y_pred, 
                                perc_vec, label_names)
     max_ef_pd = max_enrichment_factor(y_true, y_pred, 
@@ -484,18 +510,18 @@ def nef_auc(y_true, y_pred, perc_vec, label_names=None):
     """
     Returns a pandas df of nef auc values, one for each label.
     """
-    nef_mat, ef_mat, ef_max_mat  = norm_enrichment_factor(y_true, y_pred, 
-                                                         perc_vec, label_names)
-    nef_mat = nef_mat.as_matrix() 
-    ef_mat = ef_mat.as_matrix()                                                         
-    ef_max_mat = ef_max_mat.as_matrix() 
-    
     nb_classes = 1    
     if len(y_true.shape) == 2:
         nb_classes = y_true.shape[1]
         
     if label_names == None:
         label_names = ['label ' + str(i) for i in range(nb_classes)]
+        
+    nef_mat, ef_mat, ef_max_mat  = norm_enrichment_factor(y_true, y_pred, 
+                                                         perc_vec, label_names)
+    nef_mat = nef_mat.as_matrix() 
+    ef_mat = ef_mat.as_matrix()                                                         
+    ef_max_mat = ef_max_mat.as_matrix()     
         
     nef_auc_arr = np.zeros(nb_classes) 
     for i in range(nb_classes):
@@ -598,7 +624,7 @@ def plot_efp_efm(y_true, y_pred, perc_vec, file_dir, label_names=None):
         plt.close()
 
 
-def evaluate_model(y_true, y_pred, model_dir, label_names=None):
+def evaluate_model(y_true, y_pred, model_dir, label_names=None, make_plots=True):
     """
     Call this function to evaluate a model. This will call all evaluations we 
     would like to store. It will save it in model_dir.
@@ -610,20 +636,11 @@ def evaluate_model(y_true, y_pred, model_dir, label_names=None):
     if label_names == None:
         label_names = ['label ' + str(i) for i in range(nb_classes)]
         
-    perc_vec = [0.005, 0.01, 0.02, 0.05, 0.1, 0.2]
-    perc_vec_plots = np.linspace(0.005, .2, 100) 
+    perc_vec = [0.001, 0.0015, 0.005, 0.01, 0.02, 0.05, 0.1, 0.2]
+    perc_vec_plots = np.linspace(0.001, .2, 100) 
     
     metrics_dir = model_dir+'metrics.csv'
-    roc_dir = model_dir+'roc_curves/'
-    pr_dir = model_dir+'pr_curves/'
-    efp_efm_dir = model_dir+'ef_curves/efp_efm/' 
-    nef_dir = model_dir+'ef_curves/nef/' 
     
-    #create directory if it doesn't exist
-    dir_list = [roc_dir, pr_dir, efp_efm_dir, nef_dir]
-    for file_dir in dir_list:
-        if not os.path.exists(file_dir):
-            os.makedirs(file_dir)
     
     nb_classes = 1    
     if len(y_true.shape) == 2:
@@ -660,11 +677,23 @@ def evaluate_model(y_true, y_pred, model_dir, label_names=None):
             f.write('\n')  
     
     #plots
-    plot_names = ['pr', 'roc', 'efp_efm', 'nef']    
-    plot_curve_multi(y_true, y_pred, pr_dir, 'pr', label_names)
-    plot_curve_multi(y_true, y_pred, roc_dir, 'roc', label_names)
-    plot_curve_multi(y_true, y_pred, efp_efm_dir, 'efp_efm', label_names, perc_vec_plots)
-    plot_curve_multi(y_true, y_pred, nef_dir, 'nef', label_names, perc_vec_plots)
+    if make_plots:
+        roc_dir = model_dir+'roc_curves/'
+        pr_dir = model_dir+'pr_curves/'
+        efp_efm_dir = model_dir+'ef_curves/efp_efm/' 
+        nef_dir = model_dir+'ef_curves/nef/' 
+        
+        #create directory if it doesn't exist
+        dir_list = [roc_dir, pr_dir, efp_efm_dir, nef_dir]
+        for file_dir in dir_list:
+            if not os.path.exists(file_dir):
+                os.makedirs(file_dir)
+                
+        plot_names = ['pr', 'roc', 'efp_efm', 'nef']    
+        plot_curve_multi(y_true, y_pred, pr_dir, 'pr', label_names)
+        plot_curve_multi(y_true, y_pred, roc_dir, 'roc', label_names)
+        plot_curve_multi(y_true, y_pred, efp_efm_dir, 'efp_efm', label_names, perc_vec_plots)
+        plot_curve_multi(y_true, y_pred, nef_dir, 'nef', label_names, perc_vec_plots)
 
 
 def results_describe(true_label, pred_label):
