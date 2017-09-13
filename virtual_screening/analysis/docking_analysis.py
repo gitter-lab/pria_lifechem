@@ -36,7 +36,15 @@ def get_auc_table(file_path, target_name, auc_list, auc_header, title):
 
     content = ''
 
-    ground = '../../output/docking/stage_1/lc123-pria-dockdata-qnorm.csv.gz'
+    if target_name == 'Keck_Pria_AS_Retest':
+        ground = '../../output/docking/stage_1/lc123-pria-dockdata-qnorm.csv.gz'
+    elif target_name == 'Keck_Pria_FP_data':
+        ground = '../../output/docking/stage_1/lc123-pria-dockdata-qnorm.csv.gz'
+    elif target_name == 'Keck_RMI_cdd':
+        ground = '../../output/docking/stage_1/lc123-rmi-dockdata-qnorm.csv.gz'
+    else:
+        raise ValueError('Target name {} not found.'.format(target_name))
+
     ground_pd = pd.read_csv(ground)
     ground_pd = ground_pd[['Unnamed: 0', target_name]]
     ground_pd.columns = ['molid', target_name]
@@ -88,7 +96,15 @@ def get_ef_table(file_path, target_name, efr_list, ef_header, title):
     for _ in efr_list:
         splitter = '{} {} |'.format(splitter, '---')
 
-    ground = '../../output/docking/stage_1/lc123-pria-dockdata-qnorm.csv.gz'
+    if target_name == 'Keck_Pria_AS_Retest':
+        ground = '../../output/docking/stage_1/lc123-pria-dockdata-qnorm.csv.gz'
+    elif target_name == 'Keck_Pria_FP_data':
+        ground = '../../output/docking/stage_1/lc123-pria-dockdata-qnorm.csv.gz'
+    elif target_name == 'Keck_RMI_cdd':
+        ground = '../../output/docking/stage_1/lc123-rmi-dockdata-qnorm.csv.gz'
+    else:
+        raise ValueError('Target name {} not found.'.format(target_name))
+    
     ground_pd = pd.read_csv(ground)
     ground_pd = ground_pd[['Unnamed: 0', target_name]]
     ground_pd.columns = ['molid', target_name]
