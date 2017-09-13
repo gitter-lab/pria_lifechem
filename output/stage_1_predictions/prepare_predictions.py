@@ -11,7 +11,7 @@ model_name_list =  ['single_classification_22',
                     'sklearn_rf_390014_97']
 
 fold_num = [20, 20, 20, 20, 20, 20, 5, 5]
-task_list = ['cross_validation_Pria_AS_Retest', 'cross_validation_Keck_FP', 'cross_validation_RMI']
+task_list = ['cross_validation_Keck_Pria_AS_Retest', 'cross_validation_Keck_FP', 'cross_validation_RMI']
 
 for model in model_name_list:
     for task in task_list:
