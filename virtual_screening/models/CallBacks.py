@@ -30,6 +30,9 @@ class KeckCallBackOnROC(keras.callbacks.Callback):
         self.time = time.time()
 
     def on_epoch_end(self, epoch, logs={}):
+        print('Epoch {}/{}'.format(epoch + 1, self.nb_epoch))
+        training_end_time = time.time()
+        print('Epoch training duration: {}'.format(training_end_time-self.time))
         self.curr_roc = roc_auc_single(self.y_val, self.model.predict(self.X_val))
         if self.curr_roc < self.best_roc:
             if self.counter >= self.patience:
@@ -46,7 +49,6 @@ class KeckCallBackOnROC(keras.callbacks.Callback):
         train_pr = precision_auc_single(self.y_train, self.model.predict(self.X_train))
         # curr_bedroc = bedroc_auc_single(self.y_val, self.model.predict(self.X_val))
         curr_pr = precision_auc_single(self.y_val, self.model.predict(self.X_val))
-        print('Epoch %d/%d' % (epoch + 1, self.nb_epoch))
         # print 'Train\tAUC[ROC]: %.6f\tAUC[BEDROC]: %.6f\tAUC[PR]: %.6f' % \
         #       (train_roc, train_bedroc, train_pr)
         # print 'Val\tAUC[ROC]: %.6f\tAUC[BEDROC]: %.6f\tAUC[PR]: %.6f' % \
@@ -56,7 +58,8 @@ class KeckCallBackOnROC(keras.callbacks.Callback):
         print 'Val\tAUC[ROC]: %.6f\tAUC[PR]: %.6f' % \
               (self.curr_roc, curr_pr)
         end_time = time.time()
-        print('Duration: {}'.format(end_time-self.time))
+        print('Epoch evaluation duration: {}'.format(end_time-training_end_time))
+        print('Epoch duration: {}'.format(end_time-self.time))
         self.time = end_time
         print
 
@@ -94,6 +97,9 @@ class KeckCallBackOnPrecision(keras.callbacks.Callback):
         self.time = time.time()
 
     def on_epoch_end(self, epoch, logs={}):
+        print('Epoch {}/{}'.format(epoch + 1, self.nb_epoch))
+        training_end_time = time.time()
+        print('Epoch training duration: {}'.format(training_end_time-self.time))
         self.curr_pr = precision_auc_single(self.y_val, self.model.predict(self.X_val))
         if self.curr_pr < self.best_pr:
             if self.counter >= self.patience:
@@ -110,7 +116,6 @@ class KeckCallBackOnPrecision(keras.callbacks.Callback):
         train_pr = precision_auc_single(self.y_train, self.model.predict(self.X_train))
         curr_roc = roc_auc_single(self.y_val, self.model.predict(self.X_val))
         # curr_bedroc = bedroc_auc_single(self.y_val, self.model.predict(self.X_val))
-        print('Epoch %d/%d' % (epoch + 1, self.nb_epoch))
         # print 'Train\tAUC[ROC]: %.6f\tAUC[BEDROC]: %.6f\tAUC[PR]: %.6f' % \
         #       (train_roc, train_bedroc, train_pr)
         # print 'Val\tAUC[ROC]: %.6f\tAUC[BEDROC]: %.6f\tAUC[PR]: %.6f' % \
@@ -120,7 +125,8 @@ class KeckCallBackOnPrecision(keras.callbacks.Callback):
         print 'Val\tAUC[ROC]: %.6f\tAUC[PR]: %.6f' % \
               (curr_roc, self.curr_pr)
         end_time = time.time()
-        print('Duration: {}'.format(end_time-self.time))
+        print('Epoch evaluation duration: {}'.format(end_time-training_end_time))
+        print('Epoch duration: {}'.format(end_time-self.time))
         self.time = end_time
         print
 
@@ -159,6 +165,9 @@ class MultiCallBackOnROC(keras.callbacks.Callback):
         self.time = time.time()
 
     def on_epoch_end(self, epoch, logs={}):
+        print('Epoch {}/{}'.format(epoch + 1, self.nb_epoch))
+        training_end_time = time.time()
+        print('Epoch training duration: {}'.format(training_end_time-self.time))
         y_pred_val = self.model.predict(self.X_val)
         y_pred_train = self.model.predict(self.X_train)
         self.curr_roc = self.get_model_roc_auc(self.y_val, y_pred_val)
@@ -177,7 +186,6 @@ class MultiCallBackOnROC(keras.callbacks.Callback):
         train_roc = self.get_model_roc_auc(self.y_train, y_pred_train)
         # train_bedroc = self.get_model_bedroc_auc(self.y_train, y_pred_train)
         train_pr = self.get_model_precision_auc(self.y_train, y_pred_train)
-        print('Epoch {}/{}'.format(epoch + 1, self.nb_epoch))
         # print 'Train\tAUC[ROC]: %.6f\tAUC[BEDROC]: %.6f\tAUC[PR]: %.6f' % \
         #       (train_roc, train_bedroc, train_pr)
         # print 'Val\tAUC[ROC]: %.6f\tAUC[BEDROC]: %.6f\tAUC[PR]: %.6f' % \
@@ -187,7 +195,8 @@ class MultiCallBackOnROC(keras.callbacks.Callback):
         print 'Val\tAUC[ROC]: %.6f\tAUC[PR]: %.6f' % \
               (self.curr_roc, curr_pr)
         end_time = time.time()
-        print('Duration: {}'.format(end_time-self.time))
+        print('Epoch evaluation duration: {}'.format(end_time-training_end_time))
+        print('Epoch duration: {}'.format(end_time-self.time))
         self.time = end_time
         print
 
@@ -237,6 +246,9 @@ class MultiCallBackOnPR(keras.callbacks.Callback):
         self.time = time.time()
 
     def on_epoch_end(self, epoch, logs={}):
+        print('Epoch {}/{}'.format(epoch + 1, self.nb_epoch))
+        training_end_time = time.time()
+        print('Epoch training duration: {}'.format(training_end_time-self.time))
         y_pred_val = self.model.predict(self.X_val)
         y_pred_train = self.model.predict(self.X_train)
         self.curr_pr = self.get_model_precision_auc(self.y_val, y_pred_val)
@@ -256,7 +268,6 @@ class MultiCallBackOnPR(keras.callbacks.Callback):
         # train_bedroc = self.get_model_bedroc_auc(self.y_train, y_pred_train)
         train_pr = self.get_model_precision_auc(self.y_train, y_pred_train)
 
-        print('Epoch {}/{}'.format(epoch + 1, self.nb_epoch))
         # print 'Train\tAUC[ROC]: %.6f\tAUC[BEDROC]: %.6f\tAUC[PR]: %.6f' % \
         #       (train_roc, train_bedroc, train_pr)
         # print 'Val\tAUC[ROC]: %.6f\tAUC[BEDROC]: %.6f\tAUC[PR]: %.6f' % \
@@ -266,7 +277,8 @@ class MultiCallBackOnPR(keras.callbacks.Callback):
         print 'Val\tAUC[ROC]: %.6f\tAUC[PR]: %.6f' % \
               (curr_roc, self.curr_pr)
         end_time = time.time()
-        print('Duration: {}'.format(end_time-self.time))
+        print('Epoch evaluation duration: {}'.format(end_time-training_end_time))
+        print('Epoch duration: {}'.format(end_time-self.time))
         self.time = end_time
         print
 
