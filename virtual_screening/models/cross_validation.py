@@ -446,7 +446,13 @@ if __name__ == '__main__':
                         action='store', required=True)
     parser.add_argument('--cross_validation_upper_bound', dest='cross_validation_upper_bound', type=int,
                         action='store', required=False, default=20)
+    parser.add_argument('--seed', dest='seed', type=int,
+                        action='store', required=False, default=None)
     given_args = parser.parse_args()
+    print 'Seed is {}'.format(given_args.seed)
+    if given_args.seed is not None:
+        np.random.seed(given_args.seed)
+
     config_json_file = given_args.config_json_file
     PMTNN_weight_file = given_args.PMTNN_weight_file
     config_csv_file = given_args.config_csv_file
