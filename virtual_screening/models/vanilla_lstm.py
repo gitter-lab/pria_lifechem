@@ -150,7 +150,7 @@ class VanillaLSTM:
             model = early_stopping.get_best_model()
         y_pred_on_train = model.predict(X_train)
         y_pred_on_val = model.predict(X_val)
-        if X_test:
+        if X_test is not None:
             y_pred_on_test = model.predict(X_test)
 
         print('train precision: {}'.format(precision_auc_single(y_train, y_pred_on_train)))
@@ -161,13 +161,47 @@ class VanillaLSTM:
         print('validation roc: {}'.format(roc_auc_single(y_val, y_pred_on_val)))
         print('validation bedroc: {}'.format(bedroc_auc_single(y_val, y_pred_on_val)))
         print
-        if X_test:
+        if X_test is not None:
             print('test precision: {}'.format(precision_auc_single(y_test, y_pred_on_test)))
             print('test roc: {}'.format(roc_auc_single(y_test, y_pred_on_test)))
             print('test bedroc: {}'.format(bedroc_auc_single(y_test, y_pred_on_test)))
             print
 
-        if X_test:
+        if X_test is not None:
+            for EF_ratio in self.EF_ratio_list:
+                n_actives, ef, ef_max = enrichment_factor_single(y_test, y_pred_on_test, EF_ratio)
+                print('ratio: {}, EF: {},\tactive: {}'.format(EF_ratio, ef, n_actives))
+        return
+
+
+    def predict_with_existing(self,
+                              X_train, y_train,
+                              X_val, y_val,
+                              X_test, y_test,
+                              PMTNN_weight_file):
+        model = self.setup_model()
+        model.load_weights(PMTNN_weight_file)
+
+        y_pred_on_train = model.predict(X_train)
+        y_pred_on_val = model.predict(X_val)
+        if X_test is not None:
+            y_pred_on_test = model.predict(X_test)
+
+        print('train precision: {}'.format(precision_auc_single(y_train, y_pred_on_train)))
+        print('train roc: {}'.format(roc_auc_single(y_train, y_pred_on_train)))
+        print('train bedroc: {}'.format(bedroc_auc_single(y_train, y_pred_on_train)))
+        print
+        print('validation precision: {}'.format(precision_auc_single(y_val, y_pred_on_val)))
+        print('validation roc: {}'.format(roc_auc_single(y_val, y_pred_on_val)))
+        print('validation bedroc: {}'.format(bedroc_auc_single(y_val, y_pred_on_val)))
+        print
+        if X_test is not None:
+            print('test precision: {}'.format(precision_auc_single(y_test, y_pred_on_test)))
+            print('test roc: {}'.format(roc_auc_single(y_test, y_pred_on_test)))
+            print('test bedroc: {}'.format(bedroc_auc_single(y_test, y_pred_on_test)))
+            print
+
+        if X_test is not None:
             for EF_ratio in self.EF_ratio_list:
                 n_actives, ef, ef_max = enrichment_factor_single(y_test, y_pred_on_test, EF_ratio)
                 print('ratio: {}, EF: {},\tactive: {}'.format(EF_ratio, ef, n_actives))
