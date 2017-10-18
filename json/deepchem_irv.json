@@ -4,6 +4,9 @@
     "fold_num": [0, 1, 2, 3, 4],
     "label_names":["Keck_Pria_AS_Retest", "Keck_Pria_FP_data", "Keck_RMI_cdd"]
   },
+  "params_s2": {
+    "K": [5, 10, 20, 40, 80]
+  },
   "fitting": {
     "nb_epochs": 1000,
     "batch_size": 8192,

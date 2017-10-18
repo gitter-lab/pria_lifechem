@@ -6,19 +6,25 @@ from statsmodels.stats.libqsturng import psturng
 from matplotlib import pyplot as plt
 from matplotlib.widgets import Slider
 import matplotlib.gridspec as gridspec
+from model_names import model_name_dict 
 
 """
     Gathers metrics from a directory with models using k-fold in pd.dataframe. 
     Assumes the WID Storage setup of 
     folder->fold_i->(train|val|test)_metrics->metrics.csv
 """
-def gather_dir_metrics(directory, k, perc_vec=[0.001, 0.0015, 0.005, 0.01, 0.02, 0.05, 0.1, 0.2]):
+def gather_dir_metrics(directory, k, perc_vec=[0.001, 0.0015, 0.005, 0.01, 0.02, 0.05, 0.1, 0.2],
+                       n_tests_list=[100, 500, 1000, 2500, 5000, 10000]):
     perc_vec = ['{:g}'.format(perc * 100) + ' %' for perc in perc_vec]
+    n_tests_list = ['{:g}'.format(n_tests) for n_tests in n_tests_list]
+
     metric_names = ['ROC AUC', 'BEDROC AUC', 'PR auc.sklearn', 'PR auc.integral',
                     'PR auc.davis.goadrich'] + \
                     ['NEF_'+ str(s) for s in perc_vec] + \
                     ['EF_'+ str(s) for s in perc_vec] + \
-                    ['Max_EF_'+ str(s) for s in perc_vec] + ['NEF AUC']
+                    ['Max_EF_'+ str(s) for s in perc_vec] + ['NEF AUC'] + \
+                    ['n_hits_'+ str(s) for s in n_tests_list]
+                    
     folds = ['fold ' + str(i) for i in range(k)] + ['Folds Mean', 'Folds Median']
     fold_folders = ['train_metrics', 'val_metrics', 'test_metrics']
     model_names = os.listdir(directory)
@@ -41,6 +47,7 @@ def gather_dir_metrics(directory, k, perc_vec=[0.001, 0.0015, 0.005, 0.01, 0.02,
                 cols = [metric+' '+label for metric in metric_names for label in list(df.columns[1:])]
                 
                 df = df[(df.metric != 'NEF') & (df.metric != 'EF') & 
+                        (df.metric != 'n_hits') &
                         (df.metric != 'Max_EF') & (~pd.isnull(df.metric))]
                 df = df[df.columns[1:]]            
                 results_arr = np.array(df, dtype=np.float)
@@ -56,7 +63,11 @@ def gather_dir_metrics(directory, k, perc_vec=[0.001, 0.0015, 0.005, 0.01, 0.02,
             gather_matrix[m, r, k+1,:] = np.median(gather_matrix[m, r, 0:k,:], axis=0)
     
     #convert to pd.df with suitable namings
-    cols[-1] = 'NEF AUC Random Mean' 
+    cols[cols.index('NEF AUC Median')] = 'NEF AUC Random Mean' 
+    m_name_dict = model_name_dict()
+    for i in range(len(model_names)):
+        model_names[i] = m_name_dict[model_names[i]]
+        
     midx = pd.MultiIndex.from_product([model_names, fold_folders, folds],
                                       names=['model', 'set', 'fold'])
     gather_df = pd.DataFrame(data=gather_matrix.reshape(len(midx), col_count), 
@@ -78,7 +89,7 @@ def gather_dir_metrics(directory, k, perc_vec=[0.001, 0.0015, 0.005, 0.01, 0.02,
     each having sorted pd.dfs of top N models.
 """
 def get_top_mm_models(gather_df, 
-                      col_indices=list(range(10)) + list(range(15, 20)) + list(range(25, 65)) + list(range(145, 150)),
+                      col_indices=list(range(10)) + list(range(15, 20)) + list(range(25, 65)) + list(range(145, 149))+ list(range(150, 180)),
                       N=5):
     metric_names = list(gather_df.columns.values[col_indices])
     top_model_dict = {}
@@ -116,7 +127,7 @@ def get_top_mm_models(gather_df,
     Comparison is based on raw scores.
 """
 def get_mean_median_comps(gather_df, 
-                          col_indices=list(range(10)) + list(range(15, 20)) + list(range(25, 65)) + list(range(145, 150)),
+                          col_indices=list(range(10)) + list(range(15, 20)) + list(range(25, 65)) + list(range(145, 149)) + list(range(150, 180)),
                           tol=1e-4):
     metric_names = list(gather_df.columns.values[col_indices])
     model_names = list(gather_df.index.levels[0])
@@ -166,7 +177,7 @@ def get_mean_median_comps(gather_df,
     as values.
 """
 def tukey_multi_metrics(gather_df, 
-                        col_indices=list(range(10)) + list(range(15, 20)) + list(range(25, 65)) + list(range(145, 150)) ,
+                        col_indices=list(range(10)) + list(range(15, 20)) + list(range(25, 65)) + list(range(145, 149)) + list(range(150, 180)),
                         alpha=0.05):
     metric_names = list(gather_df.columns.values[col_indices])
     model_names = list(gather_df.index.levels[0])
@@ -315,7 +326,64 @@ def get_overlap(agg_comp_dict, N=5):
     overlap_df = overlap_df.sort_values('overlap_perc', ascending=False)
     return overlap_df
     
-
+"""
+    Given agg_comp_dict returns a df with a column for n_hits, and the rows
+    are the most similar metrics from top-to-bottom.
+"""
+def get_similar_to_nhits(agg_comp_dict, metric_names, n_hits_metrics, labels=['Keck_Pria_AS_Retest','Keck_Pria_FP_data','Keck_RMI_cdd']):
+    nh_dict = {}                        
+    for j, n_hit_metric in zip(range(len(n_hits_metrics)), n_hits_metrics):              
+        ranked_nh_pd = agg_comp_dict[n_hit_metric]['top'].rank(method='max')
+        ranked_nh_list = agg_comp_dict[n_hit_metric]['top'].index.tolist()
+        
+        label = labels[0]
+        for i in range(len(labels)):
+            if labels[i] in n_hit_metric:
+                label = labels[i]
+                
+        curr_metrics = [m for m in metric_names if label in m]
+                    
+        nh_metric_pd = pd.Series(0,index=curr_metrics, name=n_hit_metric)
+        
+        for k, metric in zip(range(len(curr_metrics)), curr_metrics):
+            total_dist = 0
+            ranked_m_pd = agg_comp_dict[metric]['top'].rank(method='max')
+            
+            for model in ranked_nh_list:
+                candidate_pos_1 = ranked_m_pd.loc[ranked_m_pd==ranked_m_pd.loc[model]].index.tolist()
+                candidate_pos_2 = ranked_nh_pd.loc[ranked_nh_pd==ranked_nh_pd.loc[model]].index.tolist()
+                best_dis = 10000
+                for c_pos_1 in candidate_pos_1:
+                    for c_pos_2 in candidate_pos_2:
+                        curr_dist = abs(ranked_m_pd.index.tolist().index(c_pos_1) - ranked_nh_list.index(c_pos_2))
+                        if curr_dist < best_dis:
+                            best_dis = curr_dist
+                
+                total_dist += best_dis
+            nh_metric_pd.loc[metric] = total_dist
+        
+        nh_dict[n_hit_metric] = nh_metric_pd.sort_values(ascending=True)
+        
+    ordered_df = pd.DataFrame(data=np.zeros((len(nh_dict[n_hits_metrics[0]]), len(n_hits_metrics))),
+                              columns=n_hits_metrics,
+                              dtype=str)    
+    ordered_df[:] = ''
+    for i, n_hit_metric in zip(range(len(n_hits_metrics)), n_hits_metrics): 
+        ranked_nh_pd = nh_dict[n_hit_metric].rank(method='max')
+        ranked_nh_list = nh_dict[n_hit_metric].index.tolist()
+        
+        j=0
+        for model in ranked_nh_list:
+            model_list = ranked_nh_pd.loc[ranked_nh_pd==ranked_nh_pd.loc[model]].index.tolist()
+            for label in labels:
+                model_list = [m.replace(" " + label, "") for m in model_list]
+            model_list = ", ".join(model_list)
+            if not any(ordered_df[n_hit_metric].str.match(model_list)):
+                ordered_df[n_hit_metric][j] = model_list
+                j=j+1
+        
+    return ordered_df
+    
 """
     Adapted from: http://nipy.bic.berkeley.edu/nightly/statsmodels/doc/html/_modules/statsmodels/sandbox/stats/multicomp.html#TukeyHSDResults.plot_simultaneous
     

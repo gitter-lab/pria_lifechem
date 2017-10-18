@@ -57,6 +57,9 @@ class Deepchem_IRV:
         self.early_stopping_option = conf['fitting']['early_stopping']['option']
                 
         self.stage = conf['stage']
+        if self.stage == 2:
+            self.label_names= ["Keck_Pria_AS_Retest", "Keck_Pria_FP_data", "Keck_RMI_cdd"]
+            self.K = ParameterGrid(conf['params_s2'])[self.process_id]['K']
         return
                 
     @property    
@@ -350,18 +353,18 @@ if __name__ == '__main__':
                 test_data[label_index] = transformer.transform(orig_test_data[label_index])       
         
         task.predict_with_existing(train_data, val_data, test_data)  
-        
-        if not os.path.exists(model_dir+'fold_'+str(i)+'/'+labels[label_index]+'/'):
-            os.makedirs(model_dir+'fold_'+str(i)+'/'+labels[label_index]+'/')                                        
-        task.save_model_evaluation_metrics(train_data, model_file,
-                                          model_dir+'fold_'+str(i)+'/'+labels[label_index]+'/train_metrics/',
-                                          label_names=labels)
-        task.save_model_evaluation_metrics(val_data, model_file,
-                                          model_dir+'fold_'+str(i)+'/'+labels[label_index]+'/val_metrics/',
-                                          label_names=labels)
-        task.save_model_evaluation_metrics(test_data, model_file,
-                                          model_dir+'fold_'+str(i)+'/'+labels[label_index]+'/test_metrics/',
-                                          label_names=labels)
+        for label_index in range(len(labels)): 
+            if not os.path.exists(model_dir+'fold_'+str(i)+'/'+labels[label_index]+'/'):
+                os.makedirs(model_dir+'fold_'+str(i)+'/'+labels[label_index]+'/')                                        
+            task.save_model_evaluation_metrics(train_data, model_file,
+                                              model_dir+'fold_'+str(i)+'/'+labels[label_index]+'/train_metrics/',
+                                              label_names=labels)
+            task.save_model_evaluation_metrics(val_data, model_file,
+                                              model_dir+'fold_'+str(i)+'/'+labels[label_index]+'/val_metrics/',
+                                              label_names=labels)
+            task.save_model_evaluation_metrics(test_data, model_file,
+                                              model_dir+'fold_'+str(i)+'/'+labels[label_index]+'/test_metrics/',
+                                              label_names=labels)
         
         task.save_model_params(config_csv_file)
         
@@ -440,15 +443,16 @@ if __name__ == '__main__':
                 train_data[label_index] = transformer.transform(orig_train_data[label_index])
                 val_data[label_index] = transformer.transform(orig_val_data[label_index])     
         
-        task.predict_with_existing(train_data, val_data, None)   
-        if not os.path.exists(model_dir+'fold_'+str(i)+'/'+labels[label_index]+'/'):
-            os.makedirs(model_dir+'fold_'+str(i)+'/'+labels[label_index]+'/')                                       
-        task.save_model_evaluation_metrics(train_data, model_file,
-                                          model_dir+'fold_'+str(i)+'/'+labels[label_index]+'/train_metrics/',
-                                          label_names=labels)
-        task.save_model_evaluation_metrics(val_data, model_file,
-                                          model_dir+'fold_'+str(i)+'/'+labels[label_index]+'/val_metrics/',
-                                          label_names=labels)
+        task.predict_with_existing(train_data, val_data, None)  
+        for label_index in range(len(labels)): 
+            if not os.path.exists(model_dir+'fold_'+str(i)+'/'+labels[label_index]+'/'):
+                os.makedirs(model_dir+'fold_'+str(i)+'/'+labels[label_index]+'/')                                       
+            task.save_model_evaluation_metrics(train_data, model_file,
+                                              model_dir+'fold_'+str(i)+'/'+labels[label_index]+'/train_metrics/',
+                                              label_names=labels)
+            task.save_model_evaluation_metrics(val_data, model_file,
+                                              model_dir+'fold_'+str(i)+'/'+labels[label_index]+'/val_metrics/',
+                                              label_names=labels)
         
         task.save_model_params(config_csv_file)
         

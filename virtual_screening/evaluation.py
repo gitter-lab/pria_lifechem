@@ -108,7 +108,7 @@ def bedroc_auc_single(actual, predicted, alpha=10):
         data = ScoredData(data)
         results = BEDROC(data, alpha)
         return results['area']
-    except ValueError:
+    except:
         return np.nan
 
 
@@ -623,7 +623,63 @@ def plot_efp_efm(y_true, y_pred, perc_vec, file_dir, label_names=None):
         plt.savefig(file_dir+'_curve_{}.png'.format(label_names[i]),bbox_inches='tight')
         plt.close()
 
+def n_hits_calc(y_true, y_pred, n_tests_list, label_names=None): 
+    """
+    Calculates number of actives found in the top n_tests in n_tests_list.
+    """   
+    t_count = len(n_tests_list)    
+    nb_classes = 1    
+    if len(y_true.shape) == 2:
+        nb_classes = y_true.shape[1]
+        
+    if label_names == None:
+        label_names = ['label ' + str(i) for i in range(nb_classes)]
+        
+    
+    n_hits_mat = np.zeros((t_count, nb_classes))
+    
+    for curr_n_tests in range(t_count):
+        n_hits_mat[curr_n_tests,:] = n_hits_calc_at_n_tests(y_true, 
+                                            y_pred, n_tests_list[curr_n_tests])                
+        
+    """
+    Convert to pandas matrix row-col names
+    """
+    index_names = ['{:g}'.format(n_tests) for n_tests in n_tests_list] 
+    n_hits_pd = pd.DataFrame(data=np.concatenate((n_hits_mat,
+                                              np.mean(n_hits_mat,axis=1).reshape(len(n_tests_list),1),
+                                              np.median(n_hits_mat,axis=1).reshape(len(n_tests_list),1)),axis=1),
+                         index=index_names,
+                         columns=label_names+['Mean','Median'])
+    n_hits_pd.index.name = 'n_hits'
+    
+    return n_hits_pd
 
+def n_hits_calc_at_n_tests(y_true, y_pred, n_tests):
+    """
+    Calculates number of actives found in the top n_tests.
+    """
+    nb_classes = 1    
+    if len(y_true.shape) == 2:
+        nb_classes = y_true.shape[1]
+    else:
+        y_true = y_true.reshape((y_true.shape[0], 1))
+        y_pred = y_pred.reshape((y_pred.shape[0], 1)) 
+    
+    n_hits = np.zeros(nb_classes)
+    
+    for i in range(len(n_hits)):
+        non_missing_indices = np.argwhere(y_true[:, i] != -1)[:, 0]
+        true_labels = y_true[non_missing_indices, i]
+        pred = y_pred[non_missing_indices, i]
+    
+        indices = np.argsort(pred, axis=0)[::-1][:n_tests]
+        
+        n_actives = np.nansum(true_labels) 
+        n_hits[i] = np.nansum( true_labels[indices] )
+            
+    return n_hits
+    
 def evaluate_model(y_true, y_pred, model_dir, label_names=None, make_plots=True):
     """
     Call this function to evaluate a model. This will call all evaluations we 
@@ -638,7 +694,8 @@ def evaluate_model(y_true, y_pred, model_dir, label_names=None, make_plots=True)
         
     perc_vec = [0.001, 0.0015, 0.005, 0.01, 0.02, 0.05, 0.1, 0.2]
     perc_vec_plots = np.linspace(0.001, .2, 100) 
-    
+    n_tests_list = [100, 500, 1000, 2500, 5000, 10000]
+
     metrics_dir = model_dir+'metrics.csv'
     
     
@@ -663,6 +720,7 @@ def evaluate_model(y_true, y_pred, model_dir, label_names=None, make_plots=True)
                                
     nef_pd, ef_pd, max_ef_pd = norm_enrichment_factor(y_true, y_pred, perc_vec, label_names)
     nef_auc_df = nef_auc(y_true, y_pred, perc_vec, label_names) 
+    n_hits_df = n_hits_calc(y_true, y_pred, n_tests_list, label_names)
     
     pr_roc_frames = [roc_auc_df, bedroc_auc_df, sklearn_pr_auc_df, 
                      integral_pr_auc_df, dg_pr_auc_df]
@@ -671,7 +729,7 @@ def evaluate_model(y_true, y_pred, model_dir, label_names=None, make_plots=True)
     pr_roc_frames.to_csv(metrics_dir)
     with open(metrics_dir,'a') as f:  
         f.write('\n')    
-    for pd_df in [nef_pd, ef_pd, max_ef_pd, nef_auc_df]:
+    for pd_df in [nef_pd, ef_pd, max_ef_pd, nef_auc_df, n_hits_df]:
         pd_df.to_csv(metrics_dir, mode='a')
         with open(metrics_dir,'a') as f:  
             f.write('\n')  

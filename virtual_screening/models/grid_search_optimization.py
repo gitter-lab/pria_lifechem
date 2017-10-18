@@ -60,6 +60,13 @@ def get_hyperparameter_sets(model):
                                'early stopping': ['precision'],
                                'activations': [{0: 'relu', 1: 'sigmoid', 2: 'sigmoid'},
                                                {0: 'relu', 1: 'relu', 2: 'sigmoid'}]}
+    elif model == 'random_forest':
+        hyperparameter_sets = {"n_estimators": [4000, 8000, 16000],
+                                "max_features": ["None", "sqrt", "log2"],
+                                "min_samples_leaf": [1, 10, 100, 1000],
+                                "class_weight": ["None", "balanced_subsample","balanced"]
+        
+        }
     else:
         raise Exception('No such model! Should be among [{}, {}, {}, {}].'.format(
             'single_classification',
