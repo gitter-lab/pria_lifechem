@@ -1,11 +1,11 @@
-model_names = {
-    #lightchem
-    "PRAUC_5Layer1Model": "LightChem_a",
-    "PRAUC_10Layer1Model": "LightChem_b",
-    "ROCAUC_5Layer1Model": "LightChem_c",
-    "ROCAUC_10Layer1Model": "LightChem_d",
-    "ROCAUC_1Layer1Model": "LightChem_e",
-    "PRAUC_1Layer1Model": "LightChem_f",
+model_name_dict = {
+    #lightchemPRAUC_1Layer1Model
+    "PRAUC_5Layer1Model_npz": "LightChem_a",
+    "PRAUC_10Layer1Model_npz": "LightChem_b",
+    "ROCAUC_5Layer1Model_npz": "LightChem_c",
+    "ROCAUC_10Layer1Model_npz": "LightChem_d",
+    "ROCAUC_1Layer1Model_npz": "LightChem_e",
+    "PRAUC_1Layer1Model_npz": "LightChem_f",
     #random forest
     "sklearn_rf_390014_24": "RandomForest_a",
     "sklearn_rf_390014_25": "RandomForest_b",
@@ -40,9 +40,9 @@ model_names = {
     "dockscore_ad4": "Docing_ad4",
     "dockscore_plants": "Docing_plants",
     "dockscore_smina": "Docing_smina",
-    "consensus_dockscore_max": "Consensus_Docing_max",
-    "consensus_bcs_efr1_opt": "Consensus_Docing_efr1_opt",
-    "consensus_bcs_rocauc_opt": "Consensus_Docing_rocauc_opt",
-    "consensus_dockscore_median": "Consensus_Docing_median",
-    "consensus_dockscore_mean": "Consensus_Docing_mean",
+    "consensus_dockscore_max": "ConsensusDocing_max",
+    "consensus_bcs_efr1_opt": "ConsensusDocing_efr1_opt",
+    "consensus_bcs_rocauc_opt": "ConsensusDocing_rocauc_opt",
+    "consensus_dockscore_median": "ConsensusDocing_median",
+    "consensus_dockscore_mean": "ConsensusDocing_mean",
 }

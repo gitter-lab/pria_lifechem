@@ -8,6 +8,7 @@ from matplotlib.widgets import Slider
 import matplotlib.gridspec as gridspec
 from model_names import model_name_dict 
 
+
 """
     Gathers metrics from a directory with models using k-fold in pd.dataframe. 
     Assumes the WID Storage setup of 
@@ -63,20 +64,20 @@ def gather_dir_metrics(directory, k, perc_vec=[0.001, 0.0015, 0.005, 0.01, 0.02,
             gather_matrix[m, r, k+1,:] = np.median(gather_matrix[m, r, 0:k,:], axis=0)
     
     #convert to pd.df with suitable namings
-    cols[cols.index('NEF AUC Median')] = 'NEF AUC Random Mean' 
-    m_name_dict = model_name_dict()
+    cols[cols.index('NEF AUC Median')] = 'NEF AUC Random Mean'
     for i in range(len(model_names)):
-        model_names[i] = m_name_dict[model_names[i]]
+        model_names[i] = model_name_dict[model_names[i]]
         
     midx = pd.MultiIndex.from_product([model_names, fold_folders, folds],
                                       names=['model', 'set', 'fold'])
     gather_df = pd.DataFrame(data=gather_matrix.reshape(len(midx), col_count), 
                              index=midx,
                              columns=cols)
-                             
+
     #gather_df = gather_df.dropna()
     
     return gather_df
+
 
 """
     Uses gather_df to find the top N models for each metric defined by
@@ -112,7 +113,8 @@ def get_top_mm_models(gather_df,
             top_model_dict[metric][row_name] = temp_df
     
     return top_model_dict
-    
+
+
 """
     Uses gather_df to return comp_dicts which contains 2 comparison matrices
     for mean and median for each metric.
@@ -167,7 +169,8 @@ def get_mean_median_comps(gather_df,
             
     
     return comp_dicts
-    
+
+
 """
     Runs Tukey's HSD for pairwise comparison among models for each metric in 
     df[col_indices] at the alpha significance level (fwer).
@@ -208,7 +211,8 @@ def tukey_multi_metrics(gather_df,
         tukey_dict[metric] = tukey_res
     
     return tukey_dict
-    
+
+
 """
     Given a tukey_dict with metric names as key and TukeyHSDResults objects as
     values, it creates pd dataframes from the results, reject matrix and 
@@ -254,7 +258,8 @@ def analyze_tukey_dict(tukey_dict):
         tukey_analysis_dict[metric] = (tukey_df, reject_df, comp_df)
     
     return tukey_analysis_dict
-    
+
+
 """
     Uses mean, median, and tukey comparison matrices to produce an aggregated
     comparison matrix. Can be used as loose-proxy for comparing models.
@@ -302,6 +307,7 @@ def get_model_ordering(agg_comp_dict, metric_names):
         
     return ordered_df
 
+
 """
     Given agg_comp_dict returns overlap_df with counts of overlap for each model.
 """
@@ -325,7 +331,8 @@ def get_overlap(agg_comp_dict, N=5):
     overlap_df = overlap_df/len(metric_names)
     overlap_df = overlap_df.sort_values('overlap_perc', ascending=False)
     return overlap_df
-    
+
+
 """
     Given agg_comp_dict returns a df with a column for n_hits, and the rows
     are the most similar metrics from top-to-bottom.
@@ -383,7 +390,8 @@ def get_similar_to_nhits(agg_comp_dict, metric_names, n_hits_metrics, labels=['K
                 j=j+1
         
     return ordered_df
-    
+
+
 """
     Adapted from: http://nipy.bic.berkeley.edu/nightly/statsmodels/doc/html/_modules/statsmodels/sandbox/stats/multicomp.html#TukeyHSDResults.plot_simultaneous
     
@@ -429,7 +437,8 @@ def plot_simultaneous(tukey_hsd, ax=None, figsize=(10,6),
         ax1.set_ylabel(ylabel if ylabel is not None else '')
         plt.grid(axis='y')
         return fig
-        
+
+
 """
     Given a tukey_dict with metric names as key and TukeyHSDResults objects as
     values, plots universal confidence intervals for each model under each metric.
@@ -442,7 +451,8 @@ def plot_uconf_grid(tukey_dict, metric_names):
         tukey_ax = fig.add_subplot(1,len(metric_names),i+1)
         plot_simultaneous(tukey_res, xlabel=metric, ax=tukey_ax)    
     return
-    
+
+
 """
     Given a tukey_dict with metric names as key and TukeyHSDResults objects as
     values, plots universal confidence intervals for each model under each metric.
@@ -454,7 +464,8 @@ def plot_uconf_simple(tukey_dict, metric_names, figsize=(10,6)):
         
         plot_simultaneous(tukey_res, xlabel=metric, ax=tukey_ax, figsize=figsize)    
     return
-    
+
+
 """
     Given a tukey_dict with metric names as key and TukeyHSDResults objects as
     values, plots universal confidence intervals for each model under each metric.
