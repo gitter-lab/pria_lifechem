@@ -432,7 +432,7 @@ def fetch_one_model(dir_path, number, evaluation_list, model):
     return evaluation_column, value_column, model_column
 
 
-def plot_cross_validation(dir_path_list, evaluation_list, model_list, title, plot_mode='show'):
+def plot_cross_validation(dir_path_list, evaluation_list, model_list, title, task_name):
     evaluation_column = []
     value_column = []
     model_column = []
@@ -449,18 +449,20 @@ def plot_cross_validation(dir_path_list, evaluation_list, model_list, title, plo
     data_pd = pd.DataFrame({'evaluation method': evaluation_column,
                             'value': value_column,
                             'model': model_column})
-    
-    if plot_mode == 'show':
-        boxplot = sns.boxplot(x="evaluation method", y="value", hue="model", data=data_pd, palette="PRGn")
-        # sns.violinplot(x="evaluation method", y="value", hue="model", data=data_pd, palette="PRGn", inner=None)
-        # sns.swarmplot(x="evaluation method", y="value", hue="model", data=data_pd, palette="YlOrBr", split=True, size=3)
-        sns.despine(offset=20, trim=True)
-        sns.plt.title(title)
-    elif plot_mode == 'save':
-        boxplot = sns.boxplot(x="evaluation method", y="value", hue="model", data=data_pd, palette="PRGn")
-        sns.despine(offset=20, trim=True)
-        fig = boxplot.get_figure()
-        fig.savefig(title)
+
+    # boxplot = sns.boxplot(x="evaluation method", y="value", hue="model", data=data_pd, palette="PRGn")
+    # # sns.violinplot(x="evaluation method", y="value", hue="model", data=data_pd, palette="PRGn", inner=None)
+    # # sns.swarmplot(x="evaluation method", y="value", hue="model", data=data_pd, palette="YlOrBr", split=True, size=3)
+    # sns.despine(offset=20, trim=True)
+    # sns.plt.title(title)
+
+    boxplot = sns.boxplot(x="evaluation method", y="value", hue="model", data=data_pd, palette="PRGn")
+    # sns.despine(offset=20, trim=True)
+    fig = boxplot.get_figure()
+    figure_dir = 'plottings/{}'.format(task_name)
+    if not os.path.isdir(figure_dir):
+        os.makedirs(figure_dir)
+    fig.savefig('{}/{}'.format(figure_dir, title))
 
     return
 
