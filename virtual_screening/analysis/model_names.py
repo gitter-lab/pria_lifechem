@@ -1,11 +1,11 @@
 model_name_dict = {
     #lightchemPRAUC_1Layer1Model
-    "PRAUC_5Layer1Model_npz": "LightChem_a",
-    "PRAUC_10Layer1Model_npz": "LightChem_b",
-    "ROCAUC_5Layer1Model_npz": "LightChem_c",
-    "ROCAUC_10Layer1Model_npz": "LightChem_d",
-    "ROCAUC_1Layer1Model_npz": "LightChem_e",
-    "PRAUC_1Layer1Model_npz": "LightChem_f",
+    "PRAUC_5Layer1Model": "LightChem_a",
+    "PRAUC_10Layer1Model": "LightChem_b",
+    "ROCAUC_5Layer1Model": "LightChem_c",
+    "ROCAUC_10Layer1Model": "LightChem_d",
+    "ROCAUC_1Layer1Model": "LightChem_e",
+    "PRAUC_1Layer1Model": "LightChem_f",
     #random forest
     "sklearn_rf_390014_24": "RandomForest_a",
     "sklearn_rf_390014_25": "RandomForest_b",
