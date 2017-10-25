@@ -71,7 +71,7 @@ def get_EF_scores_single_regression(model_name, EF_ratio_list, predictions_path,
     return EF_values_list, EF_max_values_list, EF_ratio_values_list, running_process_list, model_name_list
 
 
-def get_EF_score_multi_task(model_name, EF_ratio_list, predictions_path, N=5):
+def get_EF_scores_multi_task(model_name, EF_ratio_list, predictions_path, N=5):
     file_dir = '{}/{}'.format(predictions_path, model_name)
     file_paths = [file_dir+'/fold_{}.npz'.format(i) for i in range(N)]
 
@@ -95,7 +95,7 @@ def get_EF_score_multi_task(model_name, EF_ratio_list, predictions_path, N=5):
     return EF_values_list, EF_max_values_list, EF_ratio_values_list, running_process_list, model_name_list
 
 
-def get_EF_score_random_forest(model_name, EF_ratio_list, predictions_path, N=5):
+def get_EF_scores_random_forest(model_name, EF_ratio_list, predictions_path, N=5):
     file_dir = '{}/{}'.format(predictions_path, model_name)
     file_paths = [file_dir+'/fold_{}.npz'.format(i) for i in range(N)]
 
@@ -131,16 +131,19 @@ def get_EF_curve_in_pd(EF_ratio_list, data_set_name, predictions_path, model_nam
     elif 'single_regression' in model_name:
         func = get_EF_scores_single_regression
     elif 'multi_classification' in model_name:
-        func = get_EF_score_multi_task
+        func = get_EF_scores_multi_task
     elif 'sklearn_rf' in model_name:
-        func = get_EF_score_random_forest
+        func = get_EF_scores_random_forest
+    elif 'irv' in model_name:
+        func = get_EF_scores_random_forest
     else:
-        raise Exception('No such model! Should be among [{}, {}, {}, {}, {}].'.format(
+        raise Exception('No such model! Should be among [{}, {}, {}, {}, {}, {}].'.format(
             'single_classification',
             'single_regression',
             'vanilla_lstm',
             'multi_classification',
-            'sklearn_rf'
+            'sklearn_rf',
+            'irv'
         ))
 
     print 'running {}'.format(model_name)
