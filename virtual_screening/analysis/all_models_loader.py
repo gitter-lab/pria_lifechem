@@ -396,7 +396,7 @@ def get_irv_results_stage_2(model_directory, data_directory, held_out_data_file,
                 w_val = np.zeros(shape=(val_data[label_index].y.shape[0], 3)) 
                 y_test = np.zeros(shape=(test_data[label_index].y.shape[0], 3)) 
                 w_test = np.zeros(shape=(test_data[label_index].y.shape[0], 3)) 
-                
+            
             y_pred_on_train[:,label_index] = model_dict[labels[label_index]].predict_proba(train_data[label_index])[:,:,1][:,0]
             y_pred_on_val[:,label_index] = model_dict[labels[label_index]].predict_proba(val_data[label_index])[:,:,1][:,0]
             y_pred_on_test[:,label_index] = model_dict[labels[label_index]].predict_proba(test_data[label_index])[:,:,1][:,0]
@@ -436,13 +436,14 @@ def get_lightchem_results_stage_1(model_directory, data_directory, k=5):
     for i in range(k):
         file_list.append('file_{}.csv'.format(i))
     output_file_list = [data_directory + f_ for f_ in file_list]
-            
+    
     for m_name in model_names:
         model_list[m_name] = {}
         for i in range(k): 
-            fold_file = model_directory+'/'+m_name+'/lightchem_'+m_name.replace('npz','')+'test'+str(i)+'.npz'
-            fold_np = np.load(fold_file)
-            
+            fold_np_train = np.load(model_directory+'/'+m_name+'/lightchem_'+m_name.replace('npz','')+'_test'+str(i)+'_train.npz')
+            fold_np_val = np.load(model_directory+'/'+m_name+'/lightchem_'+m_name.replace('npz','')+'_test'+str(i)+'_valid.npz')
+            fold_np_test = np.load(model_directory+'/'+m_name+'/lightchem_'+m_name.replace('npz','')+'_test'+str(i)+'_test.npz')
+
             csv_file_list = output_file_list[:]
             test_pd = read_merged_data([csv_file_list[i]])
             csv_file_list.pop(i)
@@ -450,23 +451,44 @@ def get_lightchem_results_stage_1(model_directory, data_directory, k=5):
             csv_file_list.pop(i%len(csv_file_list))
             train_pd = read_merged_data(csv_file_list)
             
+            train_orig_molecule_id = np.array(train_pd['Molecule'])            
+            train_lightchem_molecule_id = fold_np_train['Molecule_ID']
+            
+            val_orig_molecule_id = np.array(val_pd['Molecule'])            
+            mask = np.in1d(train_lightchem_molecule_id, val_orig_molecule_id) 
+            
+            val_lightchem_molecule_id = train_lightchem_molecule_id[np.where(mask)]
+            train_lightchem_molecule_id = train_lightchem_molecule_id[np.where(~mask)]
+            
             test_orig_molecule_id = np.array(test_pd['Molecule'])            
-            test_lightchem_molecule_id = fold_np['Molecule_ID']   
+            test_lightchem_molecule_id = fold_np_test['Molecule_ID']   
             
             y_test = np.nan
             y_pred_on_test = np.nan
             #check that the fold molecule ids are equal and in same order
-            if np.array_equal(test_orig_molecule_id, test_lightchem_molecule_id):
+            if np.array_equal(train_orig_molecule_id, train_lightchem_molecule_id) and np.array_equal(val_orig_molecule_id, val_lightchem_molecule_id) and np.array_equal(test_orig_molecule_id, test_lightchem_molecule_id):
+                _, y_train = extract_feature_and_label(train_pd,
+                                                       feature_name='Fingerprints',
+                                                       label_name_list=labels)
+                y_pred_on_train = np.zeros(shape=(y_train.shape[0], 3)) 
+                
+                _, y_val = extract_feature_and_label(val_pd,
+                                                       feature_name='Fingerprints',
+                                                       label_name_list=labels)
+                y_pred_on_val = np.zeros(shape=(y_val.shape[0], 3)) 
+                
                 _, y_test = extract_feature_and_label(test_pd,
                                                        feature_name='Fingerprints',
                                                        label_name_list=labels)
-                y_pred_on_test = np.zeros(shape=(fold_np['Keck_pria_as_retest_pred'].shape[0], 3))            
+                y_pred_on_test = np.zeros(shape=(y_test.shape[0], 3))            
                 
                 for (j, label) in zip(range(len(LC_labels)), LC_labels):
-                    y_pred_on_test[:,j] = fold_np[label+'_pred']
+                    y_pred_on_train[:,j] = fold_np_train[label+'_pred'][np.where(~mask)]
+                    y_pred_on_val[:,j] = fold_np_val[label+'_pred'][np.where(mask)]
+                    y_pred_on_test[:,j] = fold_np_test[label+'_pred']
             
-            model_list[m_name]['fold_'+str(i)]  = (labels, np.nan,  np.nan, y_test,
-                                                   np.nan,  np.nan, y_pred_on_test)
+            model_list[m_name]['fold_'+str(i)]  = (labels, y_train, y_val, y_test,
+                                                   y_pred_on_train, y_pred_on_val, y_pred_on_test) 
             
     return model_list
 
@@ -668,7 +690,7 @@ def get_nn_results_stage_2(model_directory, data_directory, held_out_data_file, 
         train_file_list = output_file_list[train_index]
         val_file_list = output_file_list[val_index:val_index+1]
         
-        test_pd = read_merged_data(held_out_data_file)
+        test_pd = read_merged_data([held_out_data_file])
         val_pd = read_merged_data(val_file_list)
         train_pd = read_merged_data(train_file_list)
         
