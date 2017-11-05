@@ -462,8 +462,7 @@ def plot_cross_validation(dir_path_list, evaluation_list, model_list, title, tas
     figure_dir = 'plottings/{}'.format(task_name)
     if not os.path.isdir(figure_dir):
         os.makedirs(figure_dir)
-    fig.savefig('{}/{}'.format(figure_dir, title))
-
+    fig.savefig('{}/{}'.format(figure_dir, title), bbox_inches = 'tight')
     return
 
 
