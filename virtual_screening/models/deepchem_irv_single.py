@@ -33,8 +33,14 @@ class Deepchem_IRV:
         else:
             print('process id:', self.process_id)
         
+        
+        self.stage = conf['stage']
+        param_name = 'params'
+        if self.stage == 2:
+            param_name = 'params_s2'
+        
         cnt = 0
-        for param in ParameterGrid(conf['params']):
+        for param in ParameterGrid(conf[param_name]):
             if cnt != self.process_id:
                 cnt += 1
                 continue
@@ -55,11 +61,6 @@ class Deepchem_IRV:
         
         self.early_stopping_patience = conf['fitting']['early_stopping']['patience']
         self.early_stopping_option = conf['fitting']['early_stopping']['option']
-                
-        self.stage = conf['stage']
-        if self.stage == 2:
-            self.label_names= ["Keck_Pria_AS_Retest", "Keck_Pria_FP_data", "Keck_RMI_cdd"]
-            self.K = ParameterGrid(conf['params_s2'])[self.process_id]['K']
         return
                 
     @property    

@@ -7,6 +7,7 @@ from matplotlib import pyplot as plt
 from matplotlib.widgets import Slider
 import matplotlib.gridspec as gridspec
 from model_names import model_name_dict 
+from scipy.stats import spearmanr
 
 
 """
@@ -303,9 +304,62 @@ def get_model_ordering(agg_comp_dict, metric_names):
                               columns=metric_names,
                               dtype=str)    
     for i, metric in zip(range(len(metric_names)), metric_names):  
-        ordered_df[metric] = agg_comp_dict[metric]['top'].index.tolist()
+        ranking_list = agg_comp_dict[metric]['top'].rank(method='min', ascending=False).tolist()
+        m_ordering_list = agg_comp_dict[metric]['top'].index.tolist()
+        m_order_rank_list = [str(m) + ", " + str(r) for m, r in zip(m_ordering_list, ranking_list)]
+        ordered_df[metric] = m_order_rank_list
         
     return ordered_df
+    
+"""
+    Get spearman's rank-order correlation coefficient for between each metric's
+    model ranking and that of n_hits ranking.
+"""
+def get_spearman_r(agg_comp_dict, metric_names, n_hits_metrics, labels=['Keck_Pria_AS_Retest','Keck_Pria_FP_data','Keck_RMI_cdd']):
+    nh_dict = {}                        
+    for j, n_hit_metric in zip(range(len(n_hits_metrics)), n_hits_metrics):              
+        ranked_nh_pd = agg_comp_dict[n_hit_metric]['top'].rank(method='min', ascending=False)
+        ranked_nh_list = agg_comp_dict[n_hit_metric]['top'].index.tolist()
+        
+        label = labels[0]
+        for i in range(len(labels)):
+            if labels[i] in n_hit_metric:
+                label = labels[i]
+                
+        curr_metrics = [m for m in metric_names if label in m]
+                    
+        nh_metric_pd = pd.Series(0,index=curr_metrics, name=n_hit_metric)
+        
+        for k, metric in zip(range(len(curr_metrics)), curr_metrics):
+            ranked_m_pd = agg_comp_dict[metric]['top'].rank(method='min', ascending=False)
+            ranked_m_pd = ranked_m_pd.loc[ranked_nh_list]
+            
+            rho, pval = spearmanr(ranked_nh_pd.tolist(), ranked_m_pd.tolist())
+        
+            nh_metric_pd.loc[metric] = rho
+            
+        nh_dict[n_hit_metric] = nh_metric_pd
+    
+    curr_metrics = [m.replace(" " + label, "") for m in curr_metrics]    
+    spearman_df = pd.DataFrame(data=np.zeros((len(nh_dict[n_hits_metrics[0]]), len(n_hits_metrics))),
+                              columns=n_hits_metrics,
+                              index=curr_metrics,
+                              dtype=str) 
+                              
+    ordered_spearman_df = pd.DataFrame(data=np.zeros((len(nh_dict[n_hits_metrics[0]]), len(n_hits_metrics))),
+                              columns=n_hits_metrics,
+                              dtype=str)
+    spearman_df[:] = ''
+    ordered_spearman_df[:] = ''
+    for i, n_hit_metric in zip(range(len(n_hits_metrics)), n_hits_metrics): 
+        spearman_df[n_hit_metric] = nh_dict[n_hit_metric].tolist()
+        metric_list = nh_dict[n_hit_metric].sort_values(ascending=False).index.tolist()
+        for label in labels:
+            metric_list = [m.replace(" " + label, "") for m in metric_list]    
+        ordered_spearman_df[n_hit_metric] = metric_list
+        
+    return spearman_df, ordered_spearman_df
+
 
 
 """
@@ -340,7 +394,7 @@ def get_overlap(agg_comp_dict, N=5):
 def get_similar_to_nhits(agg_comp_dict, metric_names, n_hits_metrics, labels=['Keck_Pria_AS_Retest','Keck_Pria_FP_data','Keck_RMI_cdd']):
     nh_dict = {}                        
     for j, n_hit_metric in zip(range(len(n_hits_metrics)), n_hits_metrics):              
-        ranked_nh_pd = agg_comp_dict[n_hit_metric]['top'].rank(method='max')
+        ranked_nh_pd = agg_comp_dict[n_hit_metric]['top'].rank(method='min', ascending=False)
         ranked_nh_list = agg_comp_dict[n_hit_metric]['top'].index.tolist()
         
         label = labels[0]
@@ -354,7 +408,7 @@ def get_similar_to_nhits(agg_comp_dict, metric_names, n_hits_metrics, labels=['K
         
         for k, metric in zip(range(len(curr_metrics)), curr_metrics):
             total_dist = 0
-            ranked_m_pd = agg_comp_dict[metric]['top'].rank(method='max')
+            ranked_m_pd = agg_comp_dict[metric]['top'].rank(method='min', ascending=False)
             
             for model in ranked_nh_list:
                 candidate_pos_1 = ranked_m_pd.loc[ranked_m_pd==ranked_m_pd.loc[model]].index.tolist()
@@ -376,7 +430,7 @@ def get_similar_to_nhits(agg_comp_dict, metric_names, n_hits_metrics, labels=['K
                               dtype=str)    
     ordered_df[:] = ''
     for i, n_hit_metric in zip(range(len(n_hits_metrics)), n_hits_metrics): 
-        ranked_nh_pd = nh_dict[n_hit_metric].rank(method='max')
+        ranked_nh_pd = nh_dict[n_hit_metric].rank(method='min', ascending=False)
         ranked_nh_list = nh_dict[n_hit_metric].index.tolist()
         
         j=0
