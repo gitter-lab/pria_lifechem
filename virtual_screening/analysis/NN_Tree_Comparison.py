@@ -27,7 +27,9 @@ def compare_rank(y_true, y_pred_on_single_NN, y_pred_on_xgboost):
 
 
 def similarity(mol_a, mol_b):
-    return np.dot(mol_a, mol_b)/(sqrt(sum(mol_a)) * sqrt(sum(mol_b)))
+    # sim = np.dot(mol_a, mol_b) / (sqrt(sum(mol_a)) * sqrt(sum(mol_b))) # This is cosine similarity
+    sim = (np.dot(mol_a, mol_b) / (sum(mol_a) + sum(mol_b) - np.dot(mol_a, mol_b))) # This is Tanimoto similarity
+    return sim
 
 
 def print_list(test_list, X_fps, X_train, y_train,
@@ -70,6 +72,7 @@ def print_list(test_list, X_fps, X_train, y_train,
                            int(label_list[index]))
         print
     return
+
 
 def get_rank(y_true, y_pred):
     args = np.argsort(y_pred[:,0])
