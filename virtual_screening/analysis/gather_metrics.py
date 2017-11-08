@@ -16,7 +16,7 @@ from scipy.stats import spearmanr
     folder->fold_i->(train|val|test)_metrics->metrics.csv
 """
 def gather_dir_metrics(directory, k, perc_vec=[0.001, 0.0015, 0.005, 0.01, 0.02, 0.05, 0.1, 0.2],
-                       n_tests_list=[100, 500, 1000, 2500, 5000, 10000]):
+                       n_tests_list=[100, 250, 500, 1000, 2500, 5000, 10000]):
     perc_vec = ['{:g}'.format(perc * 100) + ' %' for perc in perc_vec]
     n_tests_list = ['{:g}'.format(n_tests) for n_tests in n_tests_list]
 
@@ -67,7 +67,7 @@ def gather_dir_metrics(directory, k, perc_vec=[0.001, 0.0015, 0.005, 0.01, 0.02,
     #convert to pd.df with suitable namings
     cols[cols.index('NEF AUC Median')] = 'NEF AUC Random Mean'
     for i in range(len(model_names)):
-        model_names[i] = model_name_dict[model_names[i]]
+        model_names[i] = model_name_dict()[model_names[i]]
         
     midx = pd.MultiIndex.from_product([model_names, fold_folders, folds],
                                       names=['model', 'set', 'fold'])
@@ -91,7 +91,7 @@ def gather_dir_metrics(directory, k, perc_vec=[0.001, 0.0015, 0.005, 0.01, 0.02,
     each having sorted pd.dfs of top N models.
 """
 def get_top_mm_models(gather_df, 
-                      col_indices=list(range(10)) + list(range(15, 20)) + list(range(25, 65)) + list(range(145, 149))+ list(range(150, 180)),
+                      col_indices=list(range(10)) + list(range(15, 20)) + list(range(25, 65)) + list(range(145, 149))+ list(range(150, 183)),
                       N=5):
     metric_names = list(gather_df.columns.values[col_indices])
     top_model_dict = {}
@@ -130,7 +130,7 @@ def get_top_mm_models(gather_df,
     Comparison is based on raw scores.
 """
 def get_mean_median_comps(gather_df, 
-                          col_indices=list(range(10)) + list(range(15, 20)) + list(range(25, 65)) + list(range(145, 149)) + list(range(150, 180)),
+                          col_indices=list(range(10)) + list(range(15, 20)) + list(range(25, 65)) + list(range(145, 149)) + list(range(150, 183)),
                           tol=1e-4):
     metric_names = list(gather_df.columns.values[col_indices])
     model_names = list(gather_df.index.levels[0])
@@ -181,7 +181,7 @@ def get_mean_median_comps(gather_df,
     as values.
 """
 def tukey_multi_metrics(gather_df, 
-                        col_indices=list(range(10)) + list(range(15, 20)) + list(range(25, 65)) + list(range(145, 149)) + list(range(150, 180)),
+                        col_indices=list(range(10)) + list(range(15, 20)) + list(range(25, 65)) + list(range(145, 149)) + list(range(150, 183)),
                         alpha=0.05):
     metric_names = list(gather_df.columns.values[col_indices])
     model_names = list(gather_df.index.levels[0])
@@ -277,11 +277,14 @@ def get_agg_comp(mm_comp_dict, tukey_analysis_dict,
     
     agg_comp_dict = {}
     metric_names = list(mm_comp_dict.keys())
-    for i, metric in zip(range(len(metric_names)), metric_names):  
-        _, _, tukey_comp_df = tukey_analysis_dict[metric]
+    for i, metric in zip(range(len(metric_names)), metric_names):
         mean_comp = mm_comp_dict[metric]['Folds Mean']
         median_comp = mm_comp_dict[metric]['Folds Median']
         
+        tukey_comp_df = np.zeros(mean_comp.shape)
+        if tukey_analysis_dict != None:
+            _, _, tukey_comp_df = tukey_analysis_dict[metric]
+            
         agg_comp = (mean_w*mean_comp) + (median_w*median_comp) + (tukey_w*tukey_comp_df)
         top_models = agg_comp.sum(axis=1) 
         top_models = top_models.sort_values(ascending=False)

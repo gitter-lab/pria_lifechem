@@ -55,13 +55,15 @@ def stage_2_results(model_directory, data_directory, held_out_data_file):
                   model_directory+'/irv/stage_2/',
                   model_directory+'/light_chem/stage_2/',
                   model_directory+'/neural_networks/stage_2/',
-                  model_directory+'/docking/stage_2/']
+                  model_directory+'/docking/stage_2/',
+                  model_directory+'/baseline/stage_2/']
     
     stage_2_dict = {'random_forest' : get_rf_results_stage_2(class_dirs[0], data_directory, held_out_data_file),
                     'irv' : get_irv_results_stage_2(class_dirs[1], data_directory, held_out_data_file),
                     'light_chem' : get_lightchem_results_stage_2(class_dirs[2], data_directory, held_out_data_file),
                     'neural_networks' : get_nn_results_stage_2(class_dirs[3], data_directory, held_out_data_file),
-                    'docking' : get_docking_results_stage_2(class_dirs[4], data_directory, held_out_data_file)
+                    'docking' : get_docking_results_stage_2(class_dirs[4], data_directory, held_out_data_file),
+                    'baseline' : get_baseline_results_stage_2(class_dirs[5], data_directory, held_out_data_file)
                      }    
     return stage_2_dict        
     
@@ -138,10 +140,10 @@ def get_rf_results_stage_2(model_directory, data_directory, held_out_data_file, 
     
     for m_name in model_names:
         model_list[m_name] = {}
-        for i in range(0):  
+        for i in range(1):  
             fold_dir = model_directory+'/'+m_name+'/fold_'+str(i)    
             train_pd = read_merged_data(output_file_list)
-            test_pd = read_merged_data([held_out_data_directory])      
+            test_pd = read_merged_data([held_out_data_file])      
             
             labels = ["Keck_Pria_AS_Retest", "Keck_Pria_FP_data", "Keck_RMI_cdd"]
         
@@ -509,7 +511,7 @@ def get_lightchem_results_stage_2(model_directory, data_directory, held_out_data
             
     for m_name in model_names:
         model_list[m_name] = {}
-        for i in range(0): 
+        for i in range(1): 
             fold_file = model_directory+'/'+m_name+'/lightchem_'+m_name+'_test_lc4.npz'
             fold_np = np.load(fold_file)
             
@@ -535,6 +537,34 @@ def get_lightchem_results_stage_2(model_directory, data_directory, held_out_data
                     y_pred_on_test[:,j] = fold_np[label+'_pred']
             
             model_list[m_name] = (labels, np.nan,  np.nan, y_test,
+                                  np.nan,  np.nan, y_pred_on_test)
+            
+    return model_list
+
+"""
+    Results from baseline method using similarity measure.
+"""
+def get_baseline_results_stage_2(model_directory, data_directory, held_out_data_file, k=5):
+    model_list = {}
+    labels = ["Keck_Pria_AS_Retest", "Keck_Pria_FP_data", "Keck_RMI_cdd"]
+    
+    model_names = os.listdir(model_directory)
+    
+    for m_name in model_names:
+        model_list['baseline'] = {}
+        for i in range(1): 
+            test_pd = read_merged_data([held_out_data_file])
+            
+            _, y_test = extract_feature_and_label(test_pd,
+                                                  feature_name='Fingerprints',
+                                                  label_name_list=labels)
+            y_pred_on_test = np.zeros(shape=(y_test.shape[0], 3))            
+                
+            y_pred_on_test[:,0] = np.array(pd.read_csv(model_directory+'/'+m_name)['Keck_Pria_AS_Retest'], dtype=float)
+            y_pred_on_test[:,1] = np.nan
+            y_pred_on_test[:,2] = np.nan
+            
+            model_list['baseline'] = (labels, np.nan,  np.nan, y_test,
                                   np.nan,  np.nan, y_pred_on_test)
             
     return model_list
@@ -862,7 +892,7 @@ def get_docking_results_stage_2(model_directory, data_directory, held_out_data_f
     for m_name in model_names:
         model_list[m_name] = {}
         
-    for i in range(0):         
+    for i in range(1):         
         csv_file_list = output_file_list[:]
         val_pd = read_merged_data([csv_file_list[i%len(csv_file_list)]])
         csv_file_list.pop(i%len(csv_file_list))
