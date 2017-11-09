@@ -67,7 +67,7 @@ def gather_dir_metrics(directory, k, perc_vec=[0.001, 0.0015, 0.005, 0.01, 0.02,
     #convert to pd.df with suitable namings
     cols[cols.index('NEF AUC Median')] = 'NEF AUC Random Mean'
     for i in range(len(model_names)):
-        model_names[i] = model_name_dict()[model_names[i]]
+        model_names[i] = model_name_dict[model_names[i]]
         
     midx = pd.MultiIndex.from_product([model_names, fold_folders, folds],
                                       names=['model', 'set', 'fold'])
