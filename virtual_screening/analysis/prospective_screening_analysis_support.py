@@ -16,8 +16,8 @@ if __name__ == '__main__':
     positive_idx = map(lambda x: x[0], positive_enumerate)
     actual_label = map(lambda x: 1 if x in positive_idx else 0, range(len(supplier_id)))
 
-    complete_df = pd.DataFrame({'molecule id': supplier_id, 'actual label': actual_label})
-    complete_df = complete_df[['molecule id', 'actual label']]
+    complete_df = pd.DataFrame({'molecule id': supplier_id, 'label': actual_label, 'inhibition': inhibits})
+    complete_df = complete_df[['molecule id', 'label', 'inhibition']]
     # complete_df[complete_df['actual label'] > 0]
 
     dir_ = '../../output/stage_2_predictions/Keck_Pria_AS_Retest'
@@ -48,3 +48,4 @@ if __name__ == '__main__':
         print
 
     complete_df.to_csv('{}/complete.csv'.format(dir_), index=None)
+    
