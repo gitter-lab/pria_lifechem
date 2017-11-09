@@ -25,6 +25,7 @@ if __name__ == '__main__':
 
     molecule_id = None
     model_names = []
+    special_models = ['irv', 'random_forest', 'dock', 'consensus']
 
     for model_name in model_name_mapping.keys():
         file_path = '{}/{}.npz'.format(dir_, model_name)
@@ -33,8 +34,8 @@ if __name__ == '__main__':
         print 'model: {} exists'.format(model_name)
         data = np.load(file_path)
 
-        if 'irv' in model_name or 'random_forest' in model_name:
-            y_pred = data['y_pred_on_test'][:, 0]
+        if any(x in model_name for x in special_models):
+            y_pred = data['y_pred_on_test']
         else:
             y_pred = data['y_pred']
             molecule_id = data['molecule_id']
@@ -46,6 +47,8 @@ if __name__ == '__main__':
                                 model_name_mapping[model_name]: y_pred})
         model_names.append(model_name_mapping[model_name])
         complete_df = complete_df.join(temp_df.set_index('molecule id'), on='molecule id')
+
+        print
 
     model_names = sorted(model_names)
     column_names.extend(model_names)
