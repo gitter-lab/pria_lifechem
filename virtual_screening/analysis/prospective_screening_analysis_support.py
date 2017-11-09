@@ -17,12 +17,14 @@ if __name__ == '__main__':
     actual_label = map(lambda x: 1 if x in positive_idx else 0, range(len(supplier_id)))
 
     complete_df = pd.DataFrame({'molecule id': supplier_id, 'label': actual_label, 'inhibition': inhibits})
-    complete_df = complete_df[['molecule id', 'label', 'inhibition']]
+    column_names = ['molecule id', 'label', 'inhibition']
+    complete_df = complete_df[column_names]
     # complete_df[complete_df['actual label'] > 0]
 
     dir_ = '../../output/stage_2_predictions/Keck_Pria_AS_Retest'
 
     molecule_id = None
+    model_names = []
 
     for model_name in model_name_mapping.keys():
         file_path = '{}/{}.npz'.format(dir_, model_name)
@@ -42,9 +44,12 @@ if __name__ == '__main__':
 
         temp_df = pd.DataFrame({'molecule id': molecule_id,
                                 model_name_mapping[model_name]: y_pred})
-        if model_name in complete_df.columns:
-            continue
+        model_names.append(model_name_mapping[model_name])
         complete_df = complete_df.join(temp_df.set_index('molecule id'), on='molecule id')
-        print
 
+    model_names = sorted(model_names)
+    column_names.extend(model_names)
+
+    complete_df = complete_df[column_names]
     complete_df.to_csv('{}/complete.csv'.format(dir_), index=None)
+    
