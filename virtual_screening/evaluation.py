@@ -335,26 +335,31 @@ def enrichment_factor_single(labels_arr, scores_arr, percentile):
     -1 represents missing value
     and remove them when in evaluation
     '''
-    non_missing_indices = np.argwhere(labels_arr!=-1)[:, 0]
+    non_missing_indices = np.argwhere(labels_arr != -1)[:, 0]
     labels_arr = labels_arr[non_missing_indices]
     scores_arr = scores_arr[non_missing_indices]
 
-    sample_size = int(labels_arr.shape[0] * percentile)         # determine number mols in subset
-    pred = np.sort(scores_arr, axis=0)[::-1][:sample_size]              # sort the scores list, take top subset from library
-    indices = np.argsort(scores_arr, axis=0)[::-1][:sample_size]        # get the index positions for these in library
-    n_actives = np.nansum(labels_arr)                           # count number of positive labels in library
+    sample_size = int(labels_arr.shape[0] * percentile)  # determine number mols in subset
+    pred = np.sort(scores_arr, axis=0)[::-1][:sample_size]  # sort the scores list, take top subset from library
+    indices = np.argsort(scores_arr, axis=0)[::-1][:sample_size]  # get the index positions for these in library
+    n_actives = np.nansum(labels_arr)  # count number of positive labels in library
     total_actives = np.nansum(labels_arr)
     total_count = len(labels_arr)
-    n_experimental = np.nansum(labels_arr[indices])            # count number of positive labels in subset
+    n_experimental = np.nansum(labels_arr[indices])  # count number of positive labels in subset
     temp = scores_arr[indices]
-    
+
     if n_actives > 0.0:
-        ef = float(n_experimental) / n_actives / percentile     # calc EF at percentile
-        ef_max = min(n_actives, sample_size) / ( n_actives * percentile )
+        ef = float(n_experimental) / n_actives / percentile  # calc EF at percentile
+        ef_max = min(n_actives, sample_size) / (n_actives * percentile)
     else:
         ef = 'ND'
         ef_max = 'ND'
     return n_actives, ef, ef_max
+
+
+def normalized_enrichment_factor_single(labels_arr, scores_arr, percentile):
+    n_actives, ef, ef_max = enrichment_factor_single(labels_arr, scores_arr, percentile)
+    return ef/ef_max
 
 
 def enrichment_factor_single_perc(y_true, y_pred, percentile):
