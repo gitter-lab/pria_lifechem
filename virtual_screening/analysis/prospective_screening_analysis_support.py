@@ -4,6 +4,17 @@ import os
 from prospective_screening_model_names import model_name_mapping
 
 
+def filter(model_name):
+    model_name = model_name.replace('SingleClassification', 'STC')
+    model_name = model_name.replace('SingleRegression', 'STR')
+    model_name = model_name.replace('MultiClassification', 'MTC')
+    model_name = model_name.replace('RandomForest', 'RF')
+    model_name = model_name.replace('LightChem', 'LC')
+    model_name = model_name.replace('ConsensusDocking', 'ConDock')
+    model_name = model_name.replace('Docking', 'Dock')
+    return model_name
+
+
 if __name__ == '__main__':
     dataframe = pd.read_excel('../../output/stage_2_predictions/Keck_LC4_export.xlsx')
 
