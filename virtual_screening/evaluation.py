@@ -53,7 +53,8 @@ def roc_auc_multi(y_true, y_pred, eval_indices, eval_mean_or_median,
         return auc_df
     else:
         return eval_mean_or_median(auc)
-    
+
+
 def roc_auc_single(actual, predicted):
     auc_ret = np.nan  
     try:
@@ -153,6 +154,7 @@ def precision_auc_multi(y_true, y_pred, eval_indices, eval_mean_or_median,
     else:
         return eval_mean_or_median(auc)
 
+
 '''
 the average_precision_score() function in sklearn has interpolation issue
 we call this through a R package called PRROC or sklearn
@@ -174,6 +176,27 @@ def precision_auc_single(actual, predicted, mode='auc.integral'):
         except ValueError:
             prec_auc = np.nan
     return prec_auc
+
+
+def number_of_hit_single(actual, predicted, N):
+    assert N <= actual.shape[0], \
+        'Top Number N=[{}] must be no greater than total compound number [{}]'.format(N, actual.shape[0])
+
+    if predicted.ndim == 2:
+        predicted = predicted[:, 0]
+    if actual.ndim == 2:
+        actual = actual[:, 0]
+
+    top_N_index = predicted.argsort()[::-1][:N]
+    top_N = actual[top_N_index]
+    n_hit = sum(top_N)
+    return n_hit
+
+
+def ratio_of_hit_single(actual, predicted, R):
+    assert 0.0 <= R <= 1.0, 'Top Ratio R=[{}] must be within [0.0, 1.0]'.format(R)
+    N = int(R * actual.shape[0])
+    return number_of_hit_single(actual, predicted, N)
 
 
 '''
