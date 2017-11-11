@@ -101,5 +101,5 @@ def filter_model_name(model_name):
 
 
 if __name__ == '__main__':
-    # merge_prediction()
+    merge_prediction()
     merge_evaluation()
