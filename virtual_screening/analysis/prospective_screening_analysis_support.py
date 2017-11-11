@@ -4,7 +4,7 @@ import os
 from prospective_screening_model_names import model_name_mapping
 
 
-def filter(model_name):
+def filter_model_name(model_name):
     model_name = model_name.replace('SingleClassification', 'STC')
     model_name = model_name.replace('SingleRegression', 'STR')
     model_name = model_name.replace('MultiClassification', 'MTC')
