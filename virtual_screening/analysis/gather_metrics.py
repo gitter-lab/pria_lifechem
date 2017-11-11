@@ -315,6 +315,26 @@ def get_model_ordering(agg_comp_dict, metric_names):
     return ordered_df
     
 """
+    Given gather_df returns a df with a column for each metric, and values of
+    of rows for each column are (models, metric_score) pairs.
+"""
+def get_model_ordering_mscores(gather_df, metric_names):
+    ordered_df = pd.DataFrame(data=np.zeros((gather_df[metric_names[0]].xs('test_metrics', level='set').drop('fold 0', level='fold').xs('Folds Mean', level='fold').shape[0], len(metric_names))),
+                              columns=metric_names,
+                              dtype=str)      
+    
+    for i, metric in zip(range(len(metric_names)), metric_names):
+        m_df = gather_df[metric].xs('test_metrics', level='set').drop('fold 0', level='fold').xs('Folds Mean', level='fold')
+        m_df = m_df.sort_values(ascending=False)
+        
+        mscore_list = m_df.tolist()
+        m_ordering_list = m_df.index.tolist()
+        m_order_mscore_list = [str(m) + ", " + str(r) for m, r in zip(m_ordering_list, mscore_list)]
+        ordered_df[metric] = m_order_mscore_list
+        
+    return ordered_df
+    
+"""
     Get spearman's rank-order correlation coefficient for between each metric's
     model ranking and that of n_hits ranking.
 """
@@ -363,8 +383,110 @@ def get_spearman_r(agg_comp_dict, metric_names, n_hits_metrics, labels=['Keck_Pr
         
     return spearman_df, ordered_spearman_df
 
+"""
+    Compare two spearman_r dataframes and return difference beteween spearman
+    correlation results, ranking difference via spearman, and sorted rank.
+"""
+def compare_spearman_r(spearman_df_1, spearman_df_2):
+    diff_df = np.abs(spearman_df_1 - spearman_df_2)    
+    ordered_diff_df = pd.DataFrame(data=np.zeros(spearman_df_2.shape),
+                                  columns=list(spearman_df_2.columns),
+                                  dtype=str)
+    spearman_df = pd.DataFrame(data=np.zeros((1, spearman_df_2.shape[1])),
+                              columns=list(spearman_df_2.columns),
+                              index=['CV vs. PS'])
+                              
+    n_hits_metrics = list(spearman_df_2.columns)
+    for j, n_hit_metric in zip(range(len(n_hits_metrics)), n_hits_metrics):
+        ordered_diff_df[n_hit_metric] = diff_df[n_hit_metric].sort_values().index.tolist()
+        
+        rank_0 = spearman_df_1[n_hit_metric].rank(method='min', ascending=False).tolist()
+        rank_1 = spearman_df_2[n_hit_metric].rank(method='min', ascending=False).tolist()
+        
+        rho, pval = spearmanr(rank_0, rank_1)
+        spearman_df[n_hit_metric] = [rho]
+    
+    return diff_df, ordered_diff_df, spearman_df
 
+def compare_cv_ps_model_ranking(df_1, df_2):
+    index_names = df_1.index.tolist()
+    df_2 = df_2.loc[index_names]
+    spearman_df = pd.DataFrame(data=np.zeros((1, df_1.shape[1])),
+                              columns=list(df_1.columns),
+                              index=['CV vs. PS'])
+    metrics = list(df_1.columns)
+    for j, metric in zip(range(len(metrics)), metrics):
+        rank_0 = df_1[metric].rank(method='min', ascending=False).tolist()
+        rank_1 = df_2[metric].rank(method='min', ascending=False).tolist()
+        rho, pval = spearmanr(rank_0, rank_1)
+        spearman_df[metric] = [rho]
+        
+    return spearman_df
+    
+def plot_comparison_cv_ps(df_1, df_2, save_dir, figsize=(6.0, 6.0)):
+    index_names = df_1.index.tolist()
+    df_2 = df_2.loc[index_names]
+    metrics = list(df_1.columns)
+    for j, metric in zip(range(len(metrics)), metrics):
+        rank_0 = df_1[metric].rank(method='min', ascending=False).tolist()
+        rank_1 = df_2[metric].rank(method='min', ascending=False).tolist()
+        metric_0 = metric + '_CV'
+        metric_1 = metric + '_PS'
+        plot_scatter(rank_0, rank_1, metric_0, metric_1, save_dir, figsize)
 
+def get_model_winscores(agg_comp_dict, metric_names):
+    model_names = agg_comp_dict[metric_names[0]]['top'].index.tolist()
+    winscore_df = pd.DataFrame(data=np.zeros((len(model_names), len(metric_names))),
+                                index=model_names,
+                                columns=metric_names)        
+    
+    for i, metric in zip(range(len(metric_names)), metric_names):
+        metric_df = agg_comp_dict[metric]['top'].loc[model_names]
+        winscore_df[metric] = metric_df
+        
+    return winscore_df
+          
+"""
+    Scatter plot for metrics vs n_hits.
+"""
+def plot_scatter_nhits(agg_comp_dict, metric_names, n_hits_metrics, save_dir, figsize=(6.0, 6.0), labels=['Keck_Pria_AS_Retest','Keck_Pria_FP_data','Keck_RMI_cdd']):
+    for j, n_hit_metric in zip(range(len(n_hits_metrics)), n_hits_metrics):              
+        ranked_nh_pd = agg_comp_dict[n_hit_metric]['top'].rank(method='min', ascending=False)
+        ranked_nh_list = agg_comp_dict[n_hit_metric]['top'].index.tolist()
+        
+        label = labels[0]
+        for i in range(len(labels)):
+            if labels[i] in n_hit_metric:
+                label = labels[i]
+                
+        curr_metrics = [m for m in metric_names if label in m]
+        
+        for k, metric in zip(range(len(curr_metrics)), curr_metrics):
+            ranked_m_pd = agg_comp_dict[metric]['top'].rank(method='min', ascending=False)
+            ranked_m_pd = ranked_m_pd.loc[ranked_nh_list]
+            
+            rank_0 = ranked_m_pd.tolist()
+            rank_1 = ranked_nh_pd.tolist()
+            metric_0 = metric
+            metric_1 = n_hit_metric
+            plot_scatter(rank_0, rank_1, metric_0, metric_1, save_dir, figsize)
+
+def plot_scatter(rank_0, rank_1, metric_0, metric_1, save_dir, figsize=(6.0, 6.0)):
+    plt.figure(figsize=figsize)
+    plt.scatter(rank_0, rank_1)
+    
+    filename = metric_1 + '_' + metric_0
+    filename = filename.replace('%', '')
+    filename = filename.replace(' ', '_')
+    filename = filename.replace('.', '_')
+    filename = save_dir+'/'+ filename +'.png'
+    plt.xlim(0, len(rank_1)+1)
+    plt.ylim(0, len(rank_1)+1)
+    plt.xlabel('Metric {}'.format(metric_0))
+    plt.ylabel('Metric {}'.format(metric_1))
+    plt.savefig(filename, bbox_inches='tight')
+    plt.show()
+    
 """
     Given agg_comp_dict returns overlap_df with counts of overlap for each model.
 """
