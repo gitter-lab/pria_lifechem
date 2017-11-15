@@ -1,4 +1,6 @@
 model_name_mapping = {
+    'baseline': 'baseline',
+    
     # dnn
     'single_regression_2': 'SingleRegression_a',
     'single_regression_11': 'SingleRegression_b',

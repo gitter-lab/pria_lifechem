@@ -30,7 +30,7 @@ def merge_prediction():
     molecule_id = data['molecule_id']
 
     model_names = []
-    special_models = ['irv', 'random_forest', 'dockscore', 'consensus']
+    special_models = ['irv', 'random_forest', 'dockscore', 'consensus', 'baseline']
 
     for model_name in model_name_mapping.keys():
         file_path = '{}/{}.npz'.format(dir_, model_name)
@@ -59,6 +59,39 @@ def merge_prediction():
 
     complete_df = complete_df[column_names]
     complete_df.to_csv('{}/complete_prediction.csv'.format(dir_), index=None)
+
+
+def merge_rank_with_ensemble():
+    dir_ = '../../output/stage_2_predictions/Keck_Pria_AS_Retest'
+    complete_df = pd.read_csv('{}/complete_prediction.csv'.format(dir_))
+    model_names = complete_df.columns[3:]
+    rank_df = complete_df[['molecule id', 'label', 'inhibition']]
+    for (idx, model_name) in enumerate(model_names):
+        order = complete_df[model_name].rank(ascending=False).tolist()
+        order = np.array(order)
+        order = order.astype(np.int)
+        rank_df[model_name] = order
+
+    ensemble_model_names_pairs = {'Ensemble_a': ['SingleRegression_a', 'SingleClassification_a'],
+                                  'Ensemble_b': ['SingleRegression_a', 'SingleClassification_b'],
+                                  'Ensemble_c': ['SingleRegression_b', 'SingleClassification_a'],
+                                  'Ensemble_d': ['SingleRegression_b', 'SingleClassification_b']}
+
+    for ensemble_name, ensemble_model_names in ensemble_model_names_pairs.items():
+        ensemble_orders = []
+        for (idx, model_name) in enumerate(model_names):
+            order = complete_df[model_name].rank(ascending=False).tolist()
+            order = np.array(order)
+            order = order.astype(np.int)
+            if model_name in ensemble_model_names:
+                ensemble_orders.append(order)
+        ensemble_orders = np.vstack(ensemble_orders)
+        ensemble_order = np.zeros((ensemble_orders.shape[1]))
+        for i in range(ensemble_orders.shape[1]):
+            ensemble_order[i] = min(ensemble_orders[0, i], ensemble_orders[1, i])
+        rank_df[ensemble_name] = ensemble_order
+
+    rank_df.to_csv('{}/complete_rank.csv'.format(dir_), index=None)
 
 
 def merge_evaluation():
@@ -102,4 +135,5 @@ def filter_model_name(model_name):
 
 if __name__ == '__main__':
     merge_prediction()
+    merge_rank_with_ensemble()
     merge_evaluation()
