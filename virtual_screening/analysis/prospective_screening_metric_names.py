@@ -39,7 +39,6 @@ def plot_metric_comparison(metric_df):
     print metric_names
 
     N = len(metric_names)
-    # N = 4
     fig, axs = plt.subplots(N, N, figsize=(N * 2.5, N * 2.5), sharex='col', sharey='row')
     plt.subplots_adjust(wspace=0.1)
 
