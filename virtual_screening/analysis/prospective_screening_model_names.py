@@ -1,5 +1,5 @@
 model_name_mapping = {
-    'baseline': 'baseline',
+    'baseline': 'Baseline',
     
     # dnn
     'single_regression_2': 'SingleRegression_a',
@@ -17,8 +17,9 @@ model_name_mapping = {
     'random_forest_14': 'RandomForest_c',
     'random_forest_24': 'RandomForest_d',
     'random_forest_25': 'RandomForest_e',
-    'random_forest_96': 'RandomForest_f',
-    'random_forest_97': 'RandomForest_g',
+    'random_forest_72': 'RandomForest_f',
+    'random_forest_96': 'RandomForest_g',
+    'random_forest_97': 'RandomForest_h',
 
     # irv
     'irv_5': 'IRV_a',
@@ -44,10 +45,10 @@ model_name_mapping = {
     'consensus_dockscore_mean': 'ConsensusDocking_mean',
 
     # lightchemPRAUC_1Layer1Model
-    'lightchem_PRAUC_1Layer1Model_test_lc4': 'LightChem_a',
-    'lightchem_PRAUC_5Layer1Model_test_lc4': 'LightChem_b',
-    'lightchem_PRAUC_10Layer1Model_test_lc4': 'LightChem_c',
-    'lightchem_ROCAUC_1Layer1Model_test_lc4': 'LightChem_d',
-    'lightchem_ROCAUC_5Layer1Model_test_lc4': 'LightChem_e',
-    'lightchem_ROCAUC_10Layer1Model_test_lc4': 'LightChem_f',
+    'lightchem_PRAUC_1Layer1Model_test_lc4': 'CBF_a',
+    'lightchem_PRAUC_5Layer1Model_test_lc4': 'CBF_b',
+    'lightchem_PRAUC_10Layer1Model_test_lc4': 'CBF_c',
+    'lightchem_ROCAUC_1Layer1Model_test_lc4': 'CBF_d',
+    'lightchem_ROCAUC_5Layer1Model_test_lc4': 'CBF_e',
+    'lightchem_ROCAUC_10Layer1Model_test_lc4': 'CBF_f',
 }

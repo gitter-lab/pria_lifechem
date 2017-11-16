@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import os
+from collections import OrderedDict
 from virtual_screening.function import *
 from prospective_screening_model_names import *
 from prospective_screening_metric_names import *
@@ -72,10 +73,11 @@ def merge_rank_with_ensemble():
         order = order.astype(np.int)
         rank_df[model_name] = order
 
-    ensemble_model_names_pairs = {'Ensemble_a': ['SingleRegression_a', 'SingleClassification_a'],
-                                  'Ensemble_b': ['SingleRegression_a', 'SingleClassification_b'],
-                                  'Ensemble_c': ['SingleRegression_b', 'SingleClassification_a'],
-                                  'Ensemble_d': ['SingleRegression_b', 'SingleClassification_b']}
+    ensemble_model_names_pairs = OrderedDict()
+    ensemble_model_names_pairs['Ensemble_a'] = ['SingleRegression_a', 'SingleClassification_a']
+    ensemble_model_names_pairs['Ensemble_b'] = ['SingleRegression_a', 'SingleClassification_b']
+    ensemble_model_names_pairs['Ensemble_c'] = ['SingleRegression_b', 'SingleClassification_a']
+    ensemble_model_names_pairs['Ensemble_d'] = ['SingleRegression_b', 'SingleClassification_b']
 
     for ensemble_name, ensemble_model_names in ensemble_model_names_pairs.items():
         ensemble_orders = []
