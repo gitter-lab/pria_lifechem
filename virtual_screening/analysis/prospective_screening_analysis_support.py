@@ -74,10 +74,7 @@ def merge_rank_with_ensemble():
         rank_df[model_name] = order
 
     ensemble_model_names_pairs = OrderedDict()
-    ensemble_model_names_pairs['Ensemble_a'] = ['SingleRegression_a', 'SingleClassification_a']
-    ensemble_model_names_pairs['Ensemble_b'] = ['SingleRegression_a', 'SingleClassification_b']
-    ensemble_model_names_pairs['Ensemble_c'] = ['SingleRegression_b', 'SingleClassification_a']
-    ensemble_model_names_pairs['Ensemble_d'] = ['SingleRegression_b', 'SingleClassification_b']
+    ensemble_model_names_pairs['Simple Ensemble'] = ['SingleRegression_b', 'RandomForest_h']
 
     for ensemble_name, ensemble_model_names in ensemble_model_names_pairs.items():
         ensemble_orders = []
@@ -90,8 +87,17 @@ def merge_rank_with_ensemble():
         ensemble_orders = np.vstack(ensemble_orders)
         ensemble_order = np.zeros((ensemble_orders.shape[1]))
         for i in range(ensemble_orders.shape[1]):
-            ensemble_order[i] = min(ensemble_orders[0, i], ensemble_orders[1, i])
-        rank_df[ensemble_name] = ensemble_order
+            ensemble_order[i] = np.min(ensemble_orders[:, i])
+        ensemble_order = ensemble_order.astype(int)
+
+        temp_df = pd.DataFrame()
+        temp_df[ensemble_name] = ensemble_order
+
+        # Rank the simple ensemble
+        order = temp_df[ensemble_name].rank().as_matrix()
+        order = np.array(order)
+        order = order.astype(int)
+        rank_df[ensemble_name] = order
 
     rank_df.to_csv('{}/complete_rank.csv'.format(dir_), index=None)
 
