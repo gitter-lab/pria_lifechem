@@ -14,3 +14,6 @@ output
 *.egg-info
 *.weight
 virtual_screening/models/sklearn_randomforest.py
+virtual_screening/analysis/CV_Stage_Results_latex.ipynb
+virtual_screening/analysis/CV_vs_PS_Comparison_latex.ipynb
+virtual_screening/analysis/PS_Stage_Results_latex.ipynb
