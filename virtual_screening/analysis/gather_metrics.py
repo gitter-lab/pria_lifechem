@@ -8,14 +8,77 @@ from matplotlib.widgets import Slider
 import matplotlib.gridspec as gridspec
 from model_names import model_name_dict 
 from scipy.stats import spearmanr
+import rpy2.robjects as robjects
+import rpy2.robjects.packages as rpackages
 
-
+def model_name_dict():
+    return {
+    #lightchemPRAUC_1Layer1Model
+    "PRAUC_5Layer1Model": "CBF_b",
+    "PRAUC_10Layer1Model": "CBF_c",
+    "ROCAUC_5Layer1Model": "CBF_e",
+    "ROCAUC_10Layer1Model": "CBF_f",
+    "ROCAUC_1Layer1Model": "CBF_d",
+    "PRAUC_1Layer1Model": "CBF_a",
+    #random forest
+    "sklearn_rf_390014_24": "RandomForest_d",
+    "sklearn_rf_390014_25": "RandomForest_e",
+    "sklearn_rf_390014_97": "RandomForest_h",
+    "sklearn_rf_390014_96": "RandomForest_g",
+    "sklearn_rf_390014_14": "RandomForest_c",
+    "sklearn_rf_390014_12": "RandomForest_a",
+    "sklearn_rf_390014_13": "RandomForest_b",
+    "sklearn_rf_390014_72": "RandomForest_f",
+        
+    "sklearn_rf_392335_24": "RandomForest_d",
+    "sklearn_rf_392335_25": "RandomForest_e",
+    "sklearn_rf_392335_97": "RandomForest_h",
+    "sklearn_rf_392335_96": "RandomForest_g",
+    "sklearn_rf_392335_14": "RandomForest_c",
+    "sklearn_rf_392335_12": "RandomForest_a",
+    "sklearn_rf_392335_13": "RandomForest_b",
+    "sklearn_rf_392335_72": "RandomForest_f",
+    #dnn
+    "single_regression_2": "SingleRegression_a",
+    "single_regression_11": "SingleRegression_b",
+    "single_classification_22": "SingleClassification_a",
+    "single_classification_42": "SingleClassification_b",
+    "multi_classification_15": "MultiClassification_a",
+    "multi_classification_18": "MultiClassification_b",
+    "vanilla_lstm_8": "LSTM_a",
+    "vanilla_lstm_19": "LSTM_b",
+    #irv
+    "deepchem_irv_5": "IRV_a",
+    "deepchem_irv_10": "IRV_b",
+    "deepchem_irv_20": "IRV_c",
+    "deepchem_irv_40": "IRV_d",
+    "deepchem_irv_80": "IRV_e",
+    #docking
+    "dockscore_hybrid": "Docking_hybrid",
+    "dockscore_fred": "Docking_fred",
+    "dockscore_dock6": "Docking_dock6",
+    "dockscore_rdockint": "Docking_rdockint",
+    "dockscore_rdocktot": "Docking_rdocktot",
+    "dockscore_surflex": "Docking_surflex",
+    "dockscore_ad4": "Docking_ad4",
+    "dockscore_plants": "Docking_plants",
+    "dockscore_smina": "Docking_smina",
+    "consensus_dockscore_max": "ConsensusDocking_max",
+    "consensus_bcs_efr1_opt": "ConsensusDocking_efr1_opt",
+    "consensus_bcs_rocauc_opt": "ConsensusDocking_rocauc_opt",
+    "consensus_dockscore_median": "ConsensusDocking_median",
+    "consensus_dockscore_mean": "ConsensusDocking_mean",
+    #baseline
+    "baseline": "baseline"
+    }
+    
 """
     Gathers metrics from a directory with models using k-fold in pd.dataframe. 
     Assumes the WID Storage setup of 
     folder->fold_i->(train|val|test)_metrics->metrics.csv
 """
-def gather_dir_metrics(directory, k, perc_vec=[0.001, 0.0015, 0.005, 0.01, 0.02, 0.05, 0.1, 0.2],
+def gather_dir_metrics(directory, k, labels=['PriA-SSB AS','PriA-SSB FP','RMI-FANCM1'],
+                       perc_vec=[0.001, 0.0015, 0.005, 0.01, 0.02, 0.05, 0.1, 0.2],
                        n_tests_list=[100, 250, 500, 1000, 2500, 5000, 10000]):
     perc_vec = ['{:g}'.format(perc * 100) + ' %' for perc in perc_vec]
     n_tests_list = ['{:g}'.format(n_tests) for n_tests in n_tests_list]
@@ -46,7 +109,7 @@ def gather_dir_metrics(directory, k, perc_vec=[0.001, 0.0015, 0.005, 0.01, 0.02,
                 
                 df = pd.read_csv(csv_file)  
                 
-                cols = [metric+' '+label for metric in metric_names for label in list(df.columns[1:])]
+                cols = [metric+' '+label for metric in metric_names for label in list(labels+['Mean', 'Median'])]
                 
                 df = df[(df.metric != 'NEF') & (df.metric != 'EF') & 
                         (df.metric != 'n_hits') &
@@ -67,7 +130,7 @@ def gather_dir_metrics(directory, k, perc_vec=[0.001, 0.0015, 0.005, 0.01, 0.02,
     #convert to pd.df with suitable namings
     cols[cols.index('NEF AUC Median')] = 'NEF AUC Random Mean'
     for i in range(len(model_names)):
-        model_names[i] = model_name_dict[model_names[i]]
+        model_names[i] = model_name_dict()[model_names[i]]
         
     midx = pd.MultiIndex.from_product([model_names, fold_folders, folds],
                                       names=['model', 'set', 'fold'])
@@ -213,7 +276,51 @@ def tukey_multi_metrics(gather_df,
     
     return tukey_dict
 
-
+def dtk_multi_metrics(gather_df, 
+                      col_indices=list(range(10)) + list(range(15, 20)) + list(range(25, 65)) + list(range(145, 149)) + list(range(150, 183)),
+                      alpha=0.05):
+    metric_names = list(gather_df.columns.values[col_indices])
+    model_names = list(gather_df.index.levels[0])
+    dtk_dict = {}
+    dtk_lib = rpackages.importr('DTK')
+    #drop fold means and medians
+    gather_df = gather_df[metric_names]
+    gather_df = gather_df.xs('test_metrics', level='set')
+    gather_df = gather_df.drop('Folds Mean', level='fold')
+    gather_df = gather_df.drop('Folds Median', level='fold')        
+    
+    #get fold count
+    model_names_rep = []
+    for m in model_names:        
+        k = gather_df.xs(m, level='model').shape[0]
+        model_names_rep.extend([m for _ in range(k)])
+    
+    
+    index_names_1 = []
+    index_names_2 = []
+    for i in range(len(model_names)):
+        for j in range(i+1, len(model_names)):
+            index_names_1.append(model_names[j])
+            index_names_2.append(model_names[i])
+       
+    for i, metric in zip(range(len(metric_names)), metric_names):
+        m_df = gather_df[metric]
+        m_df.sort_index(inplace=True)
+        m_df = m_df.loc[model_names]
+        m_df_mat = np.around(m_df.as_matrix(), decimals=4)
+        
+        dtk_results = dtk_lib.DTK_test(robjects.FloatVector(m_df_mat), robjects.FactorVector(model_names_rep), alpha)
+        dtk_results = np.array(dtk_results[1])        
+        dtk_pd = pd.DataFrame(data=[index_names_1, index_names_2, list(dtk_results[:,0]),list(dtk_results[:,1]),list(dtk_results[:,2]), [False for _ in range(len(index_names_1))]]).T
+        dtk_pd.columns = ['group1', 'group2', 'meandiff', 'Lower CI', 'Upper CI', 'reject'] 
+        
+        for j in range(dtk_pd.shape[0]):      
+            if dtk_pd.iloc[j,3] > 0 or dtk_pd.iloc[j,4] < 0:
+                dtk_pd.iloc[j,5] = True
+                
+        dtk_dict[metric] = dtk_pd
+    
+    return dtk_dict
 """
     Given a tukey_dict with metric names as key and TukeyHSDResults objects as
     values, it creates pd dataframes from the results, reject matrix and 
@@ -260,7 +367,31 @@ def analyze_tukey_dict(tukey_dict):
     
     return tukey_analysis_dict
 
-
+def analyze_dtk_dict(dtk_dict):
+    metric_names = list(dtk_dict.keys())
+    model_names = list(dtk_dict[metric_names[0]]['group2'][0:1]) + list(dtk_dict[metric_names[0]]['group1'][:40])
+    dtk_analysis_dict = {}
+    
+    for i, metric in zip(range(len(metric_names)), metric_names):               
+        dtk_df = dtk_dict[metric]
+        
+        reject_df = pd.DataFrame(0,index=model_names, columns=model_names)
+        comp_df = pd.DataFrame(0,index=model_names, columns=model_names)
+        for _, row in dtk_df.iterrows():
+            if row['reject'] == True:
+                if row['meandiff'] < 0:
+                    comp_df.loc[row['group2']][row['group1']] = 1
+                else:
+                    comp_df.loc[row['group1']][row['group2']] = 1
+            
+            reject_df.loc[row['group1']][row['group2']] = row['reject']
+                
+        dtk_df.columns.name = metric
+        reject_df.columns.name = metric
+        comp_df.columns.name = metric
+        dtk_analysis_dict[metric] = (dtk_df, reject_df, comp_df)
+    
+    return dtk_analysis_dict
 """
     Uses mean, median, and tukey comparison matrices to produce an aggregated
     comparison matrix. Can be used as loose-proxy for comparing models.
@@ -338,7 +469,7 @@ def get_model_ordering_mscores(gather_df, metric_names):
     Get spearman's rank-order correlation coefficient for between each metric's
     model ranking and that of n_hits ranking.
 """
-def get_spearman_r(agg_comp_dict, metric_names, n_hits_metrics, labels=['Keck_Pria_AS_Retest','Keck_Pria_FP_data','Keck_RMI_cdd']):
+def get_spearman_r(agg_comp_dict, metric_names, n_hits_metrics, labels=['PriA-SSB AS','PriA-SSB FP','RMI-FANCM1']):
     nh_dict = {}                        
     for j, n_hit_metric in zip(range(len(n_hits_metrics)), n_hits_metrics):              
         ranked_nh_pd = agg_comp_dict[n_hit_metric]['top'].rank(method='min', ascending=False)
@@ -434,6 +565,42 @@ def plot_comparison_cv_ps(df_1, df_2, save_dir, figsize=(6.0, 6.0)):
         metric_1 = metric + '_PS'
         plot_scatter(rank_0, rank_1, metric_0, metric_1, save_dir, figsize)
 
+def plot_comparison_cv_ps_alt(df_1, df_2, save_dir, figsize=(6.0, 6.0)):
+    N = 3
+    fig, axs = plt.subplots(N, N, figsize=(N * 2.5, N * 2.5), sharex='col', sharey='row')
+    plt.subplots_adjust(wspace=0.1)
+    
+    index_names = df_1.index.tolist()
+    df_2 = df_2.loc[index_names]
+    metrics = list(df_1.columns)
+    for i, metric in zip(range(len(metrics)), metrics):
+        rank_0 = df_1[metric].rank(method='min', ascending=False).tolist()
+        rank_1 = df_2[metric].rank(method='min', ascending=False).tolist()
+        metric_0 = metric + '_CV'
+        metric_1 = metric + '_PS'
+        
+        k = i // N
+        j = i % N
+        axs[k, j].scatter(rank_1, rank_0)
+        axs[k, j].set_xlim([0, len(rank_1)])
+        axs[k, j].set_ylim([0, len(rank_1)])
+        
+        axs[k, j].axes.set_ylabel(metric_0)
+        axs[k, j].axes.set_xlabel(metric_1)
+        
+        if j == 0:
+                axs[k, j].axes.set_ylabel(metric_0)
+        if k == N - 1:
+            axs[k, j].axes.set_xlabel(metric_1)
+                
+        axs[k, j].xaxis.set_ticks_position('none')
+        axs[k, j].yaxis.set_ticks_position('none')
+
+    plt.tight_layout()
+    plt.savefig(save_dir, bbox_inches='tight')
+    plt.show()
+        
+        
 def get_model_winscores(agg_comp_dict, metric_names):
     model_names = agg_comp_dict[metric_names[0]]['top'].index.tolist()
     winscore_df = pd.DataFrame(data=np.zeros((len(model_names), len(metric_names))),
@@ -449,7 +616,8 @@ def get_model_winscores(agg_comp_dict, metric_names):
 """
     Scatter plot for metrics vs n_hits.
 """
-def plot_scatter_nhits(agg_comp_dict, metric_names, n_hits_metrics, save_dir, figsize=(6.0, 6.0), labels=['Keck_Pria_AS_Retest','Keck_Pria_FP_data','Keck_RMI_cdd']):
+def plot_scatter_nhits(agg_comp_dict, metric_names, n_hits_metrics, save_dir, figsize=(6.0, 6.0), 
+                       labels=['PriA-SSB AS','PriA-SSB FP','RMI-FANCM1']):
     for j, n_hit_metric in zip(range(len(n_hits_metrics)), n_hits_metrics):              
         ranked_nh_pd = agg_comp_dict[n_hit_metric]['top'].rank(method='min', ascending=False)
         ranked_nh_list = agg_comp_dict[n_hit_metric]['top'].index.tolist()
@@ -471,10 +639,61 @@ def plot_scatter_nhits(agg_comp_dict, metric_names, n_hits_metrics, save_dir, fi
             metric_1 = n_hit_metric
             plot_scatter(rank_0, rank_1, metric_0, metric_1, save_dir, figsize)
 
+def plot_scatter_nhits_alt(agg_comp_dict, metric_names, n_hits_metrics, save_dir, figsize=(6.0, 6.0), 
+                           labels=['PriA-SSB AS','PriA-SSB FP','RMI-FANCM1']):
+    N = len(metric_names)
+    M = len(n_hits_metrics)
+    fig, axs = plt.subplots(N, M, figsize=figsize, sharex='col', sharey='row')
+    plt.subplots_adjust(wspace=0.1)
+    
+    for j, n_hit_metric in zip(range(len(n_hits_metrics)), n_hits_metrics):              
+        ranked_nh_pd = agg_comp_dict[n_hit_metric]['top'].rank(method='min', ascending=False)
+        ranked_nh_list = agg_comp_dict[n_hit_metric]['top'].index.tolist()
+        
+        label = labels[0]
+        for i in range(len(labels)):
+            if labels[i] in n_hit_metric:
+                label = labels[i]
+                
+        curr_metrics = [m for m in metric_names if label in m]
+        
+        for k, metric in zip(range(len(curr_metrics)), curr_metrics):
+            ranked_m_pd = agg_comp_dict[metric]['top'].rank(method='min', ascending=False)
+            ranked_m_pd = ranked_m_pd.loc[ranked_nh_list]
+            
+            rank_0 = ranked_m_pd.tolist()
+            rank_1 = ranked_nh_pd.tolist()
+            metric_0 = metric
+            metric_1 = n_hit_metric
+            
+            axs[k, j].scatter(rank_1, rank_0)
+            axs[k, j].set_xlim([0, len(rank_1)])
+            axs[k, j].set_ylim([0, len(rank_1)])
+            
+            if j == 0:
+                axs[k, j].axes.set_ylabel(metric_0)
+            if k == N - 1:
+                axs[k, j].axes.set_xlabel(metric_1)
+                
+            axs[k, j].xaxis.set_ticks_position('none')
+            axs[k, j].yaxis.set_ticks_position('none')
+
+    plt.tight_layout()
+    plt.savefig(save_dir, bbox_inches='tight')
+    plt.show()
+            
 def plot_scatter(rank_0, rank_1, metric_0, metric_1, save_dir, figsize=(6.0, 6.0)):
+    if not os.path.exists(save_dir):
+        os.makedirs(save_dir)
     plt.figure(figsize=figsize)
     plt.scatter(rank_0, rank_1)
     
+    labels=['PriA-SSB AS','PriA-SSB FP','RMI-FANCM1']
+    curr_label = ''
+    for l in labels:
+        if l in metric_0:
+            curr_label = l
+            
     filename = metric_1 + '_' + metric_0
     filename = filename.replace('%', '')
     filename = filename.replace(' ', '_')
@@ -482,8 +701,14 @@ def plot_scatter(rank_0, rank_1, metric_0, metric_1, save_dir, figsize=(6.0, 6.0
     filename = save_dir+'/'+ filename +'.png'
     plt.xlim(0, len(rank_1)+1)
     plt.ylim(0, len(rank_1)+1)
+    
+    metric_0 = metric_0.replace(curr_label, '')
+    metric_1 = metric_1.replace(curr_label, '')
+            
     plt.xlabel('Metric {}'.format(metric_0))
     plt.ylabel('Metric {}'.format(metric_1))
+    
+    plt.title(curr_label)
     plt.savefig(filename, bbox_inches='tight')
     plt.show()
     
@@ -494,7 +719,7 @@ def get_overlap(agg_comp_dict, N=5):
     overlap_dict = {}
     metric_names = list(agg_comp_dict.keys())
     for i, metric in zip(range(len(metric_names)), metric_names):  
-        top_models = agg_comp_dict[metric]['top'].iloc[:N]
+        top_models = agg_comp_dict[metric]['top'].loc[agg_comp_dict[metric]['top'].rank(method='min', ascending=False) <= N]
         for model, score in top_models.iteritems():
             if model in overlap_dict.keys():
                 overlap_dict[model] = overlap_dict[model]+1
@@ -516,7 +741,8 @@ def get_overlap(agg_comp_dict, N=5):
     Given agg_comp_dict returns a df with a column for n_hits, and the rows
     are the most similar metrics from top-to-bottom.
 """
-def get_similar_to_nhits(agg_comp_dict, metric_names, n_hits_metrics, labels=['Keck_Pria_AS_Retest','Keck_Pria_FP_data','Keck_RMI_cdd']):
+def get_similar_to_nhits(agg_comp_dict, metric_names, n_hits_metrics, 
+                         labels=['PriA-SSB AS','PriA-SSB FP','RMI-FANCM1']):
     nh_dict = {}                        
     for j, n_hit_metric in zip(range(len(n_hits_metrics)), n_hits_metrics):              
         ranked_nh_pd = agg_comp_dict[n_hit_metric]['top'].rank(method='min', ascending=False)
@@ -606,7 +832,7 @@ def plot_simultaneous(tukey_hsd, ax=None, figsize=(10,6),
         ax1.errorbar(means[sorted_index], np.arange(len(means))[::-1], xerr=tukey_hsd.halfwidths[sorted_index],
                          marker='o', linestyle='None', color='k', ecolor='k')
         
-        ax1.set_title('Multiple Comparisons Between All Pairs (Tukey)')
+        #ax1.set_title('Multiple Comparisons Between All Pairs (Tukey)')
         r = np.max(maxrange) - np.min(minrange)
         ax1.set_ylim([-1, tukey_hsd._multicomp.ngroups])
         ax1.set_xlim([np.min(minrange) - r / 10., np.max(maxrange) + r / 10.])
@@ -614,34 +840,168 @@ def plot_simultaneous(tukey_hsd, ax=None, figsize=(10,6),
         ax1.set_yticklabels(np.insert(tukey_hsd.groupsunique[sorted_index[::-1]].astype(str), 0, ''))
         ax1.set_xlabel(xlabel if xlabel is not None else '')
         ax1.set_ylabel(ylabel if ylabel is not None else '')
-        plt.grid(axis='y')
+        ax1.grid(axis='y')
         return fig
 
-
-"""
-    Given a tukey_dict with metric names as key and TukeyHSDResults objects as
-    values, plots universal confidence intervals for each model under each metric.
-"""
-def plot_uconf_grid(tukey_dict, metric_names):
-    fig = plt.figure()
-    for i, metric in zip(range(len(metric_names)), metric_names):               
-        tukey_res = tukey_dict[metric]
+def plot_simultaneous_alt(tukey_hsd, ax=None, figsize=(10,6),
+                          xlabel=None, ylabel=None):
+        fig, ax1 = utils.create_mpl_ax(ax)
+        if figsize is not None:
+            fig.set_size_inches(figsize)
+        if getattr(tukey_hsd, 'halfwidths', None) is None:
+            tukey_hsd._simultaneous_ci()
+        means = tukey_hsd._multicomp.groupstats.groupmean
+        g_names = tukey_hsd.groupsunique.astype(str)
         
-        tukey_ax = fig.add_subplot(1,len(metric_names),i+1)
-        plot_simultaneous(tukey_res, xlabel=metric, ax=tukey_ax)    
+        classes = ['RandomForest', 'Docking', 'CBF', 'LSTM', 'SingleRegression', 'SingleClassification', 'MultiClassification']
+        indices = []
+        for c in classes:
+            rep_indices = [i for i in range(len(means)) if c in g_names[i]]
+            rep_means = [means[i] for i in range(len(means)) if c in g_names[i]]
+            sorted_index = np.argsort(rep_means)[::-1]
+            indices.append(rep_indices[sorted_index[0]])
+        
+        means = tukey_hsd._multicomp.groupstats.groupmean[indices]
+        g_names = tukey_hsd.groupsunique[indices]
+        sorted_index = np.argsort(means)[::-1]
+        minrange = [means[i] - tukey_hsd.halfwidths[i] for i in sorted_index]
+        maxrange = [means[i] + tukey_hsd.halfwidths[i] for i in sorted_index]
+        
+        ax1.errorbar(means[sorted_index], np.arange(len(means))[::-1], xerr=tukey_hsd.halfwidths[sorted_index],
+                         marker='o', linestyle='None', color='k', ecolor='k')
+        
+        #ax1.set_title('Multiple Comparisons Between All Pairs (Tukey)')
+        r = np.max(maxrange) - np.min(minrange)
+        ax1.set_ylim([-1, len(sorted_index)])
+        ax1.set_xlim([np.min(minrange) - r / 10., np.max(maxrange) + r / 10.])
+        ax1.set_yticks(np.arange(-1,len(sorted_index)))
+        ax1.set_yticklabels(np.insert(g_names[sorted_index[::-1]].astype(str), 0, ''))
+        ax1.set_xlabel(xlabel if xlabel is not None else '')
+        ax1.set_ylabel(ylabel if ylabel is not None else '')
+        ax1.grid(axis='y')
+        return fig
+
+def plot_metrics_alt(axs, x, ml, m):
+    x = np.array(x)
+    ml = np.array(ml)
+    means = x
+    g_names = ml
+    
+    classes = ['RandomForest', 'Docking', 'CBF', 'LSTM', 'SingleRegression', 'SingleClassification', 'MultiClassification']
+    indices = []
+    for c in classes:
+        rep_indices = [i for i in range(len(means)) if c in g_names[i]]
+        rep_means = [means[i] for i in range(len(means)) if c in g_names[i]]
+        sorted_index = np.argsort(rep_means)[::-1]
+        indices.append(rep_indices[sorted_index[0]])
+    
+    x = x[indices]
+    ml = ml[indices]
+    sorted_index = np.argsort(x)[::-1]
+    x = x[sorted_index]
+    
+    axs.scatter(x, range(x.shape[0]))
+                    
+    r = np.max(x) - np.min(x)
+    axs.set_ylim([-1, len(x)])
+    axs.set_xlim([np.min(x) - r / 10., np.max(x) + r / 10.])
+    axs.set_yticks(np.arange(-1,len(x)))
+    axs.set_yticklabels(np.insert(ml[sorted_index[::-1]], 0, ''))
+    axs.set_xlabel(m.replace(' PriA-SSB AS',''))
+    axs.grid(axis='y')
+    
     return
-
-
+    
 """
     Given a tukey_dict with metric names as key and TukeyHSDResults objects as
     values, plots universal confidence intervals for each model under each metric.
 """
-def plot_uconf_simple(tukey_dict, metric_names, figsize=(10,6)):
+def plot_uconf_grid(tukey_dict, metric_names, labels, save_dir, figsize=(10,6), alt=False):
+    if not os.path.exists(save_dir):
+        os.makedirs(save_dir)
+    for l in labels:
+        if not os.path.exists(save_dir+l.replace(' ', '_')):
+            os.makedirs(save_dir+l.replace(' ', '_'))
+        
+        label_metrics = [m for m in metric_names if l in m]
+        
+        m_list = []
+        file_count = 0
+        for i, metric in zip(range(len(label_metrics)), label_metrics):
+            if len(m_list) == 4 or i == (len(label_metrics)-1):
+                if i == (len(label_metrics)-1):
+                    m_list.append((tukey_dict[metric], metric))
+                fig, axs = plt.subplots(2, 2, figsize=figsize)          
+                plt.subplots_adjust(wspace=0.1)
+                for (j, (tukey_res, m)) in zip(range(len(m_list)), m_list):
+                    ri = j // 2
+                    ci = j % 2
+                    if alt:
+                        plot_simultaneous_alt(tukey_res, xlabel=m.replace(' '+l, ''), ax=axs[ri,ci], figsize=figsize)
+                    else:
+                        plot_simultaneous(tukey_res, xlabel=m.replace(' '+l, ''), ax=axs[ri,ci], figsize=figsize)
+                    axs[ri,ci].set_title(l)
+                plt.tight_layout()
+                plt.savefig(save_dir+l.replace(' ', '_')+'/'+str(file_count)+'.png', 
+                            bbox_inches='tight')
+                plt.show()
+                file_count += 1
+                m_list = []
+            m_list.append((tukey_dict[metric], metric))
+    return
+def plot_metric_grid(gather_df, save_dir, figsize=(10,6), alt=False):
+    if not os.path.exists(save_dir):
+        os.makedirs(save_dir)
+    gather_df = gather_df.xs('test_metrics', level='set').xs('fold 0', level='fold')
+    
+    m_list = []
+    file_count = 0
+    for i, metric in zip(range(len(gather_df.columns)), gather_df.columns):
+        sorted_index = np.argsort(gather_df[metric])
+        x = np.array(gather_df[metric][sorted_index])
+        model_list = gather_df[metric][sorted_index].index.tolist()
+        if len(m_list) == 4 or i == (len(gather_df.columns)-1):
+            if i == (len(gather_df.columns)-1):
+                m_list.append((x, model_list, metric))
+            fig, axs = plt.subplots(2, 2, figsize=figsize)
+            plt.subplots_adjust(wspace=0.1)
+            for (j, (x, ml, m)) in zip(range(len(m_list)), m_list):
+                ri = j // 2
+                ci = j % 2
+                if alt:
+                    plot_metrics_alt(axs[ri,ci], x, ml, m)
+                else:
+                    axs[ri,ci].scatter(x, range(x.shape[0]))
+                    
+                    r = np.max(x) - np.min(x)
+                    axs[ri,ci].set_ylim([-1, len(x)])
+                    axs[ri,ci].set_xlim([np.min(x) - r / 10., np.max(x) + r / 10.])
+                    axs[ri,ci].set_yticks(np.arange(-1,len(x)))
+                    axs[ri,ci].set_yticklabels(np.insert(ml, 0, ''))
+                    axs[ri,ci].set_xlabel(m.replace(' PriA-SSB AS',''))
+                    axs[ri,ci].grid(axis='y')
+                axs[ri,ci].set_title('PriA-SSB AS')
+                
+            plt.tight_layout()
+            plt.savefig(save_dir+'/'+str(file_count)+'.png', bbox_inches='tight')
+            plt.show()
+            file_count += 1
+            m_list = []
+        m_list.append((x, model_list, metric))
+    return  
+"""
+    Given a tukey_dict with metric names as key and TukeyHSDResults objects as
+    values, plots universal confidence intervals for each model under each metric.
+"""
+def plot_uconf_simple(tukey_dict, metric_names, figsize=(10,6), alt=False):
     for i, metric in zip(range(len(metric_names)), metric_names):    
         fig, tukey_ax = plt.subplots()         
         tukey_res = tukey_dict[metric]
         
-        plot_simultaneous(tukey_res, xlabel=metric, ax=tukey_ax, figsize=figsize)    
+        if alt:
+            plot_simultaneous_alt(tukey_res, xlabel=metric, ax=tukey_ax, figsize=figsize)   
+        else:
+            plot_simultaneous(tukey_res, xlabel=metric, ax=tukey_ax, figsize=figsize)   
     return
 
 
@@ -690,12 +1050,12 @@ def plot_uconf_slider(tukey_dict, metric_names):
 def get_best_skrf(directory, k=5, N=5):
     gather_df = gather_dir_metrics(directory, k)
     
-    metric_names = ['ROC AUC Keck_Pria_AS_Retest',
-                 'BEDROC AUC Keck_Pria_AS_Retest',
-                 'PR auc.sklearn Keck_Pria_AS_Retest',
-                 'PR auc.integral Keck_Pria_AS_Retest',
-                 'PR auc.davis.goadrich Keck_Pria_AS_Retest',
-                 'NEF AUC Keck_Pria_AS_Retest']
+    metric_names = ['ROC AUC PriA-SSB AS',
+                 'BEDROC AUC PriA-SSB AS',
+                 'PR auc.sklearn PriA-SSB AS',
+                 'PR auc.integral PriA-SSB AS',
+                 'PR auc.davis.goadrich PriA-SSB AS',
+                 'NEF AUC PriA-SSB AS']
     gather_df = gather_df.xs('val_metrics', level='set')    
     gather_df = gather_df.xs('fold 0', level='fold')    
     gather_df = gather_df[metric_names]
