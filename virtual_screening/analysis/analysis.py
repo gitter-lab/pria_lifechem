@@ -466,6 +466,33 @@ def plot_cross_validation(dir_path_list, evaluation_list, model_list, title, tas
     return
 
 
+def plot_generalization(dir_path_list, evaluation, model_list, title, task_name):
+    evaluation_column = []
+    value_column = []
+    model_column = []
+
+    for i in range(len(dir_path_list)):
+        dir_ = dir_path_list[i]
+        model = model_list[i]
+
+        c1, c2, c3 = fetch_one_model(dir_, 20, evaluation_list=[evaluation], model=model)
+        evaluation_column.extend(c1)
+        value_column.extend(c2)
+        model_column.extend(c3)
+
+    data_pd = pd.DataFrame({'evaluation method': evaluation_column,
+                            'value': value_column,
+                            'model': model_column})
+
+    barplot = sns.barplot(x="model", y="value", data=data_pd)
+    fig = barplot.get_figure()
+    figure_dir = 'plottings/{}'.format(task_name)
+    if not os.path.isdir(figure_dir):
+        os.makedirs(figure_dir)
+    fig.savefig('{}/{}'.format(figure_dir, title), bbox_inches = 'tight')
+    return
+
+
 def get_content(grouped_data, evaluation_list, mode, evaluation_mode):
     title = '## Model comparison\n### {} of {}'.format(mode, evaluation_mode)
     header = '| model |'
