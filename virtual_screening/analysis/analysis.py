@@ -13,6 +13,14 @@ evaluations = {0: 'train prec', 1: 'train roc', 2: 'train bedroc',
 
 facecolors = ['r', 'g', 'b', 'y', 'm', 'c', 'k', 'b']
 
+dict_ = {'single_classification': 'STNN-C',
+         'single_regression': 'STNN-R',
+         'vanilla_lstm': 'LSTM',
+         'multi_classification': 'MTNN-C',
+         'random_forest': 'RF',
+         'irv': 'IRV',
+         'lightchem': 'CBF'}
+
 
 def check_result_completeness(file_path, number):
     cnt = 0
@@ -446,6 +454,9 @@ def plot_cross_validation(dir_path_list, evaluation_list, model_list, title, tas
         value_column.extend(c2)
         model_column.extend(c3)
 
+    for i in range(len(model_column)):
+        model_column[i] = dict_[model_column[i]]
+
     data_pd = pd.DataFrame({'evaluation method': evaluation_column,
                             'value': value_column,
                             'model': model_column})
@@ -480,11 +491,14 @@ def plot_generalization(dir_path_list, evaluation, model_list, title, task_name)
         value_column.extend(c2)
         model_column.extend(c3)
 
+    for i in range(len(model_column)):
+        model_column[i] = dict_[model_column[i]]
+
     data_pd = pd.DataFrame({'evaluation method': evaluation_column,
                             'value': value_column,
                             'model': model_column})
 
-    barplot = sns.barplot(x="model", y="value", data=data_pd)
+    barplot = sns.boxplot(x="model", y="value", data=data_pd)
     fig = barplot.get_figure()
     figure_dir = 'plottings/{}'.format(task_name)
     if not os.path.isdir(figure_dir):
@@ -530,6 +544,9 @@ def table_cross_validation(dir_path_list, evaluation_list, model_list, evaluatio
         evaluation_column.extend(c1)
         value_column.extend(c2)
         model_column.extend(c3)
+
+    for i in range(len(model_column)):
+        model_column[i] = dict_[model_column[i]]
         
     data_pd = pd.DataFrame({'evaluation method': evaluation_column,
                             'value': value_column,
