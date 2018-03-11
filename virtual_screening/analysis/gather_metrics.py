@@ -354,11 +354,11 @@ def analyze_tukey_dict(tukey_dict):
         for _, row in tukey_df.iterrows():
             if row['reject'] == True:
                 if row['meandiff'] < 0:
-                    comp_df.loc[row['group1']][row['group2']] = 1
+                    comp_df.loc[row['group1'],row['group2']] = 1
                 else:
-                    comp_df.loc[row['group2']][row['group1']] = 1
+                    comp_df.loc[row['group2'],row['group1']] = 1
             
-            reject_df.loc[row['group1']][row['group2']] = row['reject']
+            reject_df.loc[row['group1'],row['group2']] = row['reject']
                 
         tukey_df.columns.name = metric
         reject_df.columns.name = metric
@@ -369,7 +369,7 @@ def analyze_tukey_dict(tukey_dict):
 
 def analyze_dtk_dict(dtk_dict):
     metric_names = list(dtk_dict.keys())
-    model_names = list(dtk_dict[metric_names[0]]['group2'][0:1]) + list(dtk_dict[metric_names[0]]['group1'][:40])
+    model_names = list(np.unique(list(dtk_dict[metric_names[0]]['group2']) + list(dtk_dict[metric_names[0]]['group1'])))
     dtk_analysis_dict = {}
     
     for i, metric in zip(range(len(metric_names)), metric_names):               
@@ -380,11 +380,11 @@ def analyze_dtk_dict(dtk_dict):
         for _, row in dtk_df.iterrows():
             if row['reject'] == True:
                 if row['meandiff'] < 0:
-                    comp_df.loc[row['group2']][row['group1']] = 1
+                    comp_df.loc[row['group2'],row['group1']] = 1
                 else:
-                    comp_df.loc[row['group1']][row['group2']] = 1
+                    comp_df.loc[row['group1'],row['group2']] = 1
             
-            reject_df.loc[row['group1']][row['group2']] = row['reject']
+            reject_df.loc[row['group1'],row['group2']] = row['reject']
                 
         dtk_df.columns.name = metric
         reject_df.columns.name = metric
@@ -949,6 +949,46 @@ def plot_uconf_grid(tukey_dict, metric_names, labels, save_dir, figsize=(10,6), 
                 m_list = []
             m_list.append((tukey_dict[metric], metric))
     return
+
+def plot_metrics_bp(gather_df, metric_names, labels, save_dir):
+    for l in labels:
+        curr_metrics = [m for m in metric_names if l in m]
+        for metric in curr_metrics:
+            metric_df = gather_df[metric]
+            metric_df = metric_df.xs('test_metrics', level='set')
+            metric_df = metric_df.drop('Folds Mean', level='fold')
+            k = len(metric_df.index.levels[1]) - 2
+            for i in range(k):
+                metric_df = metric_df.drop('fold ' + str(i), level='fold')
+            metric_df = metric_df.sort_values(ascending=False)
+            boxplot_names = [m for (m,f) in metric_df.index.tolist()]
+
+            metric_df = gather_df[metric]
+            metric_df = metric_df.xs('test_metrics', level='set')
+            metric_df = metric_df.drop('Folds Mean', level='fold')
+            metric_df = metric_df.drop('Folds Median', level='fold')
+
+            boxplot_data = []
+            for model in boxplot_names:
+                boxplot_data.append(metric_df.loc[model])
+
+            file_name = metric.replace(' '+l, '')
+            file_name = file_name.replace('%', '_')
+            file_name = file_name.replace('.', '_')
+            file_name = file_name.replace(' ', '_')
+            if not os.path.exists(save_dir+'/'+l.replace(' ','_')+'/'):
+                os.makedirs(save_dir+'/'+l.replace(' ','_')+'/')
+            file_name = save_dir+'/'+l.replace(' ','_')+'/'+file_name+'.png'
+
+            plt.figure(figsize=(30, 10))
+            plt.boxplot(x=boxplot_data, labels=boxplot_names)
+            plt.xticks(rotation=90)
+            plt.ylabel(metric.replace(' '+l, ''))
+            plt.title(metric)
+            plt.tight_layout()
+            plt.savefig(file_name, bbox_inches='tight')
+            plt.show()
+
 def plot_metric_grid(gather_df, save_dir, figsize=(10,6), alt=False):
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)
