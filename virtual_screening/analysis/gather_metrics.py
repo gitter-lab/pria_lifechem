@@ -449,7 +449,7 @@ def get_model_ordering(agg_comp_dict, metric_names):
     Given gather_df returns a df with a column for each metric, and values of
     of rows for each column are (models, metric_score) pairs.
 """
-def get_model_ordering_mscores(gather_df, metric_names):
+def get_model_ordering_mscores(gather_df, metric_names, precision=4):
     ordered_df = pd.DataFrame(data=np.zeros((gather_df[metric_names[0]].xs('test_metrics', level='set').drop('fold 0', level='fold').xs('Folds Mean', level='fold').shape[0], len(metric_names))),
                               columns=metric_names,
                               dtype=str)      
@@ -460,7 +460,7 @@ def get_model_ordering_mscores(gather_df, metric_names):
         
         mscore_list = m_df.tolist()
         m_ordering_list = m_df.index.tolist()
-        m_order_mscore_list = [str(m) + ", " + str(r) for m, r in zip(m_ordering_list, mscore_list)]
+        m_order_mscore_list = [str(m) + ", " + str(round(r,precision)) for m, r in zip(m_ordering_list, mscore_list)]
         ordered_df[metric] = m_order_mscore_list
         
     return ordered_df
