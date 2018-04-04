@@ -19,7 +19,9 @@ dict_ = {'single_classification': 'STNN-C',
          'multi_classification': 'MTNN-C',
          'random_forest': 'RF',
          'irv': 'IRV',
-         'lightchem': 'CBF'}
+         'dockscore': 'Dock',
+         'consensus_dockscore': 'CDock',
+         'consensus_bcs': 'CDock'}
 
 
 def check_result_completeness(file_path, number):
@@ -492,7 +494,9 @@ def plot_generalization(dir_path_list, evaluation, model_list, title, task_name)
         model_column.extend(c3)
 
     for i in range(len(model_column)):
-        model_column[i] = dict_[model_column[i]]
+        for k in dict_.keys():
+            if k in model_column[i]:
+                model_column[i] = model_column[i].replace(k, dict_[k])
 
     data_pd = pd.DataFrame({'evaluation method': evaluation_column,
                             'value': value_column,
@@ -500,10 +504,11 @@ def plot_generalization(dir_path_list, evaluation, model_list, title, task_name)
 
     barplot = sns.boxplot(x="model", y="value", data=data_pd)
     fig = barplot.get_figure()
+    plt.xticks(rotation=60)
     figure_dir = 'plottings/{}'.format(task_name)
     if not os.path.isdir(figure_dir):
         os.makedirs(figure_dir)
-    fig.savefig('{}/{}'.format(figure_dir, title), bbox_inches = 'tight')
+    fig.savefig('{}/{}'.format(figure_dir, title), bbox_inches='tight')
     return
 
 
