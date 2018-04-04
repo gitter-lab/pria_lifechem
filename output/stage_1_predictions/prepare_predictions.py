@@ -21,20 +21,20 @@ model_name_list = [
     'deepchem_irv_20',
     'deepchem_irv_40',
     'deepchem_irv_80',
-    "dockscore_hybrid",
-    "dockscore_fred",
-    "dockscore_dock6",
-    "dockscore_rdockint",
-    "dockscore_rdocktot",
-    "dockscore_surflex",
-    "dockscore_ad4",
-    "dockscore_plants",
-    "dockscore_smina",
-    "consensus_dockscore_max",
-    "consensus_bcs_efr1_opt",
-    "consensus_bcs_rocauc_opt",
-    "consensus_dockscore_median",
-    "consensus_dockscore_mean"
+    'dockscore_hybrid',
+    'dockscore_fred',
+    'dockscore_dock6',
+    'dockscore_rdockint',
+    'dockscore_rdocktot',
+    'dockscore_surflex',
+    'dockscore_ad4',
+    'dockscore_plants',
+    'dockscore_smina',
+    'consensus_dockscore_max',
+    'consensus_bcs_efr1_opt',
+    'consensus_bcs_rocauc_opt',
+    'consensus_dockscore_median',
+    'consensus_dockscore_mean'
 ]
 
 fold_num = [
@@ -43,27 +43,6 @@ fold_num = [
     5, 5, 5, 5, 5,
     5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5
 ]
-
-model_name_list = [
-    "dockscore_hybrid",
-    "dockscore_fred",
-    "dockscore_dock6",
-    "dockscore_rdockint",
-    "dockscore_rdocktot",
-    "dockscore_surflex",
-    "dockscore_ad4",
-    "dockscore_plants",
-    "dockscore_smina",
-    "consensus_dockscore_max",
-    "consensus_bcs_efr1_opt",
-    "consensus_bcs_rocauc_opt",
-    "consensus_dockscore_median",
-    "consensus_dockscore_mean"
-]
-
-fold_num = [5, 5, 5, 5, 5,
-            5, 5, 5, 5, 5,
-            5, 5, 5, 5]
 
 task_list = ['cross_validation_Keck_Pria_AS_Retest', 'cross_validation_Keck_FP', 'cross_validation_RMI']
 
