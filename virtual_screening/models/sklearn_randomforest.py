@@ -218,8 +218,11 @@ if __name__ == '__main__':
     with open(config_json_file, 'r') as f:
             conf = json.load(f)
     stage = conf['stage']
+    isHPS = conf['isHPS']
             
     if stage == 1:
+        if isHPS:
+            k = 1
         for i in range(k):  
             if not os.path.exists(model_dir+'fold_'+str(i)):
                 os.makedirs(model_dir+'fold_'+str(i))         
