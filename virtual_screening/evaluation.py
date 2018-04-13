@@ -8,13 +8,7 @@ import rpy2.robjects.packages as rpackages
 from sklearn.metrics import auc
 from croc import BEDROC, ScoredData
 import os
-import matplotlib
-import matplotlib.pyplot as plt
 
-"""
-width and height of plots
-"""
-w, h = 16, 10
 
 '''
 this if for multi-task evaluation
@@ -217,101 +211,6 @@ def plot_curve_multi(actual, predicted, file_dir, mode='pr', label_names=None, p
         plot_curve_function[mode](actual, predicted, perc_vec, file_dir, label_names)
     else:
         plot_curve_function[mode](actual, predicted, file_dir, label_names)
-
-def plot_pr_curve(actual, predicted, file_dir, label_names=None):
-    prroc = rpackages.importr('PRROC')
-    
-    nb_classes = 1    
-    if len(actual.shape) == 2:
-        nb_classes = actual.shape[1]
-        
-    if label_names == None:
-        label_names = ['label ' + str(i) for i in range(nb_classes)]
-        
-    lw = 2
-    mean_y, mean_x = np.array([]), np.array([])
-    for i in range(nb_classes):  
-        non_missing_indices = np.argwhere(actual[:, i] != -1)[:, 0]
-        mean_x = np.concatenate((mean_x, actual[non_missing_indices,i]))
-        mean_y = np.concatenate((mean_y, predicted[non_missing_indices,i]))
-    
-    mean_y, mean_x, _ = precision_recall_curve(mean_x.ravel(), 
-                                               mean_y.ravel())
-    
-    mean_auc = precision_auc_multi(actual, predicted, range(nb_classes), np.mean)
-    median_auc = precision_auc_multi(actual, predicted, range(nb_classes), np.median)
-    for i in range(nb_classes):  
-        non_missing_indices = np.argwhere(actual[:, i] != -1)[:, 0]
-        plt.figure(figsize=(w,h))
-        y, x, _ = precision_recall_curve(actual[non_missing_indices,i], predicted[non_missing_indices,i])
-        auc = average_precision_score(actual[non_missing_indices,i], predicted[non_missing_indices,i])
-        plt.plot(x, y, lw=lw, label='label '+label_names[i] + 
-        '(sklearn = %0.5f)' % (auc))
-        
-        x = robjects.FloatVector(actual[non_missing_indices,i])
-        y = robjects.FloatVector(predicted[non_missing_indices,i])
-        pr = prroc.pr_curve(x, y, curve=True)
-        pr_curve = np.array(pr[3])
-        plt.plot(pr_curve[:, 0], pr_curve[:, 1], lw=lw,
-                 label='label '+label_names[i] + 
-                 '(integral area = %0.5f) \n (d+g area = %0.5f)' %
-                       (pr[1][0], pr[2][0])) 
-    
-        plt.plot(mean_x, mean_y, color='g', linestyle='--',
-             label='Mean (area = %0.2f)' % 
-             (mean_auc), lw=lw)
-        
-            
-        plt.ylim([0.0, 1.05])
-        plt.xlim([0.0, 1.0])
-        plt.xlabel('Recall')
-        plt.ylabel('Precision')
-        plt.title('PR Curve for label ' + label_names[i])
-        plt.legend(loc="lower right")
-        plt.savefig(file_dir+'_curve_{}.png'.format(label_names[i]),bbox_inches='tight')
-        plt.close()
-
-def plot_roc_curve(actual, predicted, file_dir, label_names=None):
-    nb_classes = 1    
-    if len(actual.shape) == 2:
-        nb_classes = actual.shape[1]
-        
-    if label_names == None:
-        label_names = ['label ' + str(i) for i in range(nb_classes)]
-        
-    lw = 2
-    mean_x, mean_y = np.array([]), np.array([])
-    for i in range(nb_classes):
-        non_missing_indices = np.argwhere(actual[:, i] != -1)[:, 0]
-        mean_x = np.concatenate((mean_x, actual[non_missing_indices,i]))
-        mean_y = np.concatenate((mean_y, predicted[non_missing_indices,i]))
-    
-    mean_x, mean_y, _ = roc_curve(mean_x.ravel(), 
-                                  mean_y.ravel())
-    
-    mean_auc = roc_auc_multi(actual, predicted, range(nb_classes), np.mean)
-    median_auc = roc_auc_multi(actual, predicted, range(nb_classes), np.median)
-    for i in range(nb_classes):
-        non_missing_indices = np.argwhere(actual[:, i] != -1)[:, 0]
-        plt.figure(figsize=(w,h))
-        x, y, _ = roc_curve(actual[non_missing_indices,i], predicted[non_missing_indices,i])
-        auc = roc_auc_score(actual[non_missing_indices,i], predicted[non_missing_indices,i])
-        plt.plot(x, y, lw=lw, label='label '+label_names[i] + 
-        '(sklearn = %0.5f)' % (auc))
-    
-        plt.plot(mean_x, mean_y, color='g', linestyle='--',
-             label='Mean (area = %0.2f)' % 
-             (mean_auc), lw=lw)
-        
-            
-        plt.ylim([0.0, 1.05])
-        plt.xlim([0.0, 1.0])
-        plt.xlabel('FPR')
-        plt.ylabel('TPR')
-        plt.title('ROC Curve for label ' + label_names[i])
-        plt.legend(loc="lower right")
-        plt.savefig(file_dir+'_curve_{}.png'.format(label_names[i]),bbox_inches='tight')
-        plt.close()
 
 
 def enrichment_factor_multi(actual, predicted, percentile, eval_indices):
@@ -567,89 +466,7 @@ def nef_auc(y_true, y_pred, perc_vec, label_names=None):
                              index=['NEF_AUC'],
                              columns=label_names+['Mean', 'Random Mean'])
     return nef_auc_pd
-    
-def plot_nef(y_true, y_pred, perc_vec, file_dir, label_names=None):
-    """
-    Plots the EF_Normalized curve with notable info. Also returns the EF_Norm AUC; 
-    upper bound is 1.
-    If more than one label is given, draws curves for each label and 
-    the mean curve. Returns a vector of auc values, one for each label.
-    """
-    nef_mat, ef_mat, ef_max_mat  = norm_enrichment_factor(y_true, y_pred, 
-                                                         perc_vec, label_names)
-    nef_mat = nef_mat.as_matrix() 
-    ef_mat = ef_mat.as_matrix()                                                         
-    ef_max_mat = ef_max_mat.as_matrix() 
-    
-    nb_classes = 1    
-    if len(y_true.shape) == 2:
-        nb_classes = y_true.shape[1]
-        
-    if label_names == None:
-        label_names = ['label ' + str(i) for i in range(nb_classes)]
-        
-    lw = 2
-    nef_auc = np.zeros(nb_classes) 
-    random_mean_nef = 1 / ef_max_mat[:,-2] 
-    mean_nef = nef_mat[:,-2]     
-    for i in range(nb_classes):
-        plt.figure(figsize=(w,h))
-        nef_auc[i] = auc(perc_vec, nef_mat[:,i])
-        plt.plot(perc_vec, nef_mat[:,i], lw=lw,
-             label=label_names[i] + ' (area = %0.2f)' % 
-             (nef_auc[i] / max(perc_vec)))
-             
-        plt.plot(perc_vec, mean_nef, color='g', linestyle='--',
-             label='Mean NEF (area = %0.2f)' % 
-             (auc(perc_vec, mean_nef) / max(perc_vec)), lw=lw)
-        
-        plt.plot(perc_vec, random_mean_nef, linestyle='--',
-             label='Random Mean NEF (area = %0.2f)' % 
-             (auc(perc_vec, random_mean_nef) / max(perc_vec)), lw=lw)
-            
-        plt.xlim([-0.01, max(perc_vec) + 0.02])
-        plt.ylim([-0.05, 1.05])
-        plt.xlabel('Percentile')
-        plt.ylabel('NEF')
-        plt.title('Normalized EF Curve for label ' + label_names[i])
-        plt.legend(loc="lower right")
-        plt.savefig(file_dir+'_curve_{}.png'.format(label_names[i]),bbox_inches='tight')
-        plt.close()
-    
-    return np.mean(nef_auc) / max(perc_vec)
-    
-def plot_efp_efm(y_true, y_pred, perc_vec, file_dir, label_names=None):
-    """
-    Plots the EF_perc+EF_max curves with notable info.
-    If more than one label is given, draws curves for each label.
-    """
-    ef_mat = enrichment_factor(y_true, y_pred, 
-                               perc_vec, label_names).as_matrix()
-    max_ef_mat = max_enrichment_factor(y_true, y_pred, 
-                                       perc_vec, label_names).as_matrix()    
-    nb_classes = 1    
-    if len(y_true.shape) == 2:
-        nb_classes = y_true.shape[1]
-        
-    if label_names == None:
-        label_names = ['label ' + str(i) for i in range(nb_classes)]
-        
-    lw = 2
-    for i in range(nb_classes):
-        plt.figure(figsize=(w,h))
-        plt.plot(perc_vec, ef_mat[:,i], lw=lw,
-             label=label_names[i])
-        plt.plot(perc_vec, max_ef_mat[:,i], lw=lw,
-             label=label_names[i] + ' max')
-             
-        plt.xlim([0.0, max(perc_vec) + 0.01])
-        plt.ylim([-0.05, np.max(max_ef_mat)+10])
-        plt.xlabel('Percentile')
-        plt.ylabel('EF')
-        plt.title('EF_perc and EF_max Curve for label ' + label_names[i])
-        plt.legend(loc="lower right")
-        plt.savefig(file_dir+'_curve_{}.png'.format(label_names[i]),bbox_inches='tight')
-        plt.close()
+
 
 def n_hits_calc(y_true, y_pred, n_tests_list, label_names=None): 
     """
@@ -707,6 +524,7 @@ def n_hits_calc_at_n_tests(y_true, y_pred, n_tests):
         n_hits[i] = np.nansum( true_labels[indices] )
             
     return n_hits
+
     
 def evaluate_model(y_true, y_pred, model_dir, label_names=None, make_plots=True):
     """
