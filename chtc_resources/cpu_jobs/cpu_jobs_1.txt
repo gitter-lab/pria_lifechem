@@ -1,1 +1,0 @@
-python src/models/sklearn_randomforest.py --config_json_file=./json/sklearn_randomforest.json --model_dir=../job_results/random_forest/sklearn_rf_${cluster}_${process}/ --dataset_dir=./dataset/keck/fold_5/
