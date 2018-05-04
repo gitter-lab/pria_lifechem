@@ -28,7 +28,7 @@ cd virtual-screening
 pip install -e .
 ```
 
-If a permission denied exception comes up, try to do the installment only for current user.
+If a permission denied exception comes up, try to use the installment only for current user.
 
 ```
 pip install --user -e .
@@ -44,31 +44,37 @@ We have a pre-fixed split dataset for Keck_Pria, PCBA, and Keck_PCBA combined.
 
 ## virtual-screening
 
-- models : (optional models)
+- models:
   
-  - SingleClassification
+  - `deep_classification.py` SingleClassification (STNN-C)
   
-  - SingleRegression
+  - `deep_regression.py` SingleRegression (STNN-R)
   
-  - MultiClassification
+  - `deep_classification.py` MultiClassification (MTNN-C)
   
-  - VanillaLSTM
+  - `vanilla_lstm.py` VanillaLSTM (LSTM)
   
-  - RandomForest
+  - `sklearn_randomforest.py` RandomForest (RF)
   
-  - InfluenceRelevanceVoter (IRV)
+  - `deepchem_irv_single.py` InfluenceRelevanceVoter (IRV)
   
-  - GridSearchOptimization
+- stages:
 
-- data_preparation.py
+  - `stage_hyperparameter_search.py`
+  
+  - `stage_cross_validation.py`
+  
+  - `stage_prospective_screening.py`
 
-- function.py
+- `data_preparation.py`
 
-- evaluation.py
+- `function.py`
 
-- integrity_checker.py
+- `evaluation.py`
 
-- demo.ipynb
+- `integrity_checker.py`
+
+- analysis
 
 ## json
 
