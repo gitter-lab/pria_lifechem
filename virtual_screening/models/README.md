@@ -14,7 +14,9 @@
 
 + `CallBacks.py`: keras callback functions for early stopping. Used in neural network models.
 
-+ `cross_validation.py`: General API to run neural network and random forest models.
++ `stage_1_cross_validation.py`: General API to run neural network and random forest models on cross-validation stage.
+
++ `stage_2_prospective_screening.py`: General API to run neural network and random forest models on cross-validation stage.
 
 ## Note
 All imeplementations are intended to run on [HTCondor](http://research.cs.wisc.edu/htcondor/manual/). 
