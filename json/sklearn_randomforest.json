@@ -8,8 +8,5 @@
   },
   "enrichment_factor": {
     "ratio_list": [0.005, 0.01, 0.02, 0.05, 0.1, 0.2]
-  },
-  "isHPS": 0,
-  "useVal": 0,
-  "stage": 2
+  }
 }
