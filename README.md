@@ -1,6 +1,6 @@
 # PriA on LifeChem Library
 
-[![Build Status](https://travis-ci.org/gitter-lab/pria_lifechem.svg?branch=master)](https://github.com/gitter-lab/pria_lifechem)
+[![Build Status](https://travis-ci.org/gitter-lab/pria_lifechem.svg?branch=master)](https://travis-ci.org/gitter-lab/pria_lifechem)
 
 ## Installation
 
