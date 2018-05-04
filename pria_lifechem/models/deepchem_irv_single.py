@@ -21,23 +21,17 @@ rnd_state=1337
 np.random.seed(seed=rnd_state)
 
 class Deepchem_IRV:
-    def __init__(self, conf):
+    def __init__(self, conf, process_id, stage):
         self.conf = conf
         self.input_layer_dimension = 1024
         self.EF_ratio_list = conf['enrichment_factor']['ratio_list']
         
-        self.process_id = int(os.environ.get('process'))        
-        if self.process_id == None:
-            print('Error: No environemnt variable process exists.')
-            return 
-        else:
-            print('process id:', self.process_id)
+        self.process_id = process_id        
         
-        
-        self.stage = conf['stage']
-        param_name = 'params'
+        self.stage = stage
+        param_name = 'cross_validation'
         if self.stage == 2:
-            param_name = 'params_s2'
+            param_name = 'prospective_screening'
         
         cnt = 0
         for param in ParameterGrid(conf[param_name]):
@@ -239,11 +233,15 @@ if __name__ == '__main__':
     parser.add_argument('--config_json_file', action="store", dest="config_json_file", required=True)
     parser.add_argument('--model_dir', action="store", dest="model_dir", required=True)
     parser.add_argument('--dataset_dir', action="store", dest="dataset_dir", required=True)
+    parser.add_argument('--process_id', action="store", dest="process_id", required=True)
+    parser.add_argument('--stage', action="store", dest="stage", required=True)
     #####
     given_args = parser.parse_args()
     config_json_file = given_args.config_json_file
     model_dir = given_args.model_dir
     dataset_dir = given_args.dataset_dir
+    process_id = int(given_args.process_id)
+    stage = int(given_args.stage)
     #####
     model_file = model_dir+'tf_checkpoints/'
     config_csv_file = model_dir+'model_config.csv'
@@ -273,10 +271,9 @@ if __name__ == '__main__':
     
     with open(config_json_file, 'r') as f:
         conf = json.load(f)
-    stage = conf['stage']
     
     if stage == 1:                               
-        task = Deepchem_IRV(conf=conf)
+        task = Deepchem_IRV(conf=conf, process_id=process_id, stage=stage)
         K_neighbors = task.K
         labels = task.labels
         
@@ -392,7 +389,7 @@ if __name__ == '__main__':
         orig_train_data = []
         orig_val_data = [] 
         
-        task = Deepchem_IRV(conf=conf)
+        task = Deepchem_IRV(conf=conf, process_id=process_id, stage=stage)
         K_neighbors = task.K
         labels = task.labels
         
