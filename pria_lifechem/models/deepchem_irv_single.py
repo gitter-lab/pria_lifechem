@@ -21,12 +21,12 @@ rnd_state=1337
 np.random.seed(seed=rnd_state)
 
 class Deepchem_IRV:
-    def __init__(self, conf, process_id, stage):
+    def __init__(self, conf, process_num, stage):
         self.conf = conf
         self.input_layer_dimension = 1024
         self.EF_ratio_list = conf['enrichment_factor']['ratio_list']
         
-        self.process_id = process_id        
+        self.process_num = process_num        
         
         self.stage = stage
         param_name = 'cross_validation'
@@ -35,7 +35,7 @@ class Deepchem_IRV:
         
         cnt = 0
         for param in ParameterGrid(conf[param_name]):
-            if cnt != self.process_id:
+            if cnt != self.process_num:
                 cnt += 1
                 continue
             
@@ -233,14 +233,14 @@ if __name__ == '__main__':
     parser.add_argument('--config_json_file', action="store", dest="config_json_file", required=True)
     parser.add_argument('--model_dir', action="store", dest="model_dir", required=True)
     parser.add_argument('--dataset_dir', action="store", dest="dataset_dir", required=True)
-    parser.add_argument('--process_id', action="store", dest="process_id", required=True)
+    parser.add_argument('--process_num', action="store", dest="process_num", required=True)
     parser.add_argument('--stage', action="store", dest="stage", required=True)
     #####
     given_args = parser.parse_args()
     config_json_file = given_args.config_json_file
     model_dir = given_args.model_dir
     dataset_dir = given_args.dataset_dir
-    process_id = int(given_args.process_id)
+    process_num = int(given_args.process_num)
     stage = int(given_args.stage)
     #####
     model_file = model_dir+'tf_checkpoints/'
@@ -273,7 +273,7 @@ if __name__ == '__main__':
         conf = json.load(f)
     
     if stage == 1:                               
-        task = Deepchem_IRV(conf=conf, process_id=process_id, stage=stage)
+        task = Deepchem_IRV(conf=conf, process_num=process_num, stage=stage)
         K_neighbors = task.K
         labels = task.labels
         
@@ -389,7 +389,7 @@ if __name__ == '__main__':
         orig_train_data = []
         orig_val_data = [] 
         
-        task = Deepchem_IRV(conf=conf, process_id=process_id, stage=stage)
+        task = Deepchem_IRV(conf=conf, process_num=process_num, stage=stage)
         K_neighbors = task.K
         labels = task.labels
         
