@@ -10,13 +10,56 @@
 | LSTM-Network | `vanilla_lstm.py` |
 | Tree-Net | `tree_net.py` |
 
+## Hyperparameter Stage
+
+```
+process=0
+$transfer_output_files=/path/to/output/directory
+
+KERAS_BACKEND=theano \
+THEANO_FLAGS="base_compiledir=./tmp,device=gpu,floatX=float32,gpuarray.preallocate=0.8" \
+python grid_search_optimization.py \
+--config_json_file=../../json/single_classification.json \
+--PMTNN_weight_file=$transfer_output_files/$process.weight \
+--config_csv_file=$transfer_output_files/$process.result.csv \
+--process_num=$process \
+--model=single_classification > $transfer_output_files/$process.out
+```
+
+## Cross-Validation Stage
+
+```
+process=0
+$transfer_output_files=/path/to/output/directory
+
+KERAS_BACKEND=theano \
+THEANO_FLAGS="base_compiledir=./tmp,device=gpu,floatX=float32,gpuarray.preallocate=0.8" \
+python stage_cross_validation.py \
+--config_json_file=../../json/single_classification.json \
+--PMTNN_weight_file=$transfer_output_files/$process.weight \
+--config_csv_file=$transfer_output_files/$process.result.csv \
+--process_num=$process \
+--model=single_classification > $transfer_output_files/$process.out
+```
+
+## Prospective-Screening Stage
+
+```
+process=0
+$transfer_output_files=/path/to/output/directory
+
+KERAS_BACKEND=theano \
+THEANO_FLAGS="base_compiledir=./tmp,device=gpu,floatX=float32,gpuarray.preallocate=0.8" \
+python stage_prospective_screening.py \
+--config_json_file=../../json/single_classification.json \
+--PMTNN_weight_file=$transfer_output_files/$process.weight \
+--config_csv_file=$transfer_output_files/$process.result.csv \
+--model=single_classification > $transfer_output_files/$process.out
+```
+
 ## Helper Files
 
-+ `CallBacks.py`: keras callback functions for early stopping. Used in neural network models.
-
-+ `stage_1_cross_validation.py`: General API to run neural network and random forest models on cross-validation stage.
-
-+ `stage_2_prospective_screening.py`: General API to run neural network and random forest models on cross-validation stage.
+`CallBacks.py`: keras callback functions for early stopping. Used in neural network models.
 
 ## Note
 All imeplementations are intended to run on [HTCondor](http://research.cs.wisc.edu/htcondor/manual/). 
