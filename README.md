@@ -57,8 +57,6 @@ We have a pre-fixed split dataset for Keck_Pria, PCBA, and Keck_PCBA combined.
   - `sklearn_randomforest.py` RandomForest (RF)
   
   - `deepchem_irv_single.py` InfluenceRelevanceVoter (IRV)
-  
-- stages:
 
   - `stage_hyperparameter_search.py`
   
