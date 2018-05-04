@@ -18,7 +18,7 @@
 | rpy2 | `conda install --yes -c r rpy2` |
 | PRROC | `conda install --yes -c bioconda r-prroc=1.1` |
 | CROC | `conda install --yes -c auto croc` |
-| modified deepchem repo for IRV | https://github.com/Malnammi/deepchem | 
+| IRV | https://github.com/Malnammi/deepchem | 
 
 All of the above are prerequisites. Then clone this git repo, go to home repository and setup.
 
