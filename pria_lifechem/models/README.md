@@ -167,8 +167,3 @@ python stage_prospective_screening.py \
 ## Helper Files
 
 `CallBacks.py`: keras callback functions for early stopping. Used in neural network models.
-
-## Note
-All imeplementations are intended to run on [HTCondor](http://research.cs.wisc.edu/htcondor/manual/). 
-Jobs are submitted and each job is identified by a cluster and process id. 
-Extract the relevant model architecture code to run on a local machine.
