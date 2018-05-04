@@ -13,13 +13,6 @@ import rpy2.robjects.packages as rpackages
 
 def model_name_dict():
     return {
-    #lightchemPRAUC_1Layer1Model
-    "PRAUC_5Layer1Model": "CBF_b",
-    "PRAUC_10Layer1Model": "CBF_c",
-    "ROCAUC_5Layer1Model": "CBF_e",
-    "ROCAUC_10Layer1Model": "CBF_f",
-    "ROCAUC_1Layer1Model": "CBF_d",
-    "PRAUC_1Layer1Model": "CBF_a",
     #random forest
     "sklearn_rf_390014_24": "RandomForest_d",
     "sklearn_rf_390014_25": "RandomForest_e",

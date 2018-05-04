@@ -135,7 +135,6 @@ def filter_model_name(model_name):
     model_name = model_name.replace('SingleRegression', 'STR')
     model_name = model_name.replace('MultiClassification', 'MTC')
     model_name = model_name.replace('RandomForest', 'RF')
-    model_name = model_name.replace('LightChem', 'LC')
     model_name = model_name.replace('ConsensusDocking', 'ConDock')
     model_name = model_name.replace('Docking', 'Dock')
     return model_name
