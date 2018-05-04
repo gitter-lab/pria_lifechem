@@ -41,22 +41,6 @@ python stage_hyperparameter_search.py \
 --model=single_classification > $transfer_output_files/$process.out
 ```
 
-**Running CMD for single-task classification**
-
-```
-process=0
-$transfer_output_files=/path/to/output/directory
-
-KERAS_BACKEND=theano \
-THEANO_FLAGS="base_compiledir=./tmp,device=gpu,floatX=float32,gpuarray.preallocate=0.8" \
-python stage_hyperparameter_search.py \
---config_json_file=../../json/single_classification.json \
---PMTNN_weight_file=$transfer_output_files/$process.weight \
---config_csv_file=$transfer_output_files/$process.result.csv \
---process_num=$process \
---model=single_classification > $transfer_output_files/$process.out
-```
-
 ## Cross-Validation Stage
 
 **Running CMD for random forest**
