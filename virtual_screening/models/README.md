@@ -12,13 +12,15 @@
 
 ## Hyperparameter Stage
 
+**Running CMD for single-task classification**
+
 ```
 process=0
 $transfer_output_files=/path/to/output/directory
 
 KERAS_BACKEND=theano \
 THEANO_FLAGS="base_compiledir=./tmp,device=gpu,floatX=float32,gpuarray.preallocate=0.8" \
-python grid_search_optimization.py \
+python stage_hyperparameter_search.py \
 --config_json_file=../../json/single_classification.json \
 --PMTNN_weight_file=$transfer_output_files/$process.weight \
 --config_csv_file=$transfer_output_files/$process.result.csv \
@@ -27,6 +29,8 @@ python grid_search_optimization.py \
 ```
 
 ## Cross-Validation Stage
+
+**Running CMD for single-task classification**
 
 ```
 process=0
@@ -43,6 +47,8 @@ python stage_cross_validation.py \
 ```
 
 ## Prospective-Screening Stage
+
+**Running CMD for single-task classification**
 
 ```
 process=0
