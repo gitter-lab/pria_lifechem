@@ -17,18 +17,17 @@ rnd_state=1337
 np.random.seed(seed=rnd_state)
 
 class SKLearn_RandomForest:
-    def __init__(self, conf):
+    def __init__(self, conf, process_id, stage):
         self.conf = conf
         self.input_layer_dimension = 1024
         self.label_names = conf['label_names']
         self.EF_ratio_list = conf['enrichment_factor']['ratio_list']
         
-        self.process_id = int(os.environ.get('process'))        
-        if self.process_id == None:
-            print('Error: No environemnt variable process exists.')
-            return 
-        else:
-            print('process id:', self.process_id)
+        self.process_id = process_id
+        self.stage =  stage
+        
+        if self.stage == 0:
+            self.label_names = [self.label_names[0]]
         
         cnt = 0
         for param in ParameterGrid(conf['params']):
@@ -50,13 +49,7 @@ class SKLearn_RandomForest:
             self.class_weight = None
         
         self.model_dict = {}
-        self.useVal = bool(conf['useVal'])
-        self.stage = conf['stage']
         return
-    
-    @property    
-    def useVal(self):
-        return self.useVal
         
     def get_prediction_info(self, X, y_true):
         y_pred = np.zeros(shape=y_true.shape)        
@@ -71,7 +64,7 @@ class SKLearn_RandomForest:
         return y_true, y_pred
         
     def setup_model(self):
-        for i in [0,1,2]:
+        for i in len(self.label_names):
             self.model_dict[self.label_names[i]] = RandomForestClassifier(n_estimators=self.n_estimators, 
                                            max_features=self.max_features, 
                                            min_samples_leaf=self.min_samples_leaf, 
@@ -83,20 +76,9 @@ class SKLearn_RandomForest:
         return
         
         
-    def train_and_predict(self,
-                          X_train, y_train,
-                          X_val, y_val,
-                          X_test, y_test,
-                          model_file):
+    def train(self, X_train, y_train, model_file):
                               
         self.setup_model()
-        
-        if self.stage == 1 and not self.useVal:
-            X_train = np.concatenate((X_train, X_val))
-            y_train = np.concatenate((y_train, y_val))
-        elif self.stage == 2:
-            X_train = np.concatenate((X_train, X_val, X_test))
-            y_train = np.concatenate((y_train, y_val, y_test))
         
         p = np.random.permutation(len(X_train))
         X_train = X_train[p,:]
@@ -113,50 +95,18 @@ class SKLearn_RandomForest:
             joblib.dump(self.model_dict[label], model_file+'_'+label+'.pkl', compress = 1)
         return
 
-    def predict_with_existing(self,
-                              X_train, y_train,
-                              X_val, y_val,
-                              X_test, y_test,
-                              model_file):  
-        if self.stage == 1:
-            if self.useVal:
-                y_val, y_pred_on_val = self.get_prediction_info(X_val, y_val)
-            else:                          
-                X_train = np.concatenate((X_train, X_val))
-                y_train = np.concatenate((y_train, y_val))
-            
-            y_test, y_pred_on_test = self.get_prediction_info(X_test, y_test)
-        elif self.stage == 2:
-            X_train = np.concatenate((X_train, X_val, X_test))
-            y_train = np.concatenate((y_train, y_val, y_test))
-        
-        y_train, y_pred_on_train = self.get_prediction_info(X_train, y_train)        
+    def predict_with_existing(self, X, y):          
+        y_true, y_pred = self.get_prediction_info(X, y)        
         
         print
-        print('train precision: {}'.format(precision_auc_multi(y_train, y_pred_on_train, range(y_train.shape[1]), np.mean)))
-        print('train roc: {}'.format(roc_auc_multi(y_train, y_pred_on_train, range(y_train.shape[1]), np.mean)))
-        print('train bedroc: {}'.format(bedroc_auc_multi(y_train, y_pred_on_train, range(y_train.shape[1]), np.mean)))
+        print('precision: {}'.format(precision_auc_multi(y_true, y_pred, range(y_true.shape[1]), np.mean)))
+        print('roc: {}'.format(roc_auc_multi(y_true, y_pred, range(y_true.shape[1]), np.mean)))
+        print('bedroc: {}'.format(bedroc_auc_multi(y_true, y_pred, range(y_true.shape[1]), np.mean)))
         print
-        if self.stage == 1:
-            if self.useVal:
-                print('val precision: {}'.format(precision_auc_multi(y_val, y_pred_on_val, range(y_val.shape[1]), np.mean)))
-                print('val roc: {}'.format(roc_auc_multi(y_val, y_pred_on_val, range(y_val.shape[1]), np.mean)))
-                print('val bedroc: {}'.format(bedroc_auc_multi(y_val, y_pred_on_val, range(y_val.shape[1]), np.mean)))
-                print
-            print('test precision: {}'.format(precision_auc_multi(y_test, y_pred_on_test, range(y_test.shape[1]), np.mean)))
-            print('test roc: {}'.format(roc_auc_multi(y_test, y_pred_on_test, range(y_test.shape[1]), np.mean)))
-            print('test bedroc: {}'.format(bedroc_auc_multi(y_test, y_pred_on_test, range(y_test.shape[1]), np.mean)))
-            print
         
         label_list = self.label_names
-        nef_auc_mean = np.mean(np.array(nef_auc(y_train, y_pred_on_train, self.EF_ratio_list, label_list))) 
-        print('train nef auc: {}'.format(nef_auc_mean))
-        if self.stage == 1:
-            if self.useVal:
-                nef_auc_mean = np.mean(np.array(nef_auc(y_val, y_pred_on_val, self.EF_ratio_list, label_list))) 
-                print('val nef auc: {}'.format(nef_auc_mean))
-            nef_auc_mean = np.mean(np.array(nef_auc(y_test, y_pred_on_test, self.EF_ratio_list, label_list))) 
-            print('test nef auc: {}'.format(nef_auc_mean))
+        nef_auc_mean = np.mean(np.array(nef_auc(y_true, y_pred, self.EF_ratio_list, label_list))) 
+        print('nef auc: {}'.format(nef_auc_mean))
         return
 
     def save_model_evaluation_metrics(self,
@@ -169,9 +119,7 @@ class SKLearn_RandomForest:
             os.makedirs(metric_dir)   
         
         y_true, y_pred = self.get_prediction_info(X, y_true)
-        
         label_list = self.label_names
-        
         evaluate_model(y_true, y_pred, metric_dir, label_list)        
         return
         
@@ -186,11 +134,15 @@ if __name__ == '__main__':
     parser.add_argument('--config_json_file', action="store", dest="config_json_file", required=True)
     parser.add_argument('--model_dir', action="store", dest="model_dir", required=True)
     parser.add_argument('--dataset_dir', action="store", dest="dataset_dir", required=True)
+    parser.add_argument('--process_id', action="store", dest="process_id", required=True)
+    parser.add_argument('--stage', action="store", dest="stage", required=True)
     #####
     given_args = parser.parse_args()
     config_json_file = given_args.config_json_file
     model_dir = given_args.model_dir
     dataset_dir = given_args.dataset_dir
+    process_id = int(given_args.process_id)
+    stage = int(given_args.stage)
     #####
     config_csv_file = model_dir+'model_config.csv'
     #####
@@ -217,12 +169,43 @@ if __name__ == '__main__':
     
     with open(config_json_file, 'r') as f:
             conf = json.load(f)
-    stage = conf['stage']
-    isHPS = conf['isHPS']
-            
-    if stage == 1:
-        if isHPS:
-            k = 1
+    
+    if stage == 0:
+        i = 0
+        if not os.path.exists(model_dir+'fold_'+str(i)):
+            os.makedirs(model_dir+'fold_'+str(i))         
+        model_file = model_dir+'fold_'+str(i)+'/rf_clf'
+
+        csv_file_list = output_file_list[:]
+        test_pd = read_merged_data([csv_file_list[i]])
+        csv_file_list.pop(i)
+        train_pd = read_merged_data(csv_file_list[:3])
+
+        labels = ["Keck_Pria_AS_Retest"]
+
+        # extract data, and split training data into training and val
+        X_train, y_train = extract_feature_and_label(train_pd,
+                                                     feature_name='Fingerprints',
+                                                     label_name_list=labels)
+
+        X_test, y_test = extract_feature_and_label(test_pd,
+                                                   feature_name='Fingerprints',
+                                                   label_name_list=labels)
+        print('done data preparation')
+
+        task = SKLearn_RandomForest(conf=conf, process_id=process_id, stage=stage)
+        task.train(X_train, y_train, model_file)
+        task.save_model_params(config_csv_file)
+
+        #####
+        task.save_model_evaluation_metrics(X_train, y_train, model_file,
+                                      model_dir+'fold_'+str(i)+'/train_metrics/',
+                                      label_names=labels)
+
+        task.save_model_evaluation_metrics(X_test, y_test, model_file,
+                                          model_dir+'fold_'+str(i)+'/test_metrics/',
+                                          label_names=labels)
+    elif stage == 1:
         for i in range(k):  
             if not os.path.exists(model_dir+'fold_'+str(i)):
                 os.makedirs(model_dir+'fold_'+str(i))         
@@ -231,8 +214,6 @@ if __name__ == '__main__':
             csv_file_list = output_file_list[:]
             test_pd = read_merged_data([csv_file_list[i]])
             csv_file_list.pop(i)
-            val_pd = read_merged_data([csv_file_list[i%len(csv_file_list)]])
-            csv_file_list.pop(i%len(csv_file_list))
             train_pd = read_merged_data(csv_file_list)
             
             labels = ["Keck_Pria_AS_Retest", "Keck_Pria_FP_data", "Keck_RMI_cdd"]
@@ -241,32 +222,18 @@ if __name__ == '__main__':
             X_train, y_train = extract_feature_and_label(train_pd,
                                                          feature_name='Fingerprints',
                                                          label_name_list=labels)
-            
-            X_val, y_val = extract_feature_and_label(val_pd,
-                                                     feature_name='Fingerprints',
-                                                     label_name_list=labels)
                                                        
             X_test, y_test = extract_feature_and_label(test_pd,
                                                        feature_name='Fingerprints',
                                                        label_name_list=labels)
             print('done data preparation')
             
-            task = SKLearn_RandomForest(conf=conf)
-            task.train_and_predict(X_train, y_train, X_val, y_val, X_test, y_test, 
-                                   model_file)
+            task = SKLearn_RandomForest(conf=conf, process_id=process_id, stage=stage)
+            task.train(X_train, y_train,  model_file)
             task.save_model_params(config_csv_file)
             
             #####
-            if task.useVal:
-                task.save_model_evaluation_metrics(X_train, y_train, model_file,
-                                              model_dir+'fold_'+str(i)+'/train_metrics/',
-                                              label_names=labels)
-                task.save_model_evaluation_metrics(X_val, y_val, model_file,
-                                              model_dir+'fold_'+str(i)+'/val_metrics/',
-                                              label_names=labels)
-            else:
-                task.save_model_evaluation_metrics(np.concatenate((X_train, X_val)), 
-                                               np.concatenate((y_train, y_val)), model_file,
+            task.save_model_evaluation_metrics(X_train, y_train, model_file,
                                               model_dir+'fold_'+str(i)+'/train_metrics/',
                                               label_names=labels)
             
@@ -281,10 +248,6 @@ if __name__ == '__main__':
             model_file = model_dir+'fold_'+str(i)+'/rf_clf'
             
             csv_file_list = output_file_list[:]
-            test_pd = read_merged_data([csv_file_list[i]])
-            csv_file_list.pop(i)
-            val_pd = read_merged_data([csv_file_list[i%len(csv_file_list)]])
-            csv_file_list.pop(i%len(csv_file_list))
             train_pd = read_merged_data(csv_file_list)
             
             labels = ["Keck_Pria_AS_Retest", "Keck_Pria_FP_data", "Keck_RMI_cdd"]
@@ -293,22 +256,13 @@ if __name__ == '__main__':
             X_train, y_train = extract_feature_and_label(train_pd,
                                                          feature_name='Fingerprints',
                                                          label_name_list=labels)
-            
-            X_val, y_val = extract_feature_and_label(val_pd,
-                                                     feature_name='Fingerprints',
-                                                     label_name_list=labels)
-                                                       
-            X_test, y_test = extract_feature_and_label(test_pd,
-                                                       feature_name='Fingerprints',
-                                                       label_name_list=labels)
             print('done data preparation')
             
-            task = SKLearn_RandomForest(conf=conf)
-            task.train_and_predict(X_train, y_train, X_val, y_val, X_test, y_test, 
-                                   model_file)
+            task = SKLearn_RandomForest(conf=conf, process_id=process_id, stage=stage)
+            task.train(X_train, y_train, model_file)
             task.save_model_params(config_csv_file)
             
-            task.save_model_evaluation_metrics(np.concatenate((X_train, X_val, X_test)), 
-                                           np.concatenate((y_train, y_val, y_test)), model_file,
-                                          model_dir+'fold_'+str(i)+'/train_metrics/',
-                                          label_names=labels)
+            task.save_model_evaluation_metrics(X_train, 
+                                               y_train, model_file,
+                                              model_dir+'fold_'+str(i)+'/train_metrics/',
+                                              label_names=labels)
