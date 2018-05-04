@@ -17,13 +17,13 @@ rnd_state=1337
 np.random.seed(seed=rnd_state)
 
 class SKLearn_RandomForest:
-    def __init__(self, conf, process_id, stage):
+    def __init__(self, conf, process_num, stage):
         self.conf = conf
         self.input_layer_dimension = 1024
         self.label_names = conf['label_names']
         self.EF_ratio_list = conf['enrichment_factor']['ratio_list']
         
-        self.process_id = process_id
+        self.process_num = process_num
         self.stage =  stage
         
         if self.stage == 0:
@@ -31,7 +31,7 @@ class SKLearn_RandomForest:
         
         cnt = 0
         for param in ParameterGrid(conf['params']):
-            if cnt != self.process_id:
+            if cnt != self.process_num:
                 cnt += 1
                 continue
             
@@ -134,14 +134,14 @@ if __name__ == '__main__':
     parser.add_argument('--config_json_file', action="store", dest="config_json_file", required=True)
     parser.add_argument('--model_dir', action="store", dest="model_dir", required=True)
     parser.add_argument('--dataset_dir', action="store", dest="dataset_dir", required=True)
-    parser.add_argument('--process_id', action="store", dest="process_id", required=True)
+    parser.add_argument('--process_num', action="store", dest="process_num", required=True)
     parser.add_argument('--stage', action="store", dest="stage", required=True)
     #####
     given_args = parser.parse_args()
     config_json_file = given_args.config_json_file
     model_dir = given_args.model_dir
     dataset_dir = given_args.dataset_dir
-    process_id = int(given_args.process_id)
+    process_num = int(given_args.process_num)
     stage = int(given_args.stage)
     #####
     config_csv_file = model_dir+'model_config.csv'
@@ -193,7 +193,7 @@ if __name__ == '__main__':
                                                    label_name_list=labels)
         print('done data preparation')
 
-        task = SKLearn_RandomForest(conf=conf, process_id=process_id, stage=stage)
+        task = SKLearn_RandomForest(conf=conf, process_num=process_num, stage=stage)
         task.train(X_train, y_train, model_file)
         task.save_model_params(config_csv_file)
 
@@ -228,7 +228,7 @@ if __name__ == '__main__':
                                                        label_name_list=labels)
             print('done data preparation')
             
-            task = SKLearn_RandomForest(conf=conf, process_id=process_id, stage=stage)
+            task = SKLearn_RandomForest(conf=conf, process_num=process_num, stage=stage)
             task.train(X_train, y_train,  model_file)
             task.save_model_params(config_csv_file)
             
@@ -258,7 +258,7 @@ if __name__ == '__main__':
                                                          label_name_list=labels)
             print('done data preparation')
             
-            task = SKLearn_RandomForest(conf=conf, process_id=process_id, stage=stage)
+            task = SKLearn_RandomForest(conf=conf, process_num=process_num, stage=stage)
             task.train(X_train, y_train, model_file)
             task.save_model_params(config_csv_file)
             
