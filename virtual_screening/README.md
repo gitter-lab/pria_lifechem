@@ -1,8 +1,8 @@
-# data_preparation.py and function.py
+## data_preparation.py and function.py
 
 Contains functions for preparing the dataset (extraction and merging). `demo.ipynb` showcases examples of usage.
 
-## split pcba into folds
+### split pcba into folds
 
     Algorithm:
         1- shuffle the pcba rows randomly
@@ -23,10 +23,10 @@ Contains functions for preparing the dataset (extraction and merging). `demo.ipy
         
         4- uniquify each fold to remove duplicate row indexes just in case
 
-# evaluation.py
+## evaluation.py
 
 Metric function: ROC, PR, EF, NEF, etc. `demo.ipynb` showcases examples of usage.
 
-# integrity_checker.py
+## integrity_checker.py
 
 Confirms integrity of dataset files via hashes.
