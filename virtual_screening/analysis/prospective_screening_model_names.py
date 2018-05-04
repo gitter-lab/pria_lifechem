@@ -43,12 +43,4 @@ model_name_mapping = {
     'consensus_bcs_rocauc_opt': 'ConsensusDocking_rocauc_opt',
     'consensus_dockscore_median': 'ConsensusDocking_median',
     'consensus_dockscore_mean': 'ConsensusDocking_mean',
-
-    # lightchemPRAUC_1Layer1Model
-    'lightchem_PRAUC_1Layer1Model_test_lc4': 'CBF_a',
-    'lightchem_PRAUC_5Layer1Model_test_lc4': 'CBF_b',
-    'lightchem_PRAUC_10Layer1Model_test_lc4': 'CBF_c',
-    'lightchem_ROCAUC_1Layer1Model_test_lc4': 'CBF_d',
-    'lightchem_ROCAUC_5Layer1Model_test_lc4': 'CBF_e',
-    'lightchem_ROCAUC_10Layer1Model_test_lc4': 'CBF_f',
 }

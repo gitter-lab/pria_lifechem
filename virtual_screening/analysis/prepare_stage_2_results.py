@@ -30,12 +30,10 @@ n_tests_list = [100, 500, 1000, 2500, 5000, 10000]
 
 class_dirs = [model_directory+'/random_forest/stage_2/',
               model_directory+'/irv/stage_2/',
-              model_directory+'/light_chem/stage_2/',
               model_directory+'/neural_networks/stage_2/',
               model_directory+'/docking/stage_2/']
 model_classes=['random_forest',
               'irv',
-              'light_chem',
               'neural_networks',
               'docking']
 

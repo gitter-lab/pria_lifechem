@@ -26,7 +26,6 @@ Function that loads all models for each class:
 
 1- random_forest
 2- irv
-3- lightchem
 4- neural_networks
 
 returns a dict with following hierarchy:
@@ -37,13 +36,11 @@ def stage_1_results(model_directory, data_directory):
     #define folders for each class    
     class_dirs = [model_directory+'/random_forest/stage_1/',
                   model_directory+'/irv/stage_1/',
-                  model_directory+'/light_chem/stage_1/',
                   model_directory+'/neural_networks/stage_1/',
                   model_directory+'/docking/stage_1/']
     
     stage_1_dict = {'random_forest' : get_rf_results_stage_1(class_dirs[0], data_directory),
                     'irv' : get_irv_results_stage_1(class_dirs[1], data_directory),
-                    'light_chem' : get_lightchem_results_stage_1(class_dirs[2], data_directory),
                     'neural_networks' : get_nn_results_stage_1(class_dirs[3], data_directory),
                     'docking' : get_docking_results_stage_1(class_dirs[4], data_directory)
                      }    
