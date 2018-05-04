@@ -11,14 +11,14 @@ from keras.layers.normalization import BatchNormalization
 from keras.optimizers import SGD, Adam
 from sklearn.cross_validation import StratifiedShuffleSplit
 from sklearn.grid_search import ParameterGrid
-from virtual_screening.function import *
-from virtual_screening.evaluation import *
-from virtual_screening.models.CallBacks import *
-from virtual_screening.models.deep_classification import *
-from virtual_screening.models.deep_regression import *
-from virtual_screening.models.vanilla_lstm import *
-from virtual_screening.models.tree_net import *
-from virtual_screening.models.dnn_rf import *
+from pria_lifechem.function import *
+from pria_lifechem.evaluation import *
+from pria_lifechem.models.CallBacks import *
+from pria_lifechem.models.deep_classification import *
+from pria_lifechem.models.deep_regression import *
+from pria_lifechem.models.vanilla_lstm import *
+from pria_lifechem.models.tree_net import *
+from pria_lifechem.models.dnn_rf import *
 
 
 def run_single_classification():
