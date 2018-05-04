@@ -18,8 +18,7 @@ called by
 roc_auc_multi(y_true, y_pred, [-1], np.mean)
 roc_auc_multi(y_true, y_pred, [0], np.median)
 '''
-def roc_auc_multi(y_true, y_pred, eval_indices, eval_mean_or_median,
-                  return_df=False, label_names=None):
+def roc_auc_multi(y_true, y_pred, eval_indices, eval_mean_or_median):
     
     y_true = y_true[:, eval_indices]
     y_pred = y_pred[:, eval_indices]
@@ -32,21 +31,7 @@ def roc_auc_multi(y_true, y_pred, eval_indices, eval_mean_or_median,
         actual = y_true[non_missing_indices, i]
         predicted = y_pred[non_missing_indices, i]
         auc[i] = roc_auc_single(actual, predicted)
-    
-    if return_df == True:
-        if label_names == None:
-            label_names = ['label ' + str(i) for i in range(nb_classes)]
-        
-        auc_data = np.concatenate((auc,
-                                   np.mean(auc).reshape(1,),
-                                   np.median(auc).reshape(1,)))
-        auc_df = pd.DataFrame(data=auc_data.reshape(1,len(auc_data)),
-                              index=['ROC AUC'],
-                              columns=label_names+['Mean','Median'])
-        auc_df.index.name='metric'
-        return auc_df
-    else:
-        return eval_mean_or_median(auc)
+    return eval_mean_or_median(auc)
 
 
 def roc_auc_single(actual, predicted):
@@ -67,8 +52,7 @@ called by
 bedroc_auc_multi(y_true, y_pred, [-1], np.mean)
 bedroc_auc_multi(y_true, y_pred, [0], np.median)
 '''
-def bedroc_auc_multi(y_true, y_pred, eval_indices, eval_mean_or_median,
-                     return_df=False, label_names=None):
+def bedroc_auc_multi(y_true, y_pred, eval_indices, eval_mean_or_median):
     y_true = y_true[:, eval_indices]
     y_pred = y_pred[:, eval_indices]
     nb_classes = y_true.shape[1]
@@ -79,22 +63,8 @@ def bedroc_auc_multi(y_true, y_pred, eval_indices, eval_mean_or_median,
         non_missing_indices = np.argwhere(y_true[:, i] != -1)[:, 0]
         actual = y_true[non_missing_indices, i:(i+1)]
         predicted = y_pred[non_missing_indices, i:(i+1)]
-        auc[i] = bedroc_auc_single(actual, predicted)
-    
-    if return_df == True:
-        if label_names == None:
-            label_names = ['label ' + str(i) for i in range(nb_classes)]
-        
-        auc_data = np.concatenate((auc,
-                                   np.mean(auc).reshape(1,),
-                                   np.median(auc).reshape(1,)))        
-        auc_df = pd.DataFrame(data=auc_data.reshape(1,len(auc_data)),
-                              index=['BEDROC AUC'],
-                              columns=label_names+['Mean','Median'])
-        auc_df.index.name='metric'
-        return auc_df
-    else:    
-        return eval_mean_or_median(auc)
+        auc[i] = bedroc_auc_single(actual, predicted) 
+    return eval_mean_or_median(auc)
 
 
 def bedroc_auc_single(actual, predicted, alpha=10):
@@ -119,8 +89,7 @@ we calculate each single AUC[PR] through a R package called PRROC or sklearn
 the mode can be either 'auc.integral', 'auc.davis.goadrich', or 'auc.sklearn'
 '''
 def precision_auc_multi(y_true, y_pred, eval_indices, eval_mean_or_median,
-                        mode='auc.integral',
-                        return_df=False, label_names=None):
+                        mode='auc.integral'):
     y_true = y_true[:, eval_indices]
     y_pred = y_pred[:, eval_indices]
     nb_classes = y_true.shape[1]
@@ -132,21 +101,7 @@ def precision_auc_multi(y_true, y_pred, eval_indices, eval_mean_or_median,
         actual = y_true[non_missing_indices, i]
         predicted = y_pred[non_missing_indices, i]
         auc[i] = precision_auc_single(actual, predicted, mode)
-    
-    if return_df == True:
-        if label_names == None:
-            label_names = ['label ' + str(i) for i in range(nb_classes)]
-        
-        auc_data = np.concatenate((auc,
-                                   np.mean(auc).reshape(1,),
-                                   np.median(auc).reshape(1,))) 
-        auc_df = pd.DataFrame(data=auc_data.reshape(1,len(auc_data)),
-                                  index=['PR ' + mode],
-                                  columns=label_names+['Mean','Median'])
-        auc_df.index.name='metric'
-        return auc_df
-    else:
-        return eval_mean_or_median(auc)
+    return eval_mean_or_median(auc)
 
 
 '''
@@ -553,17 +508,51 @@ def evaluate_model(y_true, y_pred, model_dir, label_names=None, make_plots=True)
         y_pred = y_pred.reshape((y_pred.shape[0], 1)) 
         
     # dataframe metrics    
-    roc_auc_df = roc_auc_multi(y_true, y_pred, range(nb_classes), np.mean, 
-                               True, label_names)    
-    bedroc_auc_df = bedroc_auc_multi(y_true, y_pred, range(nb_classes), np.mean, 
-                               True, label_names)    
-    sklearn_pr_auc_df = precision_auc_multi(y_true, y_pred, range(nb_classes), np.mean, 
-                               'auc.sklearn', True, label_names)
-    integral_pr_auc_df = precision_auc_multi(y_true, y_pred, range(nb_classes), np.mean, 
-                               'auc.integral', True, label_names)
-    dg_pr_auc_df = precision_auc_multi(y_true, y_pred, range(nb_classes), np.mean, 
-                               'auc.davis.goadrich', True, label_names)
-                               
+    roc_auc_df = roc_auc_multi(y_true, y_pred, range(nb_classes), np.copy)  
+    roc_auc_df = np.concatenate((roc_auc_df,
+                                 np.mean(roc_auc_df).reshape(1,),
+                                 np.median(roc_auc_df).reshape(1,)))
+    roc_auc_df = pd.DataFrame(data=roc_auc_df.reshape(1,len(roc_auc_df)),
+                            index=['ROC AUC'],
+                            columns=label_names+['Mean','Median'])
+    roc_auc_df.index.name='metric'
+      
+    bedroc_auc_df = bedroc_auc_multi(y_true, y_pred, range(nb_classes), np.copy)  
+    bedroc_auc_df = np.concatenate((bedroc_auc_df,
+                                   np.mean(bedroc_auc_df).reshape(1,),
+                                   np.median(bedroc_auc_df).reshape(1,)))
+    bedroc_auc_df = pd.DataFrame(data=bedroc_auc_df.reshape(1,len(bedroc_auc_df)),
+                                index=['BEDROC AUC'],
+                                columns=label_names+['Mean','Median'])
+    bedroc_auc_df.index.name='metric'
+    
+    sklearn_pr_auc_df = precision_auc_multi(y_true, y_pred, range(nb_classes), np.copy, 'auc.sklearn')
+    sklearn_pr_auc_df = np.concatenate((sklearn_pr_auc_df,
+                                       np.mean(sklearn_pr_auc_df).reshape(1,),
+                                       np.median(sklearn_pr_auc_df).reshape(1,)))
+    sklearn_pr_auc_df = pd.DataFrame(data=sklearn_pr_auc_df.reshape(1,len(sklearn_pr_auc_df)),
+                                    index=['PR auc.sklearn'],
+                                    columns=label_names+['Mean','Median'])
+    sklearn_pr_auc_df.index.name='metric'
+    
+    integral_pr_auc_df = precision_auc_multi(y_true, y_pred, range(nb_classes), np.copy, 'auc.integral')
+    integral_pr_auc_df = np.concatenate((integral_pr_auc_df,
+                                       np.mean(integral_pr_auc_df).reshape(1,),
+                                       np.median(integral_pr_auc_df).reshape(1,)))
+    integral_pr_auc_df = pd.DataFrame(data=integral_pr_auc_df.reshape(1,len(integral_pr_auc_df)),
+                                      index=['PR auc.integral'],
+                                      columns=label_names+['Mean','Median'])
+    integral_pr_auc_df.index.name='metric'
+    
+    dg_pr_auc_df = precision_auc_multi(y_true, y_pred, range(nb_classes), np.copy, 'auc.davis.goadrich')
+    dg_pr_auc_df = np.concatenate((dg_pr_auc_df,
+                                   np.mean(dg_pr_auc_df).reshape(1,),
+                                   np.median(dg_pr_auc_df).reshape(1,)))
+    dg_pr_auc_df = pd.DataFrame(data=dg_pr_auc_df.reshape(1,len(dg_pr_auc_df)),
+                                index=['PR auc.davis.goadrich'],
+                                columns=label_names+['Mean','Median'])
+    dg_pr_auc_df.index.name='metric'
+    
     nef_pd, ef_pd, max_ef_pd = norm_enrichment_factor(y_true, y_pred, perc_vec, label_names)
     nef_auc_df = nef_auc(y_true, y_pred, perc_vec, label_names) 
     n_hits_df = n_hits_calc(y_true, y_pred, n_tests_list, label_names)
