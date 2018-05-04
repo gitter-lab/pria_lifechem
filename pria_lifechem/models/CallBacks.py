@@ -1,7 +1,7 @@
 import keras
 import sys
 import time
-from virtual_screening.evaluation import *
+from pria_lifechem.evaluation import *
 
 
 # define custom classes

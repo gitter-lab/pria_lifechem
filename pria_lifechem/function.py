@@ -5,7 +5,6 @@ import os
 import json
 import csv
 from sklearn.cross_validation import StratifiedKFold, KFold
-import matplotlib.pyplot as plt
 import re
 
 

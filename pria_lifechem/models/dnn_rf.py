@@ -11,11 +11,11 @@ from keras.layers import Dense, Dropout, Input, Dense, Activation
 from keras.layers.normalization import BatchNormalization
 from keras.optimizers import SGD, Adam
 from sklearn.cross_validation import StratifiedShuffleSplit
-from virtual_screening.function import read_merged_data, extract_feature_and_label, store_data, \
+from pria_lifechem.function import read_merged_data, extract_feature_and_label, store_data, \
     transform_json_to_csv, reshape_data_into_2_dim
-from virtual_screening.evaluation import roc_auc_single, roc_auc_multi, bedroc_auc_multi, bedroc_auc_single, \
+from pria_lifechem.evaluation import roc_auc_single, roc_auc_multi, bedroc_auc_multi, bedroc_auc_single, \
     precision_auc_multi, precision_auc_single, enrichment_factor_multi, enrichment_factor_single
-from virtual_screening.models.CallBacks import KeckCallBackOnROC, KeckCallBackOnPrecision, \
+from pria_lifechem.models.CallBacks import KeckCallBackOnROC, KeckCallBackOnPrecision, \
     MultiCallBackOnROC, MultiCallBackOnPR
 from sklearn.ensemble import RandomForestClassifier
 
