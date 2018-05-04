@@ -108,10 +108,7 @@ python sklearn_randomforest.py \
 --stage=2
 ```
 
-There are a total of `108` hyperparameter combinations. `8` random forests were promoted to the cross-validation stage. 
-
-The following are the corresponding `process_num` for the parameters: 
-`[12, 13, 14, 24, 25, 72, 96, 97]`
+Run for `process_num`: `[12, 13, 14, 24, 25, 72, 96, 97]`
 
 **Running CMD for IRV**
 
@@ -128,8 +125,7 @@ python deepchem_irv.py \
 --stage=2
 ```
 
-We run IRV for each fold (1-total) and label (3-total) as a single process. This allows parallel training of folds. 
-This can be seen in the `json/deepchem_irv.json` file. So, for each `knn`, we run 3 processes. 
+We run IRV for each fold (1-total) and label (3-total) as a single process. 
 
 Thus, for the prospective screening stage, run `process_num` from `0:14`.
 
