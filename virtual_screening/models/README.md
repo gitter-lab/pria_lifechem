@@ -8,6 +8,7 @@
 | Single-Task Neural Network Regression | `deep_classification.py` |
 | Multi-Task Neural Network Classification | `deep_classification.py` |
 | LSTM-Network | `vanilla_lstm.py` |
+| Tree-Net | `tree_net.py` |
 
 ## Helper Files
 
