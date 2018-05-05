@@ -9,6 +9,7 @@ channels:
 dependencies:
 - python=2.7
 - setuptools
+- pip
 - pyyaml
 - h5py
 - theano=0.8
