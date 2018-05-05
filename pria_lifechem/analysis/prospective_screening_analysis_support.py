@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import os
 from collections import OrderedDict
-from virtual_screening.function import *
+from pria_lifechem.function import *
 from prospective_screening_model_names import *
 from prospective_screening_metric_names import *
 

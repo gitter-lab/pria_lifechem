@@ -3,14 +3,14 @@ import os
 import numpy as np
 import seaborn as sns
 import pandas as pd
-from virtual_screening.function import *
-from virtual_screening.evaluation import *
-from virtual_screening.models.CallBacks import *
-from virtual_screening.models.deep_classification import *
-from virtual_screening.models.deep_regression import *
-from virtual_screening.models.vanilla_lstm import *
+from pria_lifechem.function import *
+from pria_lifechem.evaluation import *
+from pria_lifechem.models.CallBacks import *
+from pria_lifechem.models.deep_classification import *
+from pria_lifechem.models.deep_regression import *
+from pria_lifechem.models.vanilla_lstm import *
 
-from virtual_screening.evaluation import roc_auc_single, roc_auc_multi, bedroc_auc_multi, bedroc_auc_single, \
+from pria_lifechem.evaluation import roc_auc_single, roc_auc_multi, bedroc_auc_multi, bedroc_auc_single, \
     precision_auc_multi, precision_auc_single, enrichment_factor_multi, enrichment_factor_single
 
 def get_EF_values_single_task(task, X_test, y_test, model_weight, EF_ratio_list):

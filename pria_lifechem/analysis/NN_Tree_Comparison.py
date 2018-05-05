@@ -1,6 +1,6 @@
-from virtual_screening.function import *
-from virtual_screening.evaluation import *
-from virtual_screening.models.deep_classification import *
+from pria_lifechem.function import *
+from pria_lifechem.evaluation import *
+from pria_lifechem.models.deep_classification import *
 from math import sqrt
 
 

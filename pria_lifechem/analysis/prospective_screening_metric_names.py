@@ -1,4 +1,4 @@
-from virtual_screening.evaluation import *
+from pria_lifechem.evaluation import *
 from collections import OrderedDict
 import matplotlib.pyplot as plt
 

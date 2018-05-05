@@ -1,8 +1,8 @@
 import pandas as pd
 import numpy as np
-from virtual_screening.evaluation import precision_auc_single, roc_auc_single, bedroc_auc_single, \
+from pria_lifechem.evaluation import precision_auc_single, roc_auc_single, bedroc_auc_single, \
     enrichment_factor_single
-from virtual_screening.function import reshape_data_into_2_dim
+from pria_lifechem.function import reshape_data_into_2_dim
 from sklearn import metrics
 
 

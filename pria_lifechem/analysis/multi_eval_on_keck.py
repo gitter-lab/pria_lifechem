@@ -1,7 +1,7 @@
-from virtual_screening.function import *
-from virtual_screening.evaluation import *
-from virtual_screening.models.CallBacks import *
-from virtual_screening.models.deep_classification import *
+from pria_lifechem.function import *
+from pria_lifechem.evaluation import *
+from pria_lifechem.models.CallBacks import *
+from pria_lifechem.models.deep_classification import *
 
 
 def predict_with_existing(task,
@@ -63,7 +63,7 @@ def predict_with_existing(task,
     return
 
 
-# TODO: may merge this with the virtual_screening.function.extract_feature_and_label
+# TODO: may merge this with the pria_lifechem.function.extract_feature_and_label
 def extract_feature_and_label(data_pd,
                               feature_name,
                               label_name_list):
