@@ -19,7 +19,6 @@ roc_auc_multi(y_true, y_pred, [-1], np.mean)
 roc_auc_multi(y_true, y_pred, [0], np.median)
 '''
 def roc_auc_multi(y_true, y_pred, eval_indices, eval_mean_or_median):
-    
     y_true = y_true[:, eval_indices]
     y_pred = y_pred[:, eval_indices]
     nb_classes = y_true.shape[1]
@@ -35,7 +34,6 @@ def roc_auc_multi(y_true, y_pred, eval_indices, eval_mean_or_median):
 
 
 def roc_auc_single(actual, predicted):
-    auc_ret = np.nan  
     try:
         auc_ret = roc_auc_score(actual, predicted)
     except ValueError:
