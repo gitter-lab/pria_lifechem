@@ -22,7 +22,7 @@ metric_name_mapping['ratio_of_hit_02'] = {'function': ratio_of_hit_single, 'argu
 
 
 def collectively_drop_nan(actual, predicted):
-    existing_index = map(lambda x: True if np.isfinite(x) else False, predicted)
+    existing_index = map(lambda x: x if np.isfinite(predicted[x]) else False, range(actual.shape[0]))
     actual = actual[existing_index]
     predicted = predicted[existing_index]
     return actual, predicted

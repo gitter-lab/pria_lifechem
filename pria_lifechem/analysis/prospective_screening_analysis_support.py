@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 import pandas as pd
 import numpy as np
 import os
@@ -18,6 +20,7 @@ def merge_prediction():
     positive_enumerate = filter(lambda x: x[1] >= 35 and supplier_id[x[0]] not in failed_id, enumerate(inhibits))
     positive_idx = map(lambda x: x[0], positive_enumerate)
     actual_label = map(lambda x: 1 if x in positive_idx else 0, range(len(supplier_id)))
+    actual_label = np.array(actual_label)
 
     complete_df = pd.DataFrame({'molecule id': supplier_id, 'label': actual_label, 'inhibition': inhibits})
     column_names = ['molecule id', 'label', 'inhibition']
@@ -37,7 +40,7 @@ def merge_prediction():
         file_path = '{}/{}.npz'.format(dir_, model_name)
         if not os.path.exists(file_path):
             continue
-        print 'model: {} exists'.format(model_name)
+        print('model: {} exists'.format(model_name))
         data = np.load(file_path)
 
         if any(x in model_name for x in special_models):
@@ -53,7 +56,7 @@ def merge_prediction():
         model_names.append(model_name_mapping[model_name])
         complete_df = complete_df.join(temp_df.set_index('molecule id'), on='molecule id')
 
-        print
+        print()
 
     model_names = sorted(model_names)
     column_names.extend(model_names)
@@ -62,7 +65,7 @@ def merge_prediction():
     complete_df.to_csv('{}/complete_prediction.csv'.format(dir_), index=None)
 
 
-def merge_rank_with_ensemble():
+def merge_rank():
     dir_ = '../../output/stage_2_predictions/Keck_Pria_AS_Retest'
     complete_df = pd.read_csv('{}/complete_prediction.csv'.format(dir_))
     model_names = complete_df.columns[3:]
@@ -74,7 +77,6 @@ def merge_rank_with_ensemble():
         rank_df[model_name] = order
 
     ensemble_model_names_pairs = OrderedDict()
-    ensemble_model_names_pairs['Simple Ensemble'] = ['SingleRegression_b', 'RandomForest_h']
 
     for ensemble_name, ensemble_model_names in ensemble_model_names_pairs.items():
         ensemble_orders = []
@@ -122,11 +124,11 @@ def merge_evaluation():
 
             value = metric_['function'](actual, pred, **metric_['argument'])
             metric_values.append(value)
-            print metric_name, '\t', model_name, '\t', value
+            print(metric_name, '\t', model_name, '\t', value)
         metric_df[metric_name] = metric_values
-        print
+        print()
 
-    print 'saving to {}/complete_evaluation.csv'.format(dir_)
+    print('saving to {}/complete_evaluation.csv'.format(dir_))
     metric_df.to_csv('{}/complete_evaluation.csv'.format(dir_), index=None)
 
 
@@ -142,5 +144,5 @@ def filter_model_name(model_name):
 
 if __name__ == '__main__':
     merge_prediction()
-    merge_rank_with_ensemble()
+    merge_rank()
     merge_evaluation()
