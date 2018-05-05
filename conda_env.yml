@@ -1,6 +1,5 @@
 name: pria
 channels:
-- auto
 - bioconda
 - r
 - rdkit
@@ -17,4 +16,3 @@ dependencies:
 - rdkit-postgresql
 - rpy2=2.8.5
 - r-prroc=1.1
-- croc=1.0.63

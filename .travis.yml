@@ -14,10 +14,12 @@ before_install:
   - export PATH="$HOME/anaconda/bin:$PATH"
   - conda env create -f conda_env.yml
   - source activate pria
+  - pip install --upgrade setuptools
+  - pip install croc==1.1.26
   - conda list
 
-#install:
-#  - pip install -e .
+install:
+  - pip install -e .
 
 script:
   - python -c "import keras.backend"
