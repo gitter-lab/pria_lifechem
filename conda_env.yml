@@ -9,7 +9,6 @@ channels:
 dependencies:
 - python=2.7
 - setuptools
-- pip
 - pyyaml
 - h5py
 - theano=0.8
@@ -18,5 +17,4 @@ dependencies:
 - rdkit-postgresql
 - rpy2=2.8.5
 - r-prroc=1.1
-- pip:
-  - croc==1.1.26
+- croc=1.0.63

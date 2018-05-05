@@ -16,8 +16,8 @@ before_install:
   - source activate pria
   - conda list
 
-install:
-  - pip install -e .
+#install:
+#  - pip install -e .
 
 script:
   - python -c "import keras.backend"
