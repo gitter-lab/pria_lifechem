@@ -10,6 +10,7 @@ Then, clone this `pria_lifechem` repository:
 ```
 git clone https://github.com/gitter-lab/pria_lifechem.git
 cd pria_lifechem
+pip install -e .
 ```
 
 Create and activate a conda environment named `pria` using the `conda_env.yml` file:
