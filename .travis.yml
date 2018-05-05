@@ -9,9 +9,8 @@ notifications:
   email: false
 
 before_install:
-  - wget https://repo.continuum.io/archive/Anaconda2-4.3.0-Linux-x86_64.sh -O anaconda.sh
-  - chmod 777 *
-  - bash anaconda.sh -b -p $HOME/anaconda
+  - wget https://repo.continuum.io/miniconda/Miniconda2-4.3.31-Linux-x86_64.sh -O miniconda.sh
+  - bash miniconda.sh -b -p $HOME/anaconda
   - export PATH="$HOME/anaconda/bin:$PATH"
   - conda install --yes pyyaml
   - conda install --yes HDF5
