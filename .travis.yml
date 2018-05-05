@@ -14,6 +14,7 @@ before_install:
   - export PATH="$HOME/anaconda/bin:$PATH"
   - conda env create -f conda_env.yml
   - source activate pria
+  - conda list
 
 install:
   - pip install -e .
