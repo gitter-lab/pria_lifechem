@@ -14,8 +14,6 @@ before_install:
   - export PATH="$HOME/anaconda/bin:$PATH"
   - conda env create -f conda_env.yml
   - source activate pria
-  - pip install --upgrade setuptools
-  - pip install croc==1.1.26
   - conda list
 
 install:
