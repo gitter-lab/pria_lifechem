@@ -23,8 +23,8 @@
 All of the above are prerequisites. Then clone this git repo, go to home repository and setup.
 
 ```
-git clone https://github.com/chao1224/virtual-screening.git
-cd virtual-screening
+git clone https://github.com/gitter-lab/pria_lifechem.git
+cd pria_lifechem
 pip install -e .
 ```
 
