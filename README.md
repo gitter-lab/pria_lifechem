@@ -1,38 +1,35 @@
-# PriA on LifeChem Library
+# Virtual screening on PriA-SSB and RMI-FANCM with the LifeChem library
 
 [![Build Status](https://travis-ci.org/gitter-lab/pria_lifechem.svg?branch=master)](https://travis-ci.org/gitter-lab/pria_lifechem)
 
 ## Installation
 
-| Package | cmd|
-| --- | --- |
-| Anaconda | `wget https://repo.continuum.io/archive/Anaconda2-4.3.0-Linux-x86_64.sh -O anaconda.sh` <br> `chmod 777 *` <br> `bash anaconda.sh -b -p $HOME/anaconda` <br> `export PATH="$HOME/anaconda/bin:$PATH"` |
-| pyyaml | `conda install --yes pyyaml` |
-| HDF5 | `conda install --yes HDF5` |
-| h5py | `conda install --yes h5py` |
-| gpu | `conda install --yes -c rdonnelly libgpuarray`<br> `conda install --yes -c rdonnelly pygpu`
-| theano | `install --yes -c conda-forge theano=0.8*` |
-| keras | `conda install --yes -c conda-forge keras=1.2*` |
-| sklearn |`conda install --yes scikit-learn=0.17*`|
-| rdkit | `conda install --yes -c rdkit rdkit-postgresql` |
-| rpy2 | `conda install --yes -c r rpy2` |
-| PRROC | `conda install --yes -c bioconda r-prroc=1.1` |
-| CROC | `conda install --yes -c auto croc=1.0.63` |
-| IRV | https://github.com/Malnammi/deepchem | 
-
-All of the above are prerequisites. Then clone this git repo, go to home repository and setup.
-
+We recommend creating a [conda environment](https://conda.io/docs/user-guide/tasks/manage-environments.html) to manage the dependencies.
+First [install Anaconda](https://www.anaconda.com/download/) if it is not already installed.
+Then, clone this `pria_lifechem` repository:
 ```
 git clone https://github.com/gitter-lab/pria_lifechem.git
 cd pria_lifechem
+```
+
+Create and activate a conda environment named `pria` using the `conda_env.yml` file:
+```
+conda env create -f conda_env.yml
+source activate pria
+```
+
+Finally, install `pria_lifechem` with `pip`.
+```
 pip install -e .
 ```
 
-If a permission denied exception comes up, try to use the installment only for current user.
+To use the package again later, use `source activate pria` to re-activate the conda environment.
+The package is only currently supported for Linux.
+The conda environment provided does not include a Theano GPU backend.
+To use Theano with a GPU, see the [Theano guide](http://deeplearning.net/software/theano_versions/0.8.X/tutorial/using_gpu.html).
 
-```
-pip install --user -e .
-```
+The IRV models were trained using a customized [fork of DeepChem](https://github.com/Malnammi/deepchem).
+See the separate installation instructions in that repository.
 
 ## dataset
 
