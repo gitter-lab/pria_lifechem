@@ -33,9 +33,7 @@ def get_hyperparameter_sets(model):
         hyperparameter_sets = {'optimizer': ['adam'],
                                'learning rate': [0.00003, 0.0001, 0.003],
                                'weighted schema': ['no_weight'],
-                               'epoch patience': [{'epoch_size': 200, 'patience': 50},
-                                                  {'epoch_size': 1000, 'patience': 200}],
-                               'early stopping': ['auc', 'precision'],
+                               'epoch size': [200, 1000],
                                'activations': [{0: 'sigmoid', 1: 'sigmoid', 2: 'linear'},
                                                {0: 'relu', 1: 'sigmoid', 2: 'sigmoid'}]}
     elif model == 'vanilla_lstm':
@@ -131,7 +129,7 @@ def run_single_classification(hyperparameter_sets, hyperparameter_index):
         print 'Testing hyperparameter ', param
         break
 
-    if cnt > hyperparameter_index:
+    if cnt < hyperparameter_index:
         raise ValueError('Process number out of limit. At most {}.'.format(cnt))
 
     task = SingleClassification(conf=conf)
@@ -190,10 +188,7 @@ def run_single_regression(hyperparameter_sets, hyperparameter_index):
         conf['compile']['optimizer']['option'] = param['optimizer']
         conf['compile']['optimizer'][param['optimizer']]['lr'] = param['learning rate']
         conf['class_weight_option'] = param['weighted schema']
-        epoch_patience = param['epoch patience']
-        conf['fitting']['nb_epoch'] = epoch_patience['epoch_size']
-        conf['fitting']['early_stopping']['patience'] = epoch_patience['patience']
-        conf['fitting']['early_stopping']['option'] = param['early stopping']
+        conf['fitting']['nb_epoch'] = param['epoch size']
         activations = param['activations']
         conf['layers'][0]['activation'] = activations[0]
         conf['layers'][1]['activation'] = activations[1]
@@ -201,7 +196,7 @@ def run_single_regression(hyperparameter_sets, hyperparameter_index):
         print 'Testing hyperparameter ', param
         break
 
-    if cnt > hyperparameter_index:
+    if cnt < hyperparameter_index:
         raise ValueError('Process number out of limit. At most {}.'.format(cnt))
 
     task = SingleRegression(conf=conf)
@@ -270,7 +265,7 @@ def run_vanilla_lstm(hyperparameter_sets, hyperparameter_index):
         print 'Testing hyperparameter ', param
         break
 
-    if cnt > hyperparameter_index:
+    if cnt < hyperparameter_index:
         raise ValueError('Process number out of limit. At most {}.'.format(cnt))
 
     task = VanillaLSTM(conf)
@@ -282,7 +277,6 @@ def run_vanilla_lstm(hyperparameter_sets, hyperparameter_index):
     store_config(conf, config_csv_file)
 
     return
-
 
 
 def run_multiple_classification(hyperparameter_sets, hyperparameter_index):
@@ -353,7 +347,7 @@ def run_multiple_classification(hyperparameter_sets, hyperparameter_index):
         print 'Testing hyperparameter ', param
         break
 
-    if cnt > hyperparameter_index:
+    if cnt < hyperparameter_index:
         raise ValueError('Process number out of limit. At most {}.'.format(cnt))
 
     task = MultiClassification(conf=conf)
@@ -434,7 +428,7 @@ if __name__ == '__main__':
     parser.add_argument('--process_num', dest='process_num', type=int,
                         action='store', required=False)
     parser.add_argument('--SMILES_mapping_json_file', dest='SMILES_mapping_json_file',
-                        action='store', required=False, default= '../../json/SMILES_mapping.json')
+                        action='store', required=False, default='../../json/SMILES_mapping.json')
     parser.add_argument('--score_file', dest='score_file',
                         action='store', required=False)
     parser.add_argument('--model', dest='model',

@@ -45,9 +45,6 @@ class SingleRegression:
         self.input_layer_dimension = 1024
         self.output_layer_dimension = 1
 
-        self.early_stopping_patience = conf['fitting']['early_stopping']['patience']
-        self.early_stopping_option = conf['fitting']['early_stopping']['option']
-
         self.fit_nb_epoch = conf['fitting']['nb_epoch']
         self.fit_batch_size = conf['fitting']['batch_size']
         self.fit_verbose = conf['fitting']['verbose']
