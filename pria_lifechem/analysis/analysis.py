@@ -20,8 +20,8 @@ dict_ = {'single_classification': 'STNN-C',
          'random_forest': 'RF',
          'irv': 'IRV',
          'dockscore': 'Dock',
-         'consensus_dockscore': 'CDock',
-         'consensus_bcs': 'CDock'}
+         'consensus_dockscore': 'CD',
+         'consensus_bcs': 'CD'}
 
 
 def check_result_completeness(file_path, number):
@@ -504,7 +504,7 @@ def plot_generalization(dir_path_list, evaluation, model_list, title, task_name)
 
     barplot = sns.boxplot(x="model", y="value", data=data_pd)
     fig = barplot.get_figure()
-    plt.xticks(rotation=60)
+    plt.xticks(rotation=65)
     figure_dir = 'plottings/{}'.format(task_name)
     if not os.path.isdir(figure_dir):
         os.makedirs(figure_dir)
