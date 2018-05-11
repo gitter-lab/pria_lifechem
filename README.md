@@ -33,16 +33,16 @@ See the separate installation instructions in that repository.
 
 ## dataset
 
-Some datasets that too big to put it here, but I upload a copy of them on the google drive, and here is the [link](https://drive.google.com/drive/folders/0B7r_bc_dhXLYLVctbC0zRnY4ZWM?usp=sharing)
+The high-throughput screening data will be uploaded to PubChem.
+Pre-processed, merged versions of the data will be available on Zenodo.
+We have a pre-fixed split dataset for LC_Pria, PCBA, and LC_PCBA combined.
 
 keck_updated_complete.csv: contains complete data for Keck_Pria
 
-We have a pre-fixed split dataset for Keck_Pria, PCBA, and Keck_PCBA combined.
-
-## virtual-screening
+## pria_lifechem
 
 - models:
-  
+
   - `deep_classification.py` SingleClassification (STNN-C)
   
   - `deep_regression.py` SingleRegression (STNN-R)
@@ -73,8 +73,8 @@ We have a pre-fixed split dataset for Keck_Pria, PCBA, and Keck_PCBA combined.
 
 ## json
 
-json config files.
+This subdirectory contains json config files with the model hyperparameters.
 
-## test
+## output
 
-test scripts.
+This subdirectory contains scripts for post-processing the output files.
