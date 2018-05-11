@@ -219,7 +219,7 @@ class Deepchem_IRV:
         y_true, y_pred = self.get_prediction_info(data)
         
         label_list = self.label_names     
-        evaluate_model(y_true, y_pred, metric_dir, label_list, False)          
+        evaluate_model(y_true, y_pred, metric_dir, label_list)          
         return
         
     def save_model_params(self, config_csv_file):      
