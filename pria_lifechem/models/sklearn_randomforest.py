@@ -64,7 +64,7 @@ class SKLearn_RandomForest:
         return y_true, y_pred
         
     def setup_model(self):
-        for i in len(self.label_names):
+        for i in range(len(self.label_names)):
             self.model_dict[self.label_names[i]] = RandomForestClassifier(n_estimators=self.n_estimators, 
                                            max_features=self.max_features, 
                                            min_samples_leaf=self.min_samples_leaf, 
