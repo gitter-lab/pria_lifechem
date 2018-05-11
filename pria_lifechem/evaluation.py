@@ -479,7 +479,7 @@ def n_hits_calc_at_n_tests(y_true, y_pred, n_tests):
     return n_hits
 
     
-def evaluate_model(y_true, y_pred, model_dir, label_names=None, make_plots=True):
+def evaluate_model(y_true, y_pred, model_dir, label_names=None):
     """
     Call this function to evaluate a model. This will call all evaluations we 
     would like to store. It will save it in model_dir.
@@ -565,26 +565,7 @@ def evaluate_model(y_true, y_pred, model_dir, label_names=None, make_plots=True)
     for pd_df in [nef_pd, ef_pd, max_ef_pd, nef_auc_df, n_hits_df]:
         pd_df.to_csv(metrics_dir, mode='a')
         with open(metrics_dir,'a') as f:  
-            f.write('\n')  
-    
-    #plots
-    if make_plots:
-        roc_dir = model_dir+'roc_curves/'
-        pr_dir = model_dir+'pr_curves/'
-        efp_efm_dir = model_dir+'ef_curves/efp_efm/' 
-        nef_dir = model_dir+'ef_curves/nef/' 
-        
-        #create directory if it doesn't exist
-        dir_list = [roc_dir, pr_dir, efp_efm_dir, nef_dir]
-        for file_dir in dir_list:
-            if not os.path.exists(file_dir):
-                os.makedirs(file_dir)
-                
-        plot_names = ['pr', 'roc', 'efp_efm', 'nef']    
-        plot_curve_multi(y_true, y_pred, pr_dir, 'pr', label_names)
-        plot_curve_multi(y_true, y_pred, roc_dir, 'roc', label_names)
-        plot_curve_multi(y_true, y_pred, efp_efm_dir, 'efp_efm', label_names, perc_vec_plots)
-        plot_curve_multi(y_true, y_pred, nef_dir, 'nef', label_names, perc_vec_plots)
+            f.write('\n')
 
 
 def results_describe(true_label, pred_label):
