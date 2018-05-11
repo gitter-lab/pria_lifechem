@@ -16,5 +16,6 @@ dependencies:
 - rdkit-postgresql
 - rpy2=2.8.5
 - r-prroc=1.1
+- pandas
 - pip:
   - croc==1.1.26
