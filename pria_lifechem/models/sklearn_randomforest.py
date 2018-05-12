@@ -246,7 +246,7 @@ if __name__ == '__main__':
                                               label_names=labels)
                                               
     elif stage == 2:
-        for i in range(0):  
+        for i in range(1):  
             if not os.path.exists(model_dir+'fold_'+str(i)):
                 os.makedirs(model_dir+'fold_'+str(i))         
             model_file = model_dir+'fold_'+str(i)+'/rf_clf'
