@@ -31,6 +31,9 @@ To use Theano with a GPU, see the [Theano guide](http://deeplearning.net/softwar
 The IRV models were trained using a customized [fork of DeepChem](https://github.com/Malnammi/deepchem).
 See the separate installation instructions in that repository.
 
+Note: Random Forest results in the paper were obtained using Python 3.4 and sklearn=0.18.1. 
+The random forest code is still compatible with `conda_env.yml`, but the results may differ due to different versions.
+
 ## dataset
 
 The high-throughput screening data will be uploaded to PubChem.
