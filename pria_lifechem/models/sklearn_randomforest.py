@@ -60,7 +60,7 @@ class SKLearn_RandomForest:
             y_true[np.where(np.isnan(y_true[:,i]))[0],i] = -1
             if i in [0,1,2]:   
                 rf_pred = model.predict_proba(X)
-                if rf_pred.shape[1] == 0:
+                if rf_pred.shape[1] == 1:
                     y_pred[:,i] = 0
                 else:
                     y_pred[:,i] = rf_pred[:,1]
