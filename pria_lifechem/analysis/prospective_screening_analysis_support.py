@@ -12,19 +12,24 @@ from prospective_screening_metric_names import *
 def merge_prediction():
     dataframe = pd.read_excel('../../output/stage_2_predictions/Keck_LC4_export.xlsx')
 
+    molecule_name_list = dataframe['Molecule Name'].tolist()
     supplier_id = dataframe['Supplier ID'].tolist()
     failed_id = ['F0401-0050', 'F2964-1411', 'F2964-1523']
     inhibits = dataframe[
         'PriA-SSB AS, normalized for plate and edge effects, correct plate map: % inhibition Alpha, normalized (%)'].tolist()
+    neo_dataframe = pd.read_csv('../../output/stage_2_predictions/pria_lc4_retest_may18.csv')
+    failed_molecule_names = neo_dataframe[neo_dataframe['Active'] == 0]['Row Labels'].tolist()
 
-    positive_enumerate = filter(lambda x: x[1] >= 35 and supplier_id[x[0]] not in failed_id, enumerate(inhibits))
+    positive_enumerate = filter(lambda x: x[1] >= 35 and supplier_id[x[0]] not in failed_id and molecule_name_list[x[0]] not in failed_molecule_names, enumerate(inhibits))
     positive_idx = map(lambda x: x[0], positive_enumerate)
     actual_label = map(lambda x: 1 if x in positive_idx else 0, range(len(supplier_id)))
     actual_label = np.array(actual_label)
 
-    complete_df = pd.DataFrame({'molecule id': supplier_id, 'label': actual_label, 'inhibition': inhibits})
-    column_names = ['molecule id', 'label', 'inhibition']
+    complete_df = pd.DataFrame({'molecule name': molecule_name_list, 'molecule id': supplier_id, 'label': actual_label, 'inhibition': inhibits})
+
+    column_names = ['molecule name', 'molecule id', 'label', 'inhibition']
     complete_df = complete_df[column_names]
+
     # complete_df[complete_df['actual label'] > 0]
 
     dir_ = '../../output/stage_2_predictions/Keck_Pria_AS_Retest'
