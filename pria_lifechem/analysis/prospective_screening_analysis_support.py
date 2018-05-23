@@ -19,6 +19,7 @@ def merge_prediction():
         'PriA-SSB AS, normalized for plate and edge effects, correct plate map: % inhibition Alpha, normalized (%)'].tolist()
     neo_dataframe = pd.read_csv('../../output/stage_2_predictions/pria_lc4_retest_may18.csv')
     failed_molecule_names = neo_dataframe[neo_dataframe['Active'] == 0]['Row Labels'].tolist()
+    failed_molecule_names += ['SMSSF-0044356', 'SMSSF-0030688']
 
     positive_enumerate = filter(lambda x: x[1] >= 35 and supplier_id[x[0]] not in failed_id and molecule_name_list[x[0]] not in failed_molecule_names, enumerate(inhibits))
     positive_idx = map(lambda x: x[0], positive_enumerate)
