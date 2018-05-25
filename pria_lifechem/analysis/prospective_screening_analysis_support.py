@@ -30,8 +30,7 @@ def merge_prediction():
 
     column_names = ['molecule name', 'molecule id', 'label', 'inhibition']
     complete_df = complete_df[column_names]
-
-    # complete_df[complete_df['actual label'] > 0]
+    complete_df.to_csv('LC4_complete.csv', index=None)
 
     dir_ = '../../output/stage_2_predictions/Keck_Pria_AS_Retest'
 
