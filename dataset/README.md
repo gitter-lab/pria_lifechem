@@ -1,17 +1,15 @@
-Under this folder, we have two folders and one cvs file.
+The subdirectory contains examples of the expected file format.
+This test dataset has been split into five folds.
+The columns in the csv files are:
+* `Molecule`, a molecule ID, used as Index for the pandas dataframe
+* `SMILES`, SMILES string representation of the compound, used for LSTM training
+* `Fingerprints`, 1024 bit ECFP4 fingerprint representation of the compound
+* `Keck_Pria_AS_Retest`, the **PriA-SSB AS** binary label
+* `Keck_Pria_FP_data`, the **PriA-SSB FP** binary label
+* `Keck_Pria_Continuous`, the continuous PriA-SSB primary screen % inhibition
+* `Keck_RMI_cdd`, the **RMI-FANCM FP** binary label
+* `FP counts % inhibition`, the continuous RMI-FANCM primary screen % inhibition
 
-1. Folder `data_preprocessing`: contains the required datasets we need for preprocessing, the function is under [src/data_preparation.py](https://github.com/lscHacker/virtual-screening/blob/master/src/data_preparation.py)
+When training models for a new target, the PriA-SSB and RMI-FANCM columns can be replaced with suitable labels for that target.
 
-2. Folder `fixed_dataset`: folders with different k, splitting function is under [src/function.py](https://github.com/lscHacker/virtual-screening/blob/master/src/function.py), split [keck_original_complete.csv]() into k folders. And merging function is in [src/function.py](https://github.com/lscHacker/virtual-screening/blob/master/src/function.py).
-
-3. File `keck_original_complete.csv`: the output of data_preprocessing. Contains all the data.
-    * Molecule, molecule ID, used as Index for Python pandas
-    * SMILES, SMILES feature, used for LSTM
-    * Fingerprints, 1024 FPs, used for canonical NN feature
-    * Keck_Pria_AS_Retest, 1st Pria binary label
-    * Keck_Pria_FP_data, 2nd Pria binary label
-    * Keck_Pria_Continuous, Pria continuous label
-    * Keck_RMI_cdd, RMI binary label
-    * FP counts % inhibition, RMI continuous label
-
-4. Folder `sample_5_fold`: a test directory with 5-fold data.
+The pria_lifechem subdirectory in the parent directory contains scripts for preprocessing a chemical screening dataset for training new models.
