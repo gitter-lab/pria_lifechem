@@ -1,10 +1,10 @@
 # Supporting packages
 
-The venn diagram adopts this [customized py-upset repo](https://github.com/chao1224/py-upset).
+The UpSet plots require this [customized py-upset repo](https://github.com/chao1224/py-upset).
 
-# Noetbook Description
-This folder contains various analysis iPython notebooks and helper files. 
-The following are descriptions:
+# Notebook description
+This folder contains various analysis iPython notebooks and helper files.
+The following are descriptions of some of the most important notebooks:
 
 + `CV_Stage_Results.ipynb`
 Contains model rankings and results for the cross-validation stage.
