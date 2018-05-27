@@ -10,6 +10,8 @@
 | LSTM-Network | `vanilla_lstm.py` |
 | Tree-Net | `tree_net.py` |
 
+Note that the `dnn_rf.py` and `tree_net.py` models were not used in our manuscript.
+
 ## Hyperparameter Stage
 
 **Running CMD for random forest**
@@ -23,7 +25,9 @@ python sklearn_randomforest.py \
 --stage=0
 ```
 
-There are a total of `108` hyperparameter combinations. Each `process_num` from `0:107` will run one of them. Results and model dumps will be save to `model_dir`.
+There are a total of `108` hyperparameter combinations.
+Each `process_num` from `0:107` will run one of them.
+Results and models will be saved to `model_dir`.
 
 **Running CMD for single-task classification**
 
@@ -54,10 +58,10 @@ python sklearn_randomforest.py \
 --stage=1
 ```
 
-There are a total of `108` hyperparameter combinations. `8` random forests were promoted to the cross-validation stage. 
+There are a total of `108` hyperparameter combinations.
+`8` random forests were promoted to the cross-validation stage.
 
-The following are the corresponding `process_num` for the parameters: 
-`[12, 13, 14, 24, 25, 72, 96, 97]`
+The following are the corresponding `process_num` for the parameters: `[12, 13, 14, 24, 25, 72, 96, 97]`
 
 **Running CMD for IRV**
 
@@ -74,8 +78,10 @@ python deepchem_irv.py \
 --stage=1
 ```
 
-We run IRV for each fold (5-total) and label (3-total) as a single process. This allows parallel training of folds. 
-This can be seen in the `json/deepchem_irv.json` file. So, for each `knn`, we run 15 processes. 
+We run IRV for each fold (5-total) and label (3-total) as a single process.
+This allows parallel training of folds.
+This can be seen in the `json/deepchem_irv.json` file.
+So, for each `knn`, we run 15 processes.
 
 Thus, for the cross-validation stage, run `process_num` from `0:74`.
 
@@ -125,7 +131,7 @@ python deepchem_irv.py \
 --stage=2
 ```
 
-We run IRV for each fold (1-total) and label (3-total) as a single process. 
+We run IRV for each fold (1-total) and label (3-total) as a single process.
 
 Thus, for the prospective screening stage, run `process_num` from `0:14`.
 
@@ -146,4 +152,5 @@ python stage_prospective_screening.py \
 
 ## Helper Files
 
-`CallBacks.py`: keras callback functions for early stopping. Used in neural network models.
+`CallBacks.py`: Keras callback functions for early stopping.
+Used in neural network models.
