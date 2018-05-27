@@ -31,53 +31,33 @@ To use Theano with a GPU, see the [Theano guide](http://deeplearning.net/softwar
 The IRV models were trained using a customized [fork of DeepChem](https://github.com/Malnammi/deepchem).
 See the separate installation instructions in that repository.
 
-Note: Random Forest results in the paper were obtained using Python 3.4 and sklearn=0.18.1. 
+Note: Random Forest results in the paper were obtained using Python 3.4 and sklearn=0.18.1.
 The random forest code is still compatible with `conda_env.yml`, but the results may differ due to different versions.
 
 ## dataset
 
-The high-throughput screening data will be uploaded to PubChem.
-Pre-processed, merged versions of the data will be available on Zenodo.
-We have a pre-fixed split dataset for LC_Pria, PCBA, and LC_PCBA combined.
+The dataset subdirectory contains a description of the expected file format and an example dataset that has been split into five folds.
 
-keck_updated_complete.csv: contains complete data for Keck_Pria
+The complete high-throughput screening data will be uploaded to PubChem.
+Pre-processed, merged versions of the data will be available on Zenodo.
+The Zenodo files contain:
+- The LifeChem compounds used for cross validation with PriA-SSB and RMI-FANCM labels split into five folds.
+- These same compounds merged with 128 tasks from PubChem split into five folds.
+- The separate LifeChem componds used for prospective testing with PriA-SSB.
 
 ## pria_lifechem
 
-- models:
+The pria_lifechem subdirectory contains:
 
-  - `deep_classification.py` SingleClassification (STNN-C)
-  
-  - `deep_regression.py` SingleRegression (STNN-R)
-  
-  - `deep_classification.py` MultiClassification (MTNN-C)
-  
-  - `vanilla_lstm.py` VanillaLSTM (LSTM)
-  
-  - `sklearn_randomforest.py` RandomForest (RF)
-  
-  - `deepchem_irv_single.py` InfluenceRelevanceVoter (IRV)
-
-  - `stage_hyperparameter_search.py`
-  
-  - `stage_cross_validation.py`
-  
-  - `stage_prospective_screening.py`
-
-- `data_preparation.py`
-
-- `function.py`
-
-- `evaluation.py`
-
-- `integrity_checker.py`
-
-- analysis
+- scripts to prepare and load datasets
+- a script to evaluate trained models
+- a models subdirectory with code and instructions for training models
+- an analysis subdirectory to reproduce figures from the manuscript
 
 ## json
 
-This subdirectory contains json config files with the model hyperparameters.
+The json subdirectory contains json config files with the model hyperparameters.
 
 ## output
 
-This subdirectory contains scripts for post-processing the output files.
+The output subdirectory contains scripts for post-processing the output files.
