@@ -9,6 +9,12 @@ from prospective_screening_model_names import *
 from prospective_screening_metric_names import *
 
 
+def clean_excel():
+    dataframe = pd.read_excel('../../output/stage_2_predictions/Keck_LC4_backup.xlsx')
+    dataframe = dataframe.drop(dataframe.index[[8779]])
+    dataframe.to_excel('../../output/stage_2_predictions/Keck_LC4_export.xlsx', index=None)
+
+
 def merge_prediction():
     dataframe = pd.read_excel('../../output/stage_2_predictions/Keck_LC4_export.xlsx')
 
@@ -67,6 +73,7 @@ def merge_prediction():
     column_names.extend(model_names)
 
     complete_df = complete_df[column_names]
+    print(complete_df.shape)
     complete_df.to_csv('{}/complete_prediction.csv'.format(dir_), index=None)
 
 
@@ -148,6 +155,7 @@ def filter_model_name(model_name):
 
 
 if __name__ == '__main__':
+    clean_excel()
     merge_prediction()
     merge_rank()
     merge_evaluation()
