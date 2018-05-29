@@ -5,7 +5,7 @@
 | Random Forest | `sklearn_randomforest.py` |
 | IRV | `deepchem_irv.py` |
 | Single-Task Neural Network Classification | `deep_classification.py` |
-| Single-Task Neural Network Regression | `deep_classification.py` |
+| Single-Task Neural Network Regression | `deep_regression.py` |
 | Multi-Task Neural Network Classification | `deep_classification.py` |
 | LSTM-Network | `vanilla_lstm.py` |
 | Tree-Net | `tree_net.py` |
