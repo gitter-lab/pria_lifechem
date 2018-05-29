@@ -36,8 +36,11 @@ def merge_prediction():
 
     column_names = ['molecule name', 'molecule id', 'label', 'inhibition']
     complete_df = complete_df[column_names]
-    complete_df.to_csv('LC4_complete.csv', index=None)
 
+    test_data_df = pd.read_csv('../../dataset/keck_lc4.csv.gz')
+    test_data_df = test_data_df[['Molecule', 'SMILES', 'Fingerprints']]
+    complete_df = complete_df.merge(test_data_df, how='left', left_on='molecule id', right_on='Molecule', sort=False)
+    complete_df.to_csv('LC4_complete.csv', index=None)
     dir_ = '../../output/stage_2_predictions/Keck_Pria_AS_Retest'
 
     file_path = '{}/{}.npz'.format(dir_, 'vanilla_lstm_19')
