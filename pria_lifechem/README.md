@@ -8,7 +8,7 @@ Contains code and instructions for training models.
 
 ## data_preparation.py and function.py
 
-Contains functions for preparing the dataset (extraction, splitting into folds, and merging). `demo.ipynb` showcases examples of usage.
+Contains functions for preparing the dataset (extraction, splitting into folds, and merging).
 
 ### Pseudocode for splitting PCBA into folds
 
@@ -33,7 +33,7 @@ Contains functions for preparing the dataset (extraction, splitting into folds, 
 
 ## evaluation.py
 
-Metric function: ROC, PR, EF, NEF, etc. `demo.ipynb` showcases examples of usage.
+Metric function: ROC, PR, EF, NEF, etc.
 
 ## integrity_checker.py
 
