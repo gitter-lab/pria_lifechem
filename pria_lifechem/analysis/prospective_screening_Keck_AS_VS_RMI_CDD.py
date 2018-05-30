@@ -8,20 +8,9 @@ from pria_lifechem.function import *
 from prospective_screening_model_names import *
 from prospective_screening_metric_names import *
 
-dataframe = pd.read_excel('../../output/stage_2_predictions/Keck_LC4_export.xlsx')
 
-supplier_id = dataframe['Supplier ID'].tolist()
-failed_id = ['F0401-0050', 'F2964-1411', 'F2964-1523']
-inhibits = dataframe[
-    'PriA-SSB AS, normalized for plate and edge effects, correct plate map: % inhibition Alpha, normalized (%)'].tolist()
-
-positive_enumerate = filter(lambda x: x[1] >= 35 and supplier_id[x[0]] not in failed_id, enumerate(inhibits))
-positive_idx = map(lambda x: x[0], positive_enumerate)
-actual_label = map(lambda x: 1 if x in positive_idx else 0, range(len(supplier_id)))
-
-complete_df = pd.DataFrame({'molecule id': supplier_id, 'label': actual_label, 'inhibition': inhibits})
-column_names = ['molecule id', 'label', 'inhibition']
-complete_df = complete_df[column_names]
+complete_df = pd.read_csv('LC4_complete.csv')
+column_names = ['molecule name', 'molecule id', 'label', 'inhibition']
 
 dir_ = '../../output/stage_2_predictions/RMI'
 
@@ -75,4 +64,4 @@ for (metric_name, metric_) in metric_name_mapping.iteritems():
         metric_values.append(value)
     metric_df[metric_name] = metric_values
 
-metric_df.to_csv('../../output/stage_2_predictions/Keck_Pria_AS_Retest/VS_RMI_metric', index=None)
+metric_df.to_csv('../../output/stage_2_predictions/Keck_Pria_AS_Retest/VS_RMI_metric.csv', index=None)
