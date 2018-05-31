@@ -6,7 +6,7 @@
 
 If you use this software or the new high-throughput screening data, please cite:
 
-Shengchao Liu<sup>+</sup>, Moayad Alnammi<sup>+</sup>, Spencer S. Ericksen, Andrew Voter, James Keck, F. Michael Hoffmann, Scott A. Wildman, Anthony Gitter.
+Shengchao Liu<sup>+</sup>, Moayad Alnammi<sup>+</sup>, Spencer S. Ericksen, Andrew F. Voter, James L. Keck, F. Michael Hoffmann, Scott A. Wildman, Anthony Gitter.
 Practical model selection for prospective virtual screening.
 2018.
 
