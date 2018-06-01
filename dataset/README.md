@@ -1,5 +1,6 @@
 The subdirectory contains examples of the expected file format.
-This test dataset has been split into five folds.
+This is the file format used for our datasets on Zenodo ([doi:10.5281/zenodo.1257463](https://doi.org/10.5281/zenodo.1257463)).
+The test dataset has been split into five folds.
 The columns in the csv files are:
 * `Molecule`, a molecule ID, used as Index for the pandas dataframe
 * `SMILES`, SMILES string representation of the compound, used for LSTM training
