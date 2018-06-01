@@ -1,7 +1,7 @@
 # Virtual screening on PriA-SSB and RMI-FANCM with the LifeChem library
 
 [![Build Status](https://travis-ci.org/gitter-lab/pria_lifechem.svg?branch=master)](https://travis-ci.org/gitter-lab/pria_lifechem)
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1257674.svg)](https://doi.org/10.5281/zenodo.1257674)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1257673.svg)](https://doi.org/10.5281/zenodo.1257673)
 
 ## Citation
 
