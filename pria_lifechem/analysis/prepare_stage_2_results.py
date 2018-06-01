@@ -26,7 +26,7 @@ if not os.path.exists(output_dir_1):
 EF_ratio_list = [0.001, 0.0015, 0.005, 0.01, 0.02, 0.05, 0.1, 0.2]
 perc_vec = EF_ratio_list
 
-n_tests_list = [100, 500, 1000, 2500, 5000, 10000]
+n_tests_list = [100, 250, 500, 1000, 2500, 5000, 10000]
 
 class_dirs = [model_directory+'/random_forest/stage_2/',
               model_directory+'/irv/stage_2/',
@@ -74,7 +74,10 @@ else:
             
                 labels, y_tr, y_v, y_te, y_pred_on_train, y_pred_on_val, y_pred_on_test = fold_np['labels'], fold_np['y_train'], fold_np['y_val'], fold_np['y_test'], fold_np['y_pred_on_train'], fold_np['y_pred_on_val'], fold_np['y_pred_on_test']
                 
-                labels = [e.decode('UTF-8') for e in labels]
+                try:
+                    labels = [e.decode('UTF-8') for e in labels]
+                except:
+                    pass
                 y_train = np.nan
                 y_val = np.nan
                 y_test = np.nan
@@ -194,8 +197,8 @@ else:
                     os.makedirs(curr_model_dir+'/test_metrics/')
                 
                 if not (np.isscalar(y_train) and np.isnan(y_train)):
-                    evaluate_model(y_train, y_pred_on_train, curr_model_dir+'/train_metrics/', labels, False)  
+                    evaluate_model(y_train, y_pred_on_train, curr_model_dir+'/train_metrics/', labels)  
                 if not (np.isscalar(y_val) and np.isnan(y_val)):
-                    evaluate_model(y_val, y_pred_on_val, curr_model_dir+'/val_metrics/', labels, False) 
+                    evaluate_model(y_val, y_pred_on_val, curr_model_dir+'/val_metrics/', labels) 
                 if not (np.isscalar(y_test) and np.isnan(y_test)):
-                    evaluate_model(y_test, y_pred_on_test, curr_model_dir+'/test_metrics/', labels, False)  
+                    evaluate_model(y_test, y_pred_on_test, curr_model_dir+'/test_metrics/', labels)  
