@@ -10,7 +10,7 @@
 | LSTM-Network | `vanilla_lstm.py` |
 | Tree-Net | `tree_net.py` |
 
-Note that the `dnn_rf.py` and `tree_net.py` models were not used in our manuscript.
+Note that the `tree_net.py` models were not used in our manuscript.
 
 ## Hyperparameter Stage
 
@@ -154,3 +154,7 @@ python stage_prospective_screening.py \
 
 `CallBacks.py`: Keras callback functions for early stopping.
 Used in neural network models.
+
+## Tester
+
+`test_demo.py` is used for a quick test on sampled dataset.

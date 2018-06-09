@@ -24,7 +24,7 @@ from sklearn.ensemble import RandomForestClassifier
 epsilon = 1.0e-9
 
 
-class DNN_RF:
+class RF_Tester:
     def __init__(self):
         self.EF_ratio_list = [0.001, 0.01]
         return
@@ -101,7 +101,7 @@ def demo():
         y_t, y_val = y_train[t_index], y_train[val_index]
     print 'done data preparation'
 
-    task = DNN_RF()
+    task = RF_Tester()
     task.get_rf(X_train, y_train, X_val, y_val, X_test, y_test)
 
     return
