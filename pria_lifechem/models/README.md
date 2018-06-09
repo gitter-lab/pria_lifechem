@@ -10,7 +10,7 @@
 | LSTM-Network | `vanilla_lstm.py` |
 | Tree-Net | `tree_net.py` |
 
-Note that the `tree_net.py` models were not used in our manuscript.
+Note that the `tree_net.py` model was not used in our manuscript.
 
 ## Hyperparameter Stage
 
@@ -157,4 +157,4 @@ Used in neural network models.
 
 ## Tester
 
-`test_demo.py` is used for a quick test on sampled dataset.
+`test_demo.py` is used for a quick test on sample dataset.
