@@ -157,4 +157,4 @@ Used in neural network models.
 
 ## Tester
 
-`test_demo.py` is used for a quick test on sample dataset.
+`test_demo.py` is used for a quick test on the sample dataset.
