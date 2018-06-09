@@ -14,3 +14,5 @@ The columns in the csv files are:
 When training models for a new target, the PriA-SSB and RMI-FANCM columns can be replaced with suitable labels for that target.
 
 The pria_lifechem subdirectory in the parent directory contains scripts for preprocessing a chemical screening dataset for training new models.
+
+`download.sh` is the a downloading script for all the files mentioned above.
