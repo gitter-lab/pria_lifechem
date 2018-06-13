@@ -50,7 +50,7 @@ The random forest code is still compatible with `conda_env.yml`, but the results
 The dataset subdirectory contains a description of the expected file format and an example dataset that has been split into five folds.
 
 The complete high-throughput screening data will be uploaded to PubChem.
-Pre-processed, merged versions of the data are available on Zenodo ([doi:10.5281/zenodo.1257463](https://doi.org/10.5281/zenodo.1257463)).
+Pre-processed, merged versions of the data are available on Zenodo ([doi:10.5281/zenodo.1287964](https://doi.org/10.5281/zenodo.1287964)).
 The Zenodo files are:
 - **pria_rmi_cv.tar.gz**: The LifeChem compounds used for cross validation with PriA-SSB and RMI-FANCM split into five folds.
 - **pria_rmi_pcba_cv.tar.gz**: These same compounds merged with 128 tasks from PubChem split into five folds.
