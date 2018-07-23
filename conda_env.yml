@@ -13,7 +13,7 @@ dependencies:
 - theano=0.8
 - keras=1.2
 - scikit-learn=0.17
-- rdkit-postgresql
+- rdkit-postgresql=2016.03.4
 - rpy2=2.8.5
 - r-prroc=1.1
 - pandas
