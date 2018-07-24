@@ -493,7 +493,7 @@ def evaluate_model(y_true, y_pred, model_dir, label_names=None):
         
     perc_vec = [0.001, 0.0015, 0.005, 0.01, 0.02, 0.05, 0.1, 0.2]
     perc_vec_plots = np.linspace(0.001, .2, 100) 
-    n_tests_list = [100, 500, 1000, 2500, 5000, 10000]
+    n_tests_list = [100, 250, 500, 1000, 2500, 5000, 10000]
 
     metrics_dir = model_dir+'metrics.csv'
     
