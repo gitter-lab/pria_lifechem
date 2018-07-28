@@ -208,8 +208,8 @@ def get_irv_results_stage_1(model_directory, data_directory, k=5):
                 test_data = []    
                 bal_train_data = []
                 
-                featurizer='ECFP'
-                if featurizer == 'ECFP':
+                featurizer='MorganFP'
+                if featurizer == 'MorganFP':
                     featurizer_func = dc.feat.CircularFingerprint(size=1024)
                 elif featurizer == 'GraphConv':
                     featurizer_func = dc.feat.ConvMolFeaturizer()
@@ -330,8 +330,8 @@ def get_irv_results_stage_2(model_directory, data_directory, held_out_data_file,
         test_data = []    
         bal_train_data = []
         
-        featurizer='ECFP'
-        if featurizer == 'ECFP':
+        featurizer='MorganFP'
+        if featurizer == 'MorganFP':
             featurizer_func = dc.feat.CircularFingerprint(size=1024)
         elif featurizer == 'GraphConv':
             featurizer_func = dc.feat.ConvMolFeaturizer()
