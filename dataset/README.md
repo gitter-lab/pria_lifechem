@@ -4,7 +4,7 @@ The test dataset has been split into five folds.
 The columns in the csv files are:
 * `Molecule`, a molecule ID, used as Index for the pandas dataframe
 * `SMILES`, SMILES string representation of the compound, used for LSTM training
-* `Fingerprints`, 1024 bit ECFP4 fingerprint representation of the compound
+* `Fingerprints`, 1024 bit Morgan fingerprints representation of the compound
 * `Keck_Pria_AS_Retest`, the **PriA-SSB AS** binary label
 * `Keck_Pria_FP_data`, the **PriA-SSB FP** binary label
 * `Keck_Pria_Continuous`, the continuous PriA-SSB primary screen % inhibition
