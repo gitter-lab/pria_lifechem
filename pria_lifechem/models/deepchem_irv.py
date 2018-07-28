@@ -294,8 +294,8 @@ if __name__ == '__main__':
         orig_val_data = []
         orig_test_data = []  
         
-        featurizer='ECFP'
-        if featurizer == 'ECFP':
+        featurizer='MorganFP'
+        if featurizer == 'MorganFP':
             featurizer_func = dc.feat.CircularFingerprint(size=1024)
         elif featurizer == 'GraphConv':
             featurizer_func = dc.feat.ConvMolFeaturizer()
@@ -393,8 +393,8 @@ if __name__ == '__main__':
         K_neighbors = task.K
         labels = task.labels
         
-        featurizer='ECFP'
-        if featurizer == 'ECFP':
+        featurizer='MorganFP'
+        if featurizer == 'MorganFP':
             featurizer_func = dc.feat.CircularFingerprint(size=1024)
         elif featurizer == 'GraphConv':
             featurizer_func = dc.feat.ConvMolFeaturizer()
