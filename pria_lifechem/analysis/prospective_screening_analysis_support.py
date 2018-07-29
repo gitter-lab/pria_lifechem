@@ -122,7 +122,7 @@ def merge_prediction_old():
 def merge_rank():
     dir_ = '../../output/stage_2_predictions/Keck_Pria_AS_Retest'
     complete_df = pd.read_csv('{}/complete_prediction.csv'.format(dir_))
-    model_names = complete_df.columns[3:]
+    model_names = complete_df.columns[1:]
     # TODO: Need complete dataframe
     # rank_df = complete_df[['molecule id', 'label', 'inhibition']]
     rank_df = complete_df[['label']]
@@ -163,7 +163,7 @@ def merge_rank():
 def merge_evaluation():
     dir_ = '../../output/stage_2_predictions/Keck_Pria_AS_Retest'
     complete_df = pd.read_csv('{}/complete_prediction.csv'.format(dir_))
-    model_names = complete_df.columns[3:]
+    model_names = complete_df.columns[1:]
 
     metric_df = pd.DataFrame({'Model': model_names})
 
