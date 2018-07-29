@@ -16,6 +16,45 @@ def clean_excel():
 
 
 def merge_prediction():
+    dir_ = '../../output/stage_2_predictions/Keck_Pria_AS_Retest'
+
+    file_path = '{}/{}.npz'.format(dir_, 'vanilla_lstm_19')
+    data = np.load(file_path)
+
+    complete_df = pd.DataFrame({'label': data['y_test'][:, 0]})
+
+    column_names = ['label']
+    model_names = []
+
+    for model_name in model_name_mapping.keys():
+        file_path = '{}/{}.npz'.format(dir_, model_name)
+        if not os.path.exists(file_path):
+            continue
+        print('model: {} exists'.format(model_name))
+        data = np.load(file_path)
+        file_path, '\t', data.keys()
+
+        y_pred = data['y_pred_on_test'][:, 0]
+        if y_pred.ndim == 2:
+            y_pred = y_pred[:, 0]
+
+        model_name = model_name_mapping[model_name]
+        model_names.append(model_name)
+        complete_df[model_name] = y_pred
+
+        print()
+
+    model_names = sorted(model_names)
+    column_names.extend(model_names)
+
+    complete_df = complete_df[column_names]
+    print(complete_df.shape)
+    complete_df.to_csv('{}/complete_prediction.csv'.format(dir_), index=None)
+
+    return
+
+
+def merge_prediction_old():
     dataframe = pd.read_excel('../../output/stage_2_predictions/Keck_LC4_export.xlsx')
 
     molecule_name_list = dataframe['Molecule Name'].tolist()
@@ -84,7 +123,9 @@ def merge_rank():
     dir_ = '../../output/stage_2_predictions/Keck_Pria_AS_Retest'
     complete_df = pd.read_csv('{}/complete_prediction.csv'.format(dir_))
     model_names = complete_df.columns[3:]
-    rank_df = complete_df[['molecule id', 'label', 'inhibition']]
+    # TODO: Need complete dataframe
+    # rank_df = complete_df[['molecule id', 'label', 'inhibition']]
+    rank_df = complete_df[['label']]
     for (idx, model_name) in enumerate(model_names):
         order = complete_df[model_name].rank(ascending=False).tolist()
         order = np.array(order)
@@ -158,7 +199,7 @@ def filter_model_name(model_name):
 
 
 if __name__ == '__main__':
-    clean_excel()
+    # clean_excel()
     merge_prediction()
     merge_rank()
     merge_evaluation()
