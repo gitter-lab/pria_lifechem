@@ -16,14 +16,17 @@ def clean_excel():
 
 
 def merge_prediction():
+    dataframe = pd.read_csv('../../dataset/fixed_dataset/pria_prospective.csv.gz')
+    molecule_ids = dataframe['Molecule'].tolist()
+    actual_labels = dataframe['Keck_Pria_AS_Retest'].tolist()
+    inhibits = dataframe['Keck_Pria_Continuous'].tolist()
+
+    complete_df = pd.DataFrame({'molecule': molecule_ids, 'label': actual_labels, 'inhibition': inhibits})
+
+    column_names = ['molecule', 'label', 'inhibition']
+    complete_df = complete_df[column_names]
+
     dir_ = '../../output/stage_2_predictions/Keck_Pria_AS_Retest'
-
-    file_path = '{}/{}.npz'.format(dir_, 'vanilla_lstm_19')
-    data = np.load(file_path)
-
-    complete_df = pd.DataFrame({'label': data['y_test'][:, 0]})
-
-    column_names = ['label']
     model_names = []
 
     for model_name in model_name_mapping.keys():
@@ -122,10 +125,8 @@ def merge_prediction_old():
 def merge_rank():
     dir_ = '../../output/stage_2_predictions/Keck_Pria_AS_Retest'
     complete_df = pd.read_csv('{}/complete_prediction.csv'.format(dir_))
-    model_names = complete_df.columns[1:]
-    # TODO: Need complete dataframe
-    # rank_df = complete_df[['molecule id', 'label', 'inhibition']]
-    rank_df = complete_df[['label']]
+    model_names = complete_df.columns[3:]
+    rank_df = complete_df[['molecule', 'label', 'inhibition']]
     for (idx, model_name) in enumerate(model_names):
         order = complete_df[model_name].rank(ascending=False).tolist()
         order = np.array(order)
@@ -163,7 +164,7 @@ def merge_rank():
 def merge_evaluation():
     dir_ = '../../output/stage_2_predictions/Keck_Pria_AS_Retest'
     complete_df = pd.read_csv('{}/complete_prediction.csv'.format(dir_))
-    model_names = complete_df.columns[1:]
+    model_names = complete_df.columns[3:]
 
     metric_df = pd.DataFrame({'Model': model_names})
 
