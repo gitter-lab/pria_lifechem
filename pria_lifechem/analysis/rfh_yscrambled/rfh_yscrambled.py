@@ -1,4 +1,3 @@
-from evaluation import *
 import argparse
 import pandas as pd
 import csv
@@ -101,20 +100,6 @@ class RFH_YScrambled:
         label_list = self.label_names
         nef_auc_mean = np.mean(np.array(nef_auc(y_true, y_pred, self.EF_ratio_list, label_list))) 
         print('nef auc: {}'.format(nef_auc_mean))
-        return
-
-    def save_model_evaluation_metrics(self,
-                              X, y_true,
-                              model_file,
-                              metric_dir,
-                              label_names=None):
-        
-        if not os.path.exists(metric_dir):
-            os.makedirs(metric_dir)   
-        
-        y_true, y_pred = self.get_prediction_info(X, y_true)
-        label_list = self.label_names
-        evaluate_model(y_true, y_pred, metric_dir, label_list)        
         return
         
     def save_model_params(self, config_csv_file):      
