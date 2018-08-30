@@ -1,5 +1,5 @@
 {
-  "label_names":["Keck_Pria_AS_Retest"]
+  "label_names":["Keck_Pria_AS_Retest"],
   "params": {
     "n_estimators": 8000,
     "max_features": "log2",

@@ -31,11 +31,11 @@ class RFH_YScrambled:
         self.process_num = process_num
         
         self.param = conf['params']
-        self.n_estimators = param['n_estimators']
-        self.max_features = param['max_features']
-        self.min_samples_leaf = param['min_samples_leaf']
-        self.class_weight = param['class_weight']
-        print('Testing set:', param)
+        self.n_estimators = self.param['n_estimators']
+        self.max_features = self.param['max_features']
+        self.min_samples_leaf = self.param['min_samples_leaf']
+        self.class_weight = self.param['class_weight']
+        print('Testing set:', self.param)
         
         self.model_dict = {}
         return
@@ -120,6 +120,39 @@ def read_merged_data(input_file_list, usecols=None):
         data_pd = pd.read_csv(input_file, usecols=usecols)
         whole_pd = whole_pd.append(data_pd)
     return whole_pd
+
+'''
+Note: Copied from function.py
+
+Reshape vector into 2-dimension matrix.
+'''
+def reshape_data_into_2_dim(data):
+    if data.ndim == 1:
+        n = data.shape[0]
+        data = data.reshape(n, 1)
+    return data
+    
+'''
+Note: Copied from function.py
+
+Get the fingerprints, with feature_name specified, and label_name specified
+'''
+def extract_feature_and_label(data_pd,
+                              feature_name,
+                              label_name_list):
+    # By default, feature should be fingerprints
+    X_data = data_pd[feature_name].tolist()
+    X_data = [list(x) for x in X_data]
+    X_data = np.array(X_data)
+
+    y_data = data_pd[label_name_list].values.tolist()
+    y_data = np.array(y_data)
+    y_data = reshape_data_into_2_dim(y_data)
+
+    X_data = X_data.astype(float)
+    y_data = y_data.astype(float)
+
+    return X_data, y_data
     
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -170,7 +203,7 @@ if __name__ == '__main__':
     
     csv_file_list = output_file_list[:]
     train_pd = read_merged_data(csv_file_list)
-    test_pd = pd.read_csv(prospective_file, compression='gzip')(prospective_file)
+    test_pd = pd.read_csv(prospective_file, compression='gzip')
     
     labels = ["Keck_Pria_AS_Retest"]
 
@@ -193,9 +226,9 @@ if __name__ == '__main__':
     task.save_model_params(config_csv_file)
                                        
     # save prediction arrays
-    y_train, y_pred_on_train = self.get_prediction_info(X_train, y_train)
-    y_test, y_pred_on_test = self.get_prediction_info(X_test, y_test)
-    npz_file_name = model_dir+str(process_num)
+    y_train, y_pred_on_train = task.get_prediction_info(X_train, y_train)
+    y_test, y_pred_on_test = task.get_prediction_info(X_test, y_test)
+    npz_file_name = model_dir+'process_'+str(process_num)
     np.savez_compressed(npz_file_name,
                         labels=labels, y_train=y_train, y_val=None, y_test=y_test,
                         y_pred_on_train=y_pred_on_train, y_pred_on_val=None, y_pred_on_test=y_pred_on_test)
