@@ -10,6 +10,7 @@ from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.externals import joblib
 from sklearn.grid_search import ParameterGrid
 from shutil import move
+import os
 
 """
  This class is similar to SKLearn_RandomForest but permutes the labels prior to training. 
