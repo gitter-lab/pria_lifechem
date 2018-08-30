@@ -6,7 +6,6 @@ import json
 import sys
 sys.path.insert(0, '..')  # Add path from parent folder
 sys.path.insert(0, '.')  # Add path from current folder
-from function import *
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.externals import joblib
 from sklearn.grid_search import ParameterGrid
@@ -107,7 +106,20 @@ class RFH_YScrambled:
         with open(config_csv_file, 'w') as csvfile:
             csvfile.write(data)
         return
-        
+
+'''
+Note: Copied from function.py
+
+Read the data from all files in input_file_list
+And merged into one dataset
+'''
+def read_merged_data(input_file_list, usecols=None):
+    whole_pd = pd.DataFrame()
+    for input_file in input_file_list:
+        data_pd = pd.read_csv(input_file, usecols=usecols)
+        whole_pd = whole_pd.append(data_pd)
+    return whole_pd
+    
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--config_json_file', action="store", dest="config_json_file", required=True)
