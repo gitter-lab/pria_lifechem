@@ -7,7 +7,7 @@ out_dir = './top_250/'
 
 classes = os.listdir(in_dir)
 stage = 'stage_2'
-keck_file = './datasets/keck_lc4_Nov_6_2017.csv'
+keck_file = './datasets/pria_prospective.csv.gz'
 df = pd.read_csv(keck_file)
 n_tests = 250
 

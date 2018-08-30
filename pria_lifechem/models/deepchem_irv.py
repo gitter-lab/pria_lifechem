@@ -246,7 +246,6 @@ if __name__ == '__main__':
     model_file = model_dir+'tf_checkpoints/'
     config_csv_file = model_dir+'model_config.csv'
     #####
-    scratch_dir = os.environ.get('_CONDOR_JOB_IWD')
 
     if not os.path.exists(model_dir):
         os.makedirs(model_dir)    

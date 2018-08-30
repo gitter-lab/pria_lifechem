@@ -138,7 +138,7 @@ def get_rf_results_stage_2(model_directory, data_directory, held_out_data_file, 
         for i in range(1):  
             fold_dir = model_directory+'/'+m_name+'/fold_'+str(i)    
             train_pd = read_merged_data(output_file_list)
-            test_pd = read_merged_data([held_out_data_file])      
+            test_pd = read_merged_data([held_out_data_file])
             
             labels = ["Keck_Pria_AS_Retest", "Keck_Pria_FP_data", "Keck_RMI_cdd"]
         

@@ -18,7 +18,7 @@ output_dir_1 = given_args.output_dir_1
 pass_num = int(given_args.pass_num)
 
 data_directory = '../../../dataset/'
-held_out_data_file = '../../../held_keck/keck_lc4.csv'
+held_out_data_file = '../../../dataset/pria_prospective.csv.gz'
 
 if not os.path.exists(output_dir_1):
     os.makedirs(output_dir_1)
