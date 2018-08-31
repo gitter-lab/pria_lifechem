@@ -29,7 +29,7 @@ preds_npz = np.load(npz_file_name)
 labels, y_train, y_test, y_pred_on_train, y_pred_on_test = preds_npz['labels'], preds_npz['y_train'], preds_npz['y_test'], preds_npz['y_pred_on_train'], preds_npz['y_pred_on_test']
 labels = [e.decode('UTF-8') for e in labels]
 
-output_dir = output_dir+'/fold_{}/'.format(process_num)
+output_dir = output_dir+'/process_{}/fold_{}/'.format(process_num, 0)
 if not os.path.exists(output_dir):
     os.makedirs(output_dir)
 if not os.path.exists(output_dir+'/train_metrics/'):
