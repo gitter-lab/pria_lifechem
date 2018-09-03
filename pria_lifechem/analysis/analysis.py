@@ -9,7 +9,8 @@ import pandas as pd
 evaluations = {0: 'train prec', 1: 'train roc', 2: 'train bedroc',
                3: 'val prec', 4: 'val roc', 5: 'val bedroc',
                6: 'test prec', 7: 'test roc', 8: 'test bedroc',
-               9: 'EF_2', 10: 'EF_1', 11: 'EF_015', 12: 'EF_01'}
+               9: 'EF_2', 10: 'EF_1', 11: 'EF_015', 12: 'EF_01',
+               13: 'NEF_2', 14: 'NEF_1', 15: 'NEF_015', 16: 'NEF_01'}
 
 facecolors = ['r', 'g', 'b', 'y', 'm', 'c', 'k', 'b']
 
@@ -67,6 +68,11 @@ def action(dir_name, k):
     EF_015_list = []
     EF_01_list = []
 
+    NEF_2_list = []
+    NEF_1_list = []
+    NEF_015_list = []
+    NEF_01_list = []
+
     for x in range(k):
         file_path = dir_name + '{}.out'.format(x)
         
@@ -85,6 +91,10 @@ def action(dir_name, k):
             EF_1_list.append([0, 0, 0])
             EF_015_list.append([0, 0, 0])
             EF_01_list.append([0, 0, 0])
+            NEF_2_list.append(0)
+            NEF_1_list.append(0)
+            NEF_015_list.append(0)
+            NEF_01_list.append(0)
             continue
             
         with open(file_path, 'r') as f:
@@ -108,14 +118,22 @@ def action(dir_name, k):
                     test_roc_list.append(get_number(line))
                 if 'test bedroc' in line:
                     test_bedroc_list.append(get_number(line))
-                if 'ratio: 0.02,' in line or 'ratio 0.02,' in line:
-                    EF_2_list.append(get_EF_number(line))
-                if 'ratio: 0.01,' in line or 'ratio 0.01,' in line:
-                    EF_1_list.append(get_EF_number(line))
-                if 'ratio: 0.0015,' in line or 'ratio 0.0015,' in line:
-                    EF_015_list.append(get_EF_number(line))
-                if 'ratio: 0.001,' in line or 'ratio 0.001,' in line:
-                    EF_01_list.append(get_EF_number(line))
+                if 'ratio: 0.02, EF' in line or 'ratio 0.02, EF' in line:
+                    ratio, ef, ef_max = get_EF_number(line)
+                    EF_2_list.append([ratio, ef, ef_max])
+                    NEF_2_list.append(ef/ef_max)
+                if 'ratio: 0.01, EF' in line or 'ratio 0.01, EF' in line:
+                    ratio, ef, ef_max = get_EF_number(line)
+                    EF_1_list.append([ratio, ef, ef_max])
+                    NEF_1_list.append(ef/ef_max)
+                if 'ratio: 0.0015, EF' in line or 'ratio 0.0015, EF' in line:
+                    ratio, ef, ef_max = get_EF_number(line)
+                    EF_015_list.append([ratio, ef, ef_max])
+                    NEF_015_list.append(ef/ef_max)
+                if 'ratio: 0.001, EF' in line or 'ratio 0.001, EF' in line:
+                    ratio, ef, ef_max = get_EF_number(line)
+                    EF_01_list.append([ratio, ef, ef_max])
+                    NEF_01_list.append(ef/ef_max)
 
     train_prec_list = np.array(train_prec_list)
     train_roc_list = np.array(train_roc_list)
@@ -134,10 +152,16 @@ def action(dir_name, k):
     EF_015_list = np.array(EF_015_list)
     EF_01_list = np.array(EF_01_list)
 
+    NEF_2_list = np.array(NEF_2_list)
+    NEF_1_list = np.array(NEF_1_list)
+    NEF_015_list = np.array(NEF_015_list)
+    NEF_01_list = np.array(NEF_01_list)
+
     return train_prec_list, train_roc_list, train_bedroc_list, \
            val_prec_list, val_roc_list, val_bedroc_list, \
            test_prec_list, test_roc_list, test_bedroc_list, \
-           EF_2_list, EF_1_list, EF_015_list, EF_01_list
+           EF_2_list, EF_1_list, EF_015_list, EF_01_list, \
+           NEF_2_list, NEF_1_list, NEF_015_list, NEF_01_list
 
 
 '''
@@ -160,6 +184,11 @@ def action_ignore(dir_name, k):
     EF_1_list = []
     EF_015_list = []
     EF_01_list = []
+
+    NEF_2_list = []
+    NEF_1_list = []
+    NEF_015_list = []
+    NEF_01_list = []
 
     for x in range(k):
         file_path = dir_name + '{}.out'.format(x)
@@ -188,14 +217,22 @@ def action_ignore(dir_name, k):
                     test_roc_list.append(get_number(line))
                 if 'test bedroc' in line:
                     test_bedroc_list.append(get_number(line))
-                if 'ratio: 0.02,' in line or 'ratio 0.02,' in line:
-                    EF_2_list.append(get_EF_number(line))
-                if 'ratio: 0.01,' in line or 'ratio 0.01,' in line:
-                    EF_1_list.append(get_EF_number(line))
-                if 'ratio: 0.0015,' in line or 'ratio 0.0015,' in line:
-                    EF_015_list.append(get_EF_number(line))
-                if 'ratio: 0.001,' in line or 'ratio 0.001,' in line:
-                    EF_01_list.append(get_EF_number(line))
+                if 'ratio: 0.02, EF' in line or 'ratio 0.02, EF' in line:
+                    ratio, ef, ef_max = get_EF_number(line)
+                    EF_2_list.append([ratio, ef, ef_max])
+                    NEF_2_list.append(ef/ef_max)
+                if 'ratio: 0.01, EF' in line or 'ratio 0.01, EF' in line:
+                    ratio, ef, ef_max = get_EF_number(line)
+                    EF_1_list.append([ratio, ef, ef_max])
+                    NEF_1_list.append(ef/ef_max)
+                if 'ratio: 0.0015, EF' in line or 'ratio 0.0015, EF' in line:
+                    ratio, ef, ef_max = get_EF_number(line)
+                    EF_015_list.append([ratio, ef, ef_max])
+                    NEF_015_list.append(ef/ef_max)
+                if 'ratio: 0.001, EF' in line or 'ratio 0.001, EF' in line:
+                    ratio, ef, ef_max = get_EF_number(line)
+                    EF_01_list.append([ratio, ef, ef_max])
+                    NEF_01_list.append(ef/ef_max)
 
     train_prec_list = np.array(train_prec_list)
     train_roc_list = np.array(train_roc_list)
@@ -214,10 +251,16 @@ def action_ignore(dir_name, k):
     EF_015_list = np.array(EF_015_list)
     EF_01_list = np.array(EF_01_list)
 
+    NEF_2_list = np.array(NEF_2_list)
+    NEF_1_list = np.array(NEF_1_list)
+    NEF_015_list = np.array(NEF_015_list)
+    NEF_01_list = np.array(NEF_01_list)
+
     return train_prec_list, train_roc_list, train_bedroc_list, \
            val_prec_list, val_roc_list, val_bedroc_list, \
            test_prec_list, test_roc_list, test_bedroc_list, \
-           EF_2_list, EF_1_list, EF_015_list, EF_01_list
+           EF_2_list, EF_1_list, EF_015_list, EF_01_list, \
+           NEF_2_list, NEF_1_list, NEF_015_list, NEF_01_list
 
 
 def plot_single_model_single_evaluation(dir_path, k, evaluation, title):
@@ -227,7 +270,8 @@ def plot_single_model_single_evaluation(dir_path, k, evaluation, title):
     train_prec_list, train_roc_list, train_bedroc_list, \
     val_prec_list, val_roc_list, val_bedroc_list, \
     test_prec_list, test_roc_list, test_bedroc_list, \
-    EF_2_list, EF_1_list, EF_015_list, EF_01_list = action(dir_path, k)
+    EF_2_list, EF_1_list, EF_015_list, EF_01_list, \
+    NEF_2_list, NEF_1_list, NEF_015_list, NEF_01_list = action(dir_path, k)
     
     print 'k ', k
     print 'train size : ', train_prec_list.shape
@@ -258,6 +302,14 @@ def plot_single_model_single_evaluation(dir_path, k, evaluation, title):
         Y = EF_015_list[:, 1]
     elif evaluation == 'EF_01':
         Y = EF_01_list[:, 1]
+    elif evaluation == 'NEF_2':
+        Y = NEF_2_list
+    elif evaluation == 'NEF_1':
+        Y = NEF_1_list
+    elif evaluation == 'NEF_015':
+        Y = NEF_015_list
+    elif evaluation == 'NEF_01':
+        Y = NEF_01_list
     else:
         raise Exception('No such evaluation method.')
 
@@ -279,7 +331,8 @@ def plot_single_model_multi_evaluations(dir_path, k, evaluation_list, title):
     train_prec_list, train_roc_list, train_bedroc_list, \
     val_prec_list, val_roc_list, val_bedroc_list, \
     test_prec_list, test_roc_list, test_bedroc_list, \
-    EF_2_list, EF_1_list, EF_015_list, EF_01_list = action(dir_path, k)
+    EF_2_list, EF_1_list, EF_015_list, EF_01_list, \
+    NEF_2_list, NEF_1_list, NEF_015_list, NEF_01_list = action(dir_path, k)
 
     for i in range(len(evaluation_list)):
         evaluation = evaluation_list[i]
@@ -309,6 +362,14 @@ def plot_single_model_multi_evaluations(dir_path, k, evaluation_list, title):
             Y = EF_015_list[:, 1]
         elif evaluation == 'EF_01':
             Y = EF_01_list[:, 1]
+        elif evaluation == 'NEF_2':
+            Y = NEF_2_list
+        elif evaluation == 'NEF_1':
+            Y = NEF_1_list
+        elif evaluation == 'NEF_015':
+            Y = NEF_015_list
+        elif evaluation == 'NEF_01':
+            Y = NEF_01_list
         else:
             raise Exception('No such evaluation method.')
 
@@ -328,7 +389,8 @@ def get_ranked_analysis(dir_path, k, evaluation_list, fetch_top_num):
     train_prec_list, train_roc_list, train_bedroc_list, \
     val_prec_list, val_roc_list, val_bedroc_list, \
     test_prec_list, test_roc_list, test_bedroc_list, \
-    EF_2_list, EF_1_list, EF_015_list, EF_01_list = action(dir_path, k)
+    EF_2_list, EF_1_list, EF_015_list, EF_01_list, \
+    NEF_2_list, NEF_1_list, NEF_015_list, NEF_01_list = action(dir_path, k)
 
     for i in range(len(evaluation_list)):
         evaluation = evaluation_list[i]
@@ -359,6 +421,14 @@ def get_ranked_analysis(dir_path, k, evaluation_list, fetch_top_num):
             Y = EF_015_list[:, 1]
         elif evaluation == 'EF_01':
             Y = EF_01_list[:, 1]
+        elif evaluation == 'NEF_2':
+            Y = NEF_2_list
+        elif evaluation == 'NEF_1':
+            Y = NEF_1_list
+        elif evaluation == 'NEF_015':
+            Y = NEF_015_list
+        elif evaluation == 'NEF_01':
+            Y = NEF_01_list
         else:
             raise Exception('No such evaluation method.')
 
@@ -377,7 +447,8 @@ def fetch_one_model(dir_path, number, evaluation_list, model):
     train_prec_list, train_roc_list, train_bedroc_list, \
     val_prec_list, val_roc_list, val_bedroc_list, \
     test_prec_list, test_roc_list, test_bedroc_list, \
-    EF_2_list, EF_1_list, EF_015_list, EF_01_list = action_ignore(dir_path, number)
+    EF_2_list, EF_1_list, EF_015_list, EF_01_list, \
+    NEF_2_list, NEF_1_list, NEF_015_list, NEF_01_list = action(dir_path, number)
 
     evaluation_column = []
     value_column = []
@@ -438,6 +509,23 @@ def fetch_one_model(dir_path, number, evaluation_list, model):
         evaluation_column.extend(['EF_01' for _ in EF_01_list])
         value_column.extend(list(EF_01_list[:,1]))
         model_column.extend([model for _ in EF_01_list])
+
+    if 'NEF_2' in evaluation_list:
+        evaluation_column.extend(['NEF_2' for _ in NEF_2_list])
+        value_column.extend(list(NEF_2_list))
+        model_column.extend([model for _ in NEF_2_list])
+    if 'NEF_1' in evaluation_list:
+        evaluation_column.extend(['NEF_1' for _ in NEF_1_list])
+        value_column.extend(list(NEF_1_list))
+        model_column.extend([model for _ in NEF_1_list])
+    if 'NEF_015' in evaluation_list:
+        evaluation_column.extend(['NEF_015' for _ in NEF_015_list])
+        value_column.extend(list(NEF_015_list))
+        model_column.extend([model for _ in NEF_015_list])
+    if 'NEF_01' in evaluation_list:
+        evaluation_column.extend(['NEF_01' for _ in NEF_01_list])
+        value_column.extend(list(NEF_01_list))
+        model_column.extend([model for _ in NEF_01_list])
 
     return evaluation_column, value_column, model_column
 
