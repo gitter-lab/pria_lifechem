@@ -217,7 +217,9 @@ class SingleClassification:
         if X_test is not None:
             for EF_ratio in self.EF_ratio_list:
                 n_actives, ef, ef_max = enrichment_factor_single(y_test, y_pred_on_test, EF_ratio)
+                nef = ef / ef_max
                 print('ratio: {}, EF: {},\tactive: {}'.format(EF_ratio, ef, n_actives))
+                print('ratio: {}, NEF: {}'.format(EF_ratio, nef))
 
         return
 
@@ -252,7 +254,10 @@ class SingleClassification:
         if X_test is not None:
             for EF_ratio in self.EF_ratio_list:
                 n_actives, ef, ef_max = enrichment_factor_single(y_test, y_pred_on_test, EF_ratio)
+                n_actives, ef, ef_max = enrichment_factor_single(y_test, y_pred_on_test, EF_ratio)
+                nef = ef / ef_max
                 print('ratio: {}, EF: {},\tactive: {}'.format(EF_ratio, ef, n_actives))
+                print('ratio: {}, NEF: {}'.format(EF_ratio, nef))
 
         return
 
@@ -463,7 +468,9 @@ class MultiClassification:
         # Just print last target EF into output file.
             for EF_ratio in self.EF_ratio_list:
                 n_actives, ef, ef_max = enrichment_factor_single(y_test[:, -1], y_pred_on_test[:, -1], EF_ratio)
+                nef = ef / ef_max
                 print('ratio: {}, EF: {},\tactive: {}'.format(EF_ratio, ef, n_actives))
+                print('ratio: {}, NEF: {}'.format(EF_ratio, nef))
 
             # Store all the target EF into score file.
             out = open(score_file, 'w')
@@ -471,7 +478,9 @@ class MultiClassification:
             for EF_ratio in self.EF_ratio_list:
                 for i in range(y_test.shape[1]):
                     n_actives, ef, ef_max = enrichment_factor_single(y_test[:, i], y_pred_on_test[:, i], EF_ratio)
+                    nef = ef / ef_max
                     print >> out, 'ratio:', EF_ratio, 'EF:', ef, 'active:', n_actives
+                    print >> out, 'ratio:', EF_ratio, 'EF:', nef
 
         return
 
@@ -527,14 +536,18 @@ class MultiClassification:
             # Just print last target EF into output file.
             for EF_ratio in self.EF_ratio_list:
                 n_actives, ef, ef_max = enrichment_factor_single(y_test[:, -1], y_pred_on_test[:, -1], EF_ratio)
+                nef = ef / ef_max
                 print('ratio: {}, EF: {},\tactive: {}'.format(EF_ratio, ef, n_actives))
+                print('ratio: {}, NEF: {}'.format(EF_ratio, nef))
 
             out = open(score_file, 'w')
             print >> out, "EF"
             for EF_ratio in self.EF_ratio_list:
                 for i in range(y_test.shape[1]):
                     n_actives, ef, ef_max = enrichment_factor_single(y_test[:, i], y_pred_on_test[:, i], EF_ratio)
+                    nef = ef / ef_max
                     print >> out, 'ratio:', EF_ratio, 'EF:', ef, 'active:', n_actives
+                    print >> out, 'ratio:', EF_ratio, 'EF:', nef
 
         return
 

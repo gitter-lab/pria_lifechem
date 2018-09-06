@@ -153,7 +153,9 @@ class SingleRegression:
         if X_test:
             for EF_ratio in self.EF_ratio_list:
                 n_actives, ef, ef_max = enrichment_factor_single(y_test_classification, y_pred_on_test, EF_ratio)
+                nef = ef / ef_max
                 print('ratio: {}, EF: {},\tactive: {}'.format(EF_ratio, ef, n_actives))
+                print('ratio: {}, NEF: {}'.format(EF_ratio, nef))
 
         return
 
@@ -188,7 +190,9 @@ class SingleRegression:
         if X_test:
             for EF_ratio in self.EF_ratio_list:
                 n_actives, ef, ef_max = enrichment_factor_single(y_test_classification, y_pred_on_test, EF_ratio)
+                nef = ef / ef_max
                 print('ratio: {}, EF: {},\tactive: {}'.format(EF_ratio, ef, n_actives))
+                print('ratio: {}, NEF: {}'.format(EF_ratio, nef))
 
         return
 
@@ -204,7 +208,9 @@ class SingleRegression:
         print
 
         n_actives, ef, ef_max = enrichment_factor_single(y_test_classification, y_pred_on_test, EF_ratio)
+        nef = ef / ef_max
         print('EF: {},\tactive: {}'.format(ef, n_actives))
+        print('NEF: {}'.format(nef))
 
         return
 
