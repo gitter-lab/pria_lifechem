@@ -254,7 +254,6 @@ class SingleClassification:
         if X_test is not None:
             for EF_ratio in self.EF_ratio_list:
                 n_actives, ef, ef_max = enrichment_factor_single(y_test, y_pred_on_test, EF_ratio)
-                n_actives, ef, ef_max = enrichment_factor_single(y_test, y_pred_on_test, EF_ratio)
                 nef = ef / ef_max
                 print('ratio: {}, EF: {},\tactive: {}'.format(EF_ratio, ef, n_actives))
                 print('ratio: {}, NEF: {}'.format(EF_ratio, nef))
@@ -488,66 +487,40 @@ class MultiClassification:
                               X_train, y_train,
                               X_val, y_val,
                               X_test, y_test,
-                              PMTNN_weight_file,
-                              score_file,
-                              eval_indices=[-1],
-                              eval_mean_or_median=np.mean):
-        def get_model_roc_auc(true_label,
-                              predicted_label,
-                              eval_indices=eval_indices,
-                              eval_mean_or_median=eval_mean_or_median):
-            return roc_auc_multi(true_label, predicted_label, eval_indices, eval_mean_or_median)
-
-        def get_model_bedroc_auc(true_label,
-                                 predicted_label,
-                                 eval_indices=eval_indices,
-                                 eval_mean_or_median=eval_mean_or_median):
-            return bedroc_auc_multi(true_label, predicted_label, eval_indices, eval_mean_or_median)
-
-        def get_model_precision_auc(true_label,
-                                    predicted_label,
-                                    eval_indices=eval_indices,
-                                    eval_mean_or_median=eval_mean_or_median):
-            return precision_auc_multi(true_label, predicted_label, eval_indices, eval_mean_or_median)
-
+                              PMTNN_weight_file):
         model = self.setup_model()
         model.load_weights(PMTNN_weight_file)
 
-        y_pred_on_train = model.predict(X_train)
-        y_pred_on_val = model.predict(X_val)
+        y_pred_on_train = model.predict(X_train)[:, -1]
+        y_train = y_train[:, -1]
+        y_pred_on_val = model.predict(X_val)[:, -1]
+        y_val = y_val[:, -1]
         if X_test is not None:
-            y_pred_on_test = model.predict(X_test)
+            y_pred_on_test = model.predict(X_test)[:, -1]
+            y_test = y_test[:, -1]
+        print y_train.shape, '\t', y_pred_on_test.shape
 
-        print('train precision: {}'.format(get_model_precision_auc(y_train, y_pred_on_train)))
-        print('train roc: {}'.format(get_model_roc_auc(y_train, y_pred_on_train)))
-        print('train bedroc: {}'.format(get_model_bedroc_auc(y_train, y_pred_on_train)))
         print
-        print('validation precision: {}'.format(get_model_precision_auc(y_val, y_pred_on_val)))
-        print('validation roc: {}'.format(get_model_roc_auc(y_val, y_pred_on_val)))
-        print('validation bedroc: {}'.format(get_model_bedroc_auc(y_val, y_pred_on_val)))
+        print('train precision: {}'.format(precision_auc_single(y_train, y_pred_on_train)))
+        print('train roc: {}'.format(roc_auc_single(y_train, y_pred_on_train)))
+        print('train bedroc: {}'.format(bedroc_auc_single(y_train, y_pred_on_train)))
+        print
+        print('validation precision: {}'.format(precision_auc_single(y_val, y_pred_on_val)))
+        print('validation roc: {}'.format(roc_auc_single(y_val, y_pred_on_val)))
+        print('validation bedroc: {}'.format(bedroc_auc_single(y_val, y_pred_on_val)))
         print
         if X_test is not None:
-            print('test precision: {}'.format(get_model_precision_auc(y_test, y_pred_on_test)))
-            print('test roc: {}'.format(get_model_roc_auc(y_test, y_pred_on_test)))
-            print('test bedroc: {}'.format(get_model_bedroc_auc(y_test, y_pred_on_test)))
+            print('test precision: {}'.format(precision_auc_single(y_test, y_pred_on_test)))
+            print('test roc: {}'.format(roc_auc_single(y_test, y_pred_on_test)))
+            print('test bedroc: {}'.format(bedroc_auc_single(y_test, y_pred_on_test)))
             print
 
         if X_test is not None:
-            # Just print last target EF into output file.
             for EF_ratio in self.EF_ratio_list:
-                n_actives, ef, ef_max = enrichment_factor_single(y_test[:, -1], y_pred_on_test[:, -1], EF_ratio)
+                n_actives, ef, ef_max = enrichment_factor_single(y_test, y_pred_on_test, EF_ratio)
                 nef = ef / ef_max
                 print('ratio: {}, EF: {},\tactive: {}'.format(EF_ratio, ef, n_actives))
                 print('ratio: {}, NEF: {}'.format(EF_ratio, nef))
-
-            out = open(score_file, 'w')
-            print >> out, "EF"
-            for EF_ratio in self.EF_ratio_list:
-                for i in range(y_test.shape[1]):
-                    n_actives, ef, ef_max = enrichment_factor_single(y_test[:, i], y_pred_on_test[:, i], EF_ratio)
-                    nef = ef / ef_max
-                    print >> out, 'ratio:', EF_ratio, 'EF:', ef, 'active:', n_actives
-                    print >> out, 'ratio:', EF_ratio, 'EF:', nef
 
         return
 

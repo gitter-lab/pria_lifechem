@@ -2,11 +2,9 @@ import numpy as np
 import pria_lifechem
 import os
 from pria_lifechem.function import *
-from pria_lifechem.evaluation import *
 from pria_lifechem.models.CallBacks import *
 from pria_lifechem.models.deep_classification import *
 from pria_lifechem.models.deep_regression import *
-from pria_lifechem.models.vanilla_lstm import *
 from pria_lifechem.models.tree_net import *
 
 
@@ -64,7 +62,10 @@ if __name__ == '__main__':
     print os.path.isfile(weight_file)
 
     k = 5
-    directory = '../../dataset/fixed_dataset/fold_{}/'.format(k)
+    if 'multi_classification' in model_name:
+        directory = '../../dataset/keck_pcba/fold_{}/'.format(k)
+    else:
+        directory = '../../dataset/fixed_dataset/fold_{}/'.format(k)
     file_list = []
     for i in range(k):
         file_list.append('{}file_{}.csv'.format(directory, i))
@@ -79,6 +80,8 @@ if __name__ == '__main__':
     train_file_list = file_list[train_index]
     val_file_list = file_list[val_index:val_index + 1]
     test_file_list = file_list[test_index:test_index + 1]
+
+    print model_name
 
     if 'single_classification' in model_name:
         with open('../../json/single_classification_keck_pria_retest.json', 'r') as f:
@@ -133,7 +136,7 @@ if __name__ == '__main__':
         y_test_regression = reshape_data_into_2_dim(y_test[:, 1])
 
         task = SingleRegression(conf=conf)
-        task.predict_with_existing(X_t, y_t_regression, y_t_classification,
+        task.predict_with_existing(X_train, y_train_regression, y_train_classification,
                                    X_val, y_val_regression, y_val_classification,
                                    X_test, y_test_regression, y_test_classification,
                                    weight_file)
@@ -165,20 +168,8 @@ if __name__ == '__main__':
                                                    feature_name='Fingerprints',
                                                    label_name_list=multi_name_list)
 
-        sample_weight_dir = '../../dataset/sample_weights/keck_pcba/fold_5/'
-        file_list = []
-        for i in range(k):
-            file_list.append('sample_weight_{}.csv'.format(i))
-        sample_weight_file = [sample_weight_dir + f_ for f_ in file_list]
-        sample_weight_file = np.array(sample_weight_file)
-        sample_weight_pd = read_merged_data(sample_weight_file[train_index])
-        _, sample_weight = extract_feature_and_label(sample_weight_pd,
-                                                     feature_name='Fingerprints',
-                                                     label_name_list=multi_name_list)
-
         task = MultiClassification(conf=conf)
         task.predict_with_existing(X_train, y_train,
                                    X_val, y_val,
                                    X_test, y_test,
-                                   weight_file,
-                                   '{}/{}/{}/{}/score'.format(task_name, model_name, record[model_name, task_name], fold_idx))
+                                   weight_file)
