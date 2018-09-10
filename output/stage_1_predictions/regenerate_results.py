@@ -7,8 +7,21 @@ from pria_lifechem.models.deep_classification import *
 from pria_lifechem.models.deep_regression import *
 
 
-fold_num = 20
 task_list = ['cross_validation_Keck_Pria_AS_Retest', 'cross_validation_Keck_FP', 'cross_validation_RMI']
+
+
+def clean(list_a, list_b):
+    neo_a, neo_b = [], []
+    for a,b in zip(list_a, list_b):
+        if np.isnan(a) or np.isnan(b):
+            continue
+        else:
+            neo_a.append(a)
+            neo_b.append(b)
+    neo_a = np.array(neo_a)
+    neo_b = np.array(neo_b)
+    return neo_a, neo_b
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -32,7 +45,11 @@ if __name__ == '__main__':
     y_pred_on_train = reshape_data_into_2_dim(data['y_pred_on_train'][:, task_index])
     y_pred_on_val = reshape_data_into_2_dim(data['y_pred_on_val'][:, task_index])
     y_pred_on_test = reshape_data_into_2_dim(data['y_pred_on_test'][:, task_index])
+    print y_train.shape, '\t', y_pred_on_train.shape, '\t', y_test.shape, '\t', y_pred_on_test.shape
 
+    y_train, y_pred_on_train = clean(y_train, y_pred_on_train)
+    y_val, y_pred_on_val = clean(y_val, y_pred_on_val)
+    y_test, y_pred_on_test = clean(y_test, y_pred_on_test)
     print y_train.shape, '\t', y_pred_on_train.shape, '\t', y_test.shape, '\t', y_pred_on_test.shape
 
     print('train precision: {}'.format(precision_auc_single(y_train, y_pred_on_train)))

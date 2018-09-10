@@ -50,6 +50,12 @@ def get_EF_number(string):
     return ret
 
 
+def get_NEF_number(string):
+    m = re.findall('\d+\.\d+', string)
+    ret = np.array(m).astype(float)
+    return ret[1]
+
+
 def action(dir_name, k):
     train_prec_list = []
     train_roc_list = []
@@ -121,19 +127,23 @@ def action(dir_name, k):
                 if 'ratio: 0.02, EF' in line or 'ratio 0.02, EF' in line:
                     ratio, ef, ef_max = get_EF_number(line)
                     EF_2_list.append([ratio, ef, ef_max])
-                    NEF_2_list.append(ef/ef_max)
                 if 'ratio: 0.01, EF' in line or 'ratio 0.01, EF' in line:
                     ratio, ef, ef_max = get_EF_number(line)
                     EF_1_list.append([ratio, ef, ef_max])
-                    NEF_1_list.append(ef/ef_max)
                 if 'ratio: 0.0015, EF' in line or 'ratio 0.0015, EF' in line:
                     ratio, ef, ef_max = get_EF_number(line)
                     EF_015_list.append([ratio, ef, ef_max])
-                    NEF_015_list.append(ef/ef_max)
                 if 'ratio: 0.001, EF' in line or 'ratio 0.001, EF' in line:
                     ratio, ef, ef_max = get_EF_number(line)
                     EF_01_list.append([ratio, ef, ef_max])
-                    NEF_01_list.append(ef/ef_max)
+                if 'ratio: 0.02, NEF' in line or 'ratio 0.02, NEF' in line:
+                    NEF_2_list.append(get_NEF_number(line))
+                if 'ratio: 0.01, NEF' in line or 'ratio 0.01, NEF' in line:
+                    NEF_1_list.append(get_NEF_number(line))
+                if 'ratio: 0.0015, NEF' in line or 'ratio 0.0015, NEF' in line:
+                    NEF_015_list.append(get_NEF_number(line))
+                if 'ratio: 0.001, NEF' in line or 'ratio 0.001, NEF' in line:
+                    NEF_01_list.append(get_NEF_number(line))
 
     train_prec_list = np.array(train_prec_list)
     train_roc_list = np.array(train_roc_list)
@@ -220,19 +230,23 @@ def action_ignore(dir_name, k):
                 if 'ratio: 0.02, EF' in line or 'ratio 0.02, EF' in line:
                     ratio, ef, ef_max = get_EF_number(line)
                     EF_2_list.append([ratio, ef, ef_max])
-                    NEF_2_list.append(ef/ef_max)
                 if 'ratio: 0.01, EF' in line or 'ratio 0.01, EF' in line:
                     ratio, ef, ef_max = get_EF_number(line)
                     EF_1_list.append([ratio, ef, ef_max])
-                    NEF_1_list.append(ef/ef_max)
                 if 'ratio: 0.0015, EF' in line or 'ratio 0.0015, EF' in line:
                     ratio, ef, ef_max = get_EF_number(line)
                     EF_015_list.append([ratio, ef, ef_max])
-                    NEF_015_list.append(ef/ef_max)
                 if 'ratio: 0.001, EF' in line or 'ratio 0.001, EF' in line:
                     ratio, ef, ef_max = get_EF_number(line)
                     EF_01_list.append([ratio, ef, ef_max])
-                    NEF_01_list.append(ef/ef_max)
+                if 'ratio: 0.02, NEF' in line or 'ratio 0.02, NEF' in line:
+                    NEF_2_list.append(get_NEF_number(line))
+                if 'ratio: 0.01, NEF' in line or 'ratio 0.01, NEF' in line:
+                    NEF_1_list.append(get_NEF_number(line))
+                if 'ratio: 0.0015, NEF' in line or 'ratio 0.0015, NEF' in line:
+                    NEF_015_list.append(get_NEF_number(line))
+                if 'ratio: 0.001, NEF' in line or 'ratio 0.001, NEF' in line:
+                    NEF_01_list.append(get_NEF_number(line))
 
     train_prec_list = np.array(train_prec_list)
     train_roc_list = np.array(train_roc_list)
@@ -576,7 +590,10 @@ def plot_generalization(dir_path_list, evaluation, model_list, title, task_name)
         dir_ = dir_path_list[i]
         model = model_list[i]
 
-        c1, c2, c3 = fetch_one_model(dir_, 20, evaluation_list=[evaluation], model=model)
+        if 'dock' in dir_ or 'consensus' in dir_:
+            c1, c2, c3 = fetch_one_model(dir_, 5, evaluation_list=[evaluation], model=model)
+        else:
+            c1, c2, c3 = fetch_one_model(dir_, 20, evaluation_list=[evaluation], model=model)
         evaluation_column.extend(c1)
         value_column.extend(c2)
         model_column.extend(c3)
