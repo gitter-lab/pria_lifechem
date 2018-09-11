@@ -227,13 +227,13 @@ def enrichment_factor_single_perc(y_true, y_pred, percentile):
         y_pred = y_pred.reshape((y_pred.shape[0], 1)) 
     
     ef = np.zeros(nb_classes)
-    sample_size = int(y_true.shape[0] * percentile)
     
     for i in range(len(ef)):
         non_missing_indices = np.argwhere(y_true[:, i] != -1)[:, 0]
         true_labels = y_true[non_missing_indices, i]
         pred = y_pred[non_missing_indices, i]
     
+        sample_size = int(true_labels.shape[0] * percentile)
         indices = np.argsort(pred, axis=0)[::-1][:sample_size]
         
         n_actives = np.nansum(true_labels) 
@@ -264,13 +264,13 @@ def max_enrichment_factor_single_perc(y_true, y_pred, percentile):
     y_pred = y_pred[non_missing_indices,:]  
     
     max_ef = np.zeros(nb_classes)
-    sample_size = int(y_true.shape[0] * percentile)
     
     for i in range(len(max_ef)):
         non_missing_indices = np.argwhere(y_true[:, i] != -1)[:, 0]
         true_labels = y_true[non_missing_indices, i]    
         n_actives = np.nansum(true_labels) 
         
+        sample_size = int(true_labels.shape[0] * percentile)
         try:
             max_ef[i] = ( min(n_actives, sample_size) /  n_actives ) / percentile 
         except ValueError:

@@ -14,3 +14,4 @@ output
 *.egg-info
 *.weight
 pria_lifechem/analysis/rfh_yscrambled/rfh_yscrambled_preds/rfh_yscrambled_preds/*.npz
+pria_lifechem/analysis/Check Means.ipynb
