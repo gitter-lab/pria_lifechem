@@ -132,7 +132,7 @@ class SingleRegression:
 
         y_pred_on_train = model.predict(X_train)
         y_pred_on_val = model.predict(X_val)
-        if X_test:
+        if X_test is not None:
             y_pred_on_test = model.predict(X_test)
 
         print
@@ -144,16 +144,18 @@ class SingleRegression:
         print('validation roc: {}'.format(roc_auc_single(y_val_classification, y_pred_on_val)))
         print('validation bedroc: {}'.format(bedroc_auc_single(y_val_classification, y_pred_on_val)))
         print
-        if X_test:
+        if X_test is not None:
             print('test precision: {}'.format(precision_auc_single(y_test_classification, y_pred_on_test)))
             print('test roc: {}'.format(roc_auc_single(y_test_classification, y_pred_on_test)))
             print('test bedroc: {}'.format(bedroc_auc_single(y_test_classification, y_pred_on_test)))
             print
 
-        if X_test:
+        if X_test is not None:
             for EF_ratio in self.EF_ratio_list:
                 n_actives, ef, ef_max = enrichment_factor_single(y_test_classification, y_pred_on_test, EF_ratio)
+                nef = ef / ef_max
                 print('ratio: {}, EF: {},\tactive: {}'.format(EF_ratio, ef, n_actives))
+                print('ratio: {}, NEF: {}'.format(EF_ratio, nef))
 
         return
 
@@ -167,7 +169,7 @@ class SingleRegression:
 
         y_pred_on_train = model.predict(X_train)
         y_pred_on_val = model.predict(X_val)
-        if X_test:
+        if X_test is not None:
             y_pred_on_test = model.predict(X_test)
 
         print
@@ -179,16 +181,18 @@ class SingleRegression:
         print('validation roc: {}'.format(roc_auc_single(y_val_classification, y_pred_on_val)))
         print('validation bedroc: {}'.format(bedroc_auc_single(y_val_classification, y_pred_on_val)))
         print
-        if X_test:
+        if X_test is not None:
             print('test precision: {}'.format(precision_auc_single(y_test_classification, y_pred_on_test)))
             print('test roc: {}'.format(roc_auc_single(y_test_classification, y_pred_on_test)))
             print('test bedroc: {}'.format(bedroc_auc_single(y_test_classification, y_pred_on_test)))
             print
 
-        if X_test:
+        if X_test is not None:
             for EF_ratio in self.EF_ratio_list:
                 n_actives, ef, ef_max = enrichment_factor_single(y_test_classification, y_pred_on_test, EF_ratio)
+                nef = ef / ef_max
                 print('ratio: {}, EF: {},\tactive: {}'.format(EF_ratio, ef, n_actives))
+                print('ratio: {}, NEF: {}'.format(EF_ratio, nef))
 
         return
 
@@ -204,7 +208,9 @@ class SingleRegression:
         print
 
         n_actives, ef, ef_max = enrichment_factor_single(y_test_classification, y_pred_on_test, EF_ratio)
+        nef = ef / ef_max
         print('EF: {},\tactive: {}'.format(ef, n_actives))
+        print('NEF: {}'.format(nef))
 
         return
 

@@ -18,7 +18,6 @@ from pria_lifechem.models.deep_classification import *
 from pria_lifechem.models.deep_regression import *
 from pria_lifechem.models.vanilla_lstm import *
 from pria_lifechem.models.tree_net import *
-from pria_lifechem.models.dnn_rf import *
 
 
 def run_single_classification(running_index, use_duplicate=False):

@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 from pria_lifechem.evaluation import precision_auc_single, roc_auc_single, bedroc_auc_single, \
-    enrichment_factor_single
+    enrichment_factor_single, normalized_enrichment_factor_single
 from pria_lifechem.function import reshape_data_into_2_dim
 from sklearn import metrics
 
@@ -104,7 +104,7 @@ def get_ef_table(file_path, target_name, efr_list, ef_header, title):
         ground = '../../output/docking/stage_1/lc123-rmi-dockdata-qnorm.csv.gz'
     else:
         raise ValueError('Target name {} not found.'.format(target_name))
-    
+
     ground_pd = pd.read_csv(ground)
     ground_pd = ground_pd[['Unnamed: 0', target_name]]
     ground_pd.columns = ['molid', target_name]
@@ -124,6 +124,64 @@ def get_ef_table(file_path, target_name, efr_list, ef_header, title):
         for ratio in efr_list:
             n_actives, ef, ef_max = enrichment_factor_single(true_label_list, docking_ranked_list, ratio)
             row = '{} {} |'.format(row, ef)
+        content = '{}{}\n'.format(content, row)
+    content = '{}\n{}\n{}\n{}'.format(title, header, splitter, content)
+    return content
+
+
+def get_nef_table(file_path, target_name, nefr_list, nef_header, title):
+    """
+    :param file_path: Docking results
+    :param efr_list: EF ratio list
+    :param ef_header: Table header
+    :param title: Markdown Table caption
+    :return: the markdown content
+
+    example run: get_nef_table(file_path='../../output/docking_result/lc123-pria-dockdata-qnorm.csv.gz',
+                               target_name='Keck_Pria_AS_Retest',
+                               nefr_list=[0.02, 0.01, 0.0015, 0.001],
+                               nef_header=['NEF_2', 'NEF_1', 'NEF_015', 'NEF_01'],
+                               title='Enrichment Factor for Docking Methods')
+    """
+    pria_pd = pd.read_csv(file_path)
+    title = '## {}'.format(title)
+
+    header = '| docking method |'
+    for name in nefr_list:
+        header = '{} {} |'.format(header, name)
+
+    splitter = '| --- |'
+    for _ in nef_header:
+        splitter = '{} {} |'.format(splitter, '---')
+
+    if target_name == 'Keck_Pria_AS_Retest':
+        ground = '../../output/docking/stage_1/lc123-pria-dockdata-qnorm.csv.gz'
+    elif target_name == 'Keck_Pria_FP_data':
+        ground = '../../output/docking/stage_1/lc123-pria-dockdata-qnorm.csv.gz'
+    elif target_name == 'Keck_RMI_cdd':
+        ground = '../../output/docking/stage_1/lc123-rmi-dockdata-qnorm.csv.gz'
+    else:
+        raise ValueError('Target name {} not found.'.format(target_name))
+
+    ground_pd = pd.read_csv(ground)
+    ground_pd = ground_pd[['Unnamed: 0', target_name]]
+    ground_pd.columns = ['molid', target_name]
+    pria_pd = pd.merge(pria_pd, ground_pd, on='molid', how='outer')
+
+    content = ''
+    for docking_method in docking_methods:
+        # temp_pd = pria_pd[['Unnamed: 0', target_name, docking_method]]
+        temp_pd = pria_pd[['molid', target_name, docking_method]]
+        filtered_pd = temp_pd.dropna()
+        # TODO: may find the difference with panda.series for EF calculation
+        # true_label_list = filtered_pd[target_name]
+        # docking_ranked_list = filtered_pd[docking_method]
+        true_label_list = np.array(filtered_pd[target_name].tolist())
+        docking_ranked_list = np.array(filtered_pd[docking_method].tolist())
+        row = '| {} |'.format(docking_method)
+        for ratio in nefr_list:
+            nef = normalized_enrichment_factor_single(true_label_list, docking_ranked_list, ratio)
+            row = '{} {} |'.format(row, nef)
         content = '{}{}\n'.format(content, row)
     content = '{}\n{}\n{}\n{}'.format(title, header, splitter, content)
     return content
