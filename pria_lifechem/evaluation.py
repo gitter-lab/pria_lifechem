@@ -259,10 +259,6 @@ def max_enrichment_factor_single_perc(y_true, y_pred, percentile):
         y_true = y_true.reshape((y_true.shape[0], 1))
         y_pred = y_pred.reshape((y_pred.shape[0], 1)) 
     
-    non_missing_indices = np.argwhere(y_true!=-1)[:, 0]
-    y_true = y_true[non_missing_indices,:]
-    y_pred = y_pred[non_missing_indices,:]  
-    
     max_ef = np.zeros(nb_classes)
     
     for i in range(len(max_ef)):
