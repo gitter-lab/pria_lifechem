@@ -15,3 +15,7 @@ output
 *.weight
 pria_lifechem/analysis/rfh_yscrambled/rfh_yscrambled_preds/rfh_yscrambled_preds/*.npz
 pria_lifechem/analysis/Check Means.ipynb
+pria_lifechem/analysis/Means_vs_DTK+Means_CV_Utility_PriA_SSB_AS-latex.ipynb
+pria_lifechem/analysis/CV_Stage_Results-latex.ipynb
+pria_lifechem/analysis/Means_vs_DTK+Means_CV_Utility_PriA_SSB_FP-latex.ipynb
+pria_lifechem/analysis/Means_vs_DTK+Means_CV_Utility_RMI_FANCM1-latex.ipynb

@@ -70,7 +70,7 @@ def model_name_dict():
     Assumes the WID Storage setup of 
     folder->fold_i->(train|val|test)_metrics->metrics.csv
 """
-def gather_dir_metrics(directory, k, labels=['PriA-SSB AS','PriA-SSB FP','RMI-FANCM1'],
+def gather_dir_metrics(directory, k, labels=['PriA-SSB AS','PriA-SSB FP','RMI-FANCM FP'],
                        perc_vec=[0.001, 0.0015, 0.005, 0.01, 0.02, 0.05, 0.1, 0.2],
                        n_tests_list=[100, 250, 500, 1000, 2500, 5000, 10000]):
     perc_vec = ['{:g}'.format(perc * 100) + ' %' for perc in perc_vec]
@@ -462,7 +462,7 @@ def get_model_ordering_mscores(gather_df, metric_names, precision=4):
     Get spearman's rank-order correlation coefficient for between each metric's
     model ranking and that of n_hits ranking.
 """
-def get_spearman_r(agg_comp_dict, metric_names, n_hits_metrics, labels=['PriA-SSB AS','PriA-SSB FP','RMI-FANCM1']):
+def get_spearman_r(agg_comp_dict, metric_names, n_hits_metrics, labels=['PriA-SSB AS','PriA-SSB FP','RMI-FANCM FP']):
     nh_dict = {}                        
     for j, n_hit_metric in zip(range(len(n_hits_metrics)), n_hits_metrics):              
         ranked_nh_pd = agg_comp_dict[n_hit_metric]['top'].rank(method='min', ascending=False)
@@ -610,7 +610,7 @@ def get_model_winscores(agg_comp_dict, metric_names):
     Scatter plot for metrics vs n_hits.
 """
 def plot_scatter_nhits(agg_comp_dict, metric_names, n_hits_metrics, save_dir, figsize=(6.0, 6.0), 
-                       labels=['PriA-SSB AS','PriA-SSB FP','RMI-FANCM1']):
+                       labels=['PriA-SSB AS','PriA-SSB FP','RMI-FANCM FP']):
     for j, n_hit_metric in zip(range(len(n_hits_metrics)), n_hits_metrics):              
         ranked_nh_pd = agg_comp_dict[n_hit_metric]['top'].rank(method='min', ascending=False)
         ranked_nh_list = agg_comp_dict[n_hit_metric]['top'].index.tolist()
@@ -633,7 +633,7 @@ def plot_scatter_nhits(agg_comp_dict, metric_names, n_hits_metrics, save_dir, fi
             plot_scatter(rank_0, rank_1, metric_0, metric_1, save_dir, figsize)
 
 def plot_scatter_nhits_alt(agg_comp_dict, metric_names, n_hits_metrics, save_dir, figsize=(6.0, 6.0), 
-                           labels=['PriA-SSB AS','PriA-SSB FP','RMI-FANCM1']):
+                           labels=['PriA-SSB AS','PriA-SSB FP','RMI-FANCM FP']):
     N = len(metric_names)
     M = len(n_hits_metrics)
     fig, axs = plt.subplots(N, M, figsize=figsize, sharex='col', sharey='row')
@@ -681,7 +681,7 @@ def plot_scatter(rank_0, rank_1, metric_0, metric_1, save_dir, figsize=(6.0, 6.0
     plt.figure(figsize=figsize)
     plt.scatter(rank_0, rank_1)
     
-    labels=['PriA-SSB AS','PriA-SSB FP','RMI-FANCM1']
+    labels=['PriA-SSB AS','PriA-SSB FP','RMI-FANCM FP']
     curr_label = ''
     for l in labels:
         if l in metric_0:
@@ -735,7 +735,7 @@ def get_overlap(agg_comp_dict, N=5):
     are the most similar metrics from top-to-bottom.
 """
 def get_similar_to_nhits(agg_comp_dict, metric_names, n_hits_metrics, 
-                         labels=['PriA-SSB AS','PriA-SSB FP','RMI-FANCM1']):
+                         labels=['PriA-SSB AS','PriA-SSB FP','RMI-FANCM FP']):
     nh_dict = {}                        
     for j, n_hit_metric in zip(range(len(n_hits_metrics)), n_hits_metrics):              
         ranked_nh_pd = agg_comp_dict[n_hit_metric]['top'].rank(method='min', ascending=False)
