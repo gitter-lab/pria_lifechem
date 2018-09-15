@@ -128,7 +128,7 @@ def merge_rank():
     model_names = complete_df.columns[3:]
     rank_df = complete_df[['molecule', 'label', 'inhibition']]
     for (idx, model_name) in enumerate(model_names):
-        order = complete_df[model_name].rank(ascending=False).tolist()
+        order = complete_df[model_name].rank(ascending=False, method='max').tolist()
         order = np.array(order)
         order = order.astype(np.int)
         rank_df[model_name] = order
@@ -138,7 +138,7 @@ def merge_rank():
     for ensemble_name, ensemble_model_names in ensemble_model_names_pairs.items():
         ensemble_orders = []
         for (idx, model_name) in enumerate(model_names):
-            order = complete_df[model_name].rank(ascending=False).tolist()
+            order = complete_df[model_name].rank(ascending=False, method='max').tolist()
             order = np.array(order)
             order = order.astype(np.int)
             if model_name in ensemble_model_names:
@@ -153,7 +153,7 @@ def merge_rank():
         temp_df[ensemble_name] = ensemble_order
 
         # Rank the simple ensemble
-        order = temp_df[ensemble_name].rank().as_matrix()
+        order = temp_df[ensemble_name].rank(method='max').as_matrix()
         order = np.array(order)
         order = order.astype(int)
         rank_df[ensemble_name] = order
