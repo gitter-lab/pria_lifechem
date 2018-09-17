@@ -13,6 +13,7 @@ from shutil import move
 import os
 import itertools
 from sklearn.model_selection import train_test_split
+from evaluation import *
 
 """
  This class is similar to SKLearn_RandomForest but with removed features and modified constructor.
