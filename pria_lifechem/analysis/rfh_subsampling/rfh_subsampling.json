@@ -1,0 +1,15 @@
+{
+  "label_names":["Keck_Pria_AS_Retest"],
+  "params": {
+    "n_estimators": 8000,
+    "max_features": "log2",
+    "min_samples_leaf": 1,
+    "class_weight": "balanced"
+  },
+  "enrichment_factor": {
+    "ratio_list": [0.005, 0.01, 0.02, 0.05, 0.1, 0.2]
+  },
+  "start_mol_count": 500,
+  "train_count_spacing": 100,
+  "max_runs": 40
+}
