@@ -246,3 +246,6 @@ if __name__ == '__main__':
     evaluate_model(y_train, y_pred_on_train, output_dir+'/train_metrics/', labels)
     # evaluate on the prospective set
     evaluate_model(y_test, y_pred_on_test, output_dir+'/test_metrics/', labels)
+    
+    # save train_indices
+    np.save(output_dir+'/train_indices', train_indices)
