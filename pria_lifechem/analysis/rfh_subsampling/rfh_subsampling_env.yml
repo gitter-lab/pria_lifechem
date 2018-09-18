@@ -4,16 +4,17 @@ channels:
 - r
 - rdkit
 - conda-forge
+- auto
 - defaults
 dependencies:
-- python=3.5
+- python=2.7
 - setuptools
 - pyyaml
 - h5py
 - scikit-learn=0.18.1
 - pandas
 - sympy
-- rpy2=2.9.3
+- rpy2=2.8.5
 - r-prroc=1.1
 - pip:
   - croc==1.1.26
