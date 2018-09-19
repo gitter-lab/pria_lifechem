@@ -222,7 +222,11 @@ if __name__ == '__main__':
     np.random.seed(seed=(process_num*train_count+run_num))
     
     # stratify sample the training set
-    X_train, _, y_train, _, train_indices, _ = train_test_split(X_train, y_train, train_indices, train_size=train_count, stratify=y_train)
+    if train_count == X_train.shape[0]: # account for edge case
+        X_train, y_train, train_indices = X_train, y_train, train_indices
+        run_num = 0
+    else:
+        X_train, _, y_train, _, train_indices, _ = train_test_split(X_train, y_train, train_indices, train_size=train_count, stratify=y_train)
     print('done data preparation')
     
     task = RFH_Sklearn(conf=conf, process_num=process_num)
