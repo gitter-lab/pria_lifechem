@@ -11,5 +11,5 @@
   },
   "start_mol_count": 500,
   "train_count_spacing": 100,
-  "max_runs": 40
+  "run_range": [40, 100]
 }

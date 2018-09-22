@@ -211,11 +211,11 @@ if __name__ == '__main__':
     
     start_mol_count = int(conf["start_mol_count"])
     train_count_spacing = int(conf["train_count_spacing"])
-    max_runs = int(conf["max_runs"])
+    begin_run, end_run = conf["run_range"][0], conf["run_range"][1]
     
     # get train_count and run_num for this process_num
     train_counts = np.linspace(start_mol_count, X_train.shape[0], train_count_spacing, dtype=np.int)
-    total_runs = np.arange(max_runs)
+    total_runs = np.arange(begin_run, end_run)
     train_count, run_num = list(itertools.product(train_counts,total_runs))[process_num]
     
     # set seed according to (process_num*train_count+run_num)
