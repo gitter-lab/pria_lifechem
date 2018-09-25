@@ -17,7 +17,8 @@ def rename_run_dirs(class_dirs):
         run_dirs = [cdir+'/{}/'.format(d) for d in os.listdir(cdir)]
         for rdir in run_dirs:
             new_rdir_name = rdir.replace('run', 'fold')
-            os.rename(rdir, new_rdir_name)
+            if not os.path.exists(new_rdir_name):
+                os.rename(rdir, new_rdir_name)
             
  
 """
@@ -77,3 +78,39 @@ def get_active_count_dict_with_tsize_thresh(model_directory, y_train, gather_df,
             for aidx in train_indices_dict[tsize_run][np.where(y_train[train_indices_dict[tsize_run]] == 1)[0]]:
                 train_actives_count_dict[aidx] += 1
     return train_actives_count_dict
+
+"""
+    The columns are the clusters with active training set compounds, the rows are the runs.
+    Then use one color (black) for the training set clusters that were sampled in that run and 
+    another (white) for those that were not sampled.
+"""
+def heatmap_idea(model_directory, y_train, gather_df, column, col_threshold_func, tsize_threshold_func):
+    col_df = gather_df[column]
+    tsize_run_pairs = col_df.index.tolist()
+    func_run_train_indices_dirs = [model_directory+'/n_{}/fold_{}/train_indices.npy'.format(tsize, int(func_run.replace('run ',''))) for tsize, func_run in tsize_run_pairs]
+
+    # read in the train_indices.npy of the func run for each n_{}
+    train_indices_dict = {}
+    for i,  tsize_run, train_indices_dir in zip(range(len(tsize_run_pairs)), tsize_run_pairs, func_run_train_indices_dirs):
+        tsize, run = tsize_run
+        train_indices_dict[tsize_run] = np.load(train_indices_dir)
+        assert tsize == train_indices_dict[tsize_run].shape[0]
+    
+    # append qualifying rows and columns
+    df_cell_data = [] # contains 0/1 to indicate if train_active was present in n_{}/fold_{}
+    index_labels = [] # row index labeling as n_{}/fold_{}
+    active_indices = np.where(y_train == 1)[0]
+    for tsize_run in train_indices_dict:
+        tsize, run = tsize_run
+        if tsize_threshold_func(tsize) and col_threshold_func(col_df[tsize][run]):
+            index_labels.append('n_{}/{}'.format(tsize, run))
+            curr_row = np.zeros(shape=(active_indices.shape[0],))
+            for aidx in train_indices_dict[tsize_run][np.where(y_train[train_indices_dict[tsize_run]] == 1)[0]]:
+                curr_row[np.where(active_indices == aidx)[0][0]] = 1
+            df_cell_data.append(list(curr_row))
+            
+    # create dataframe
+    heatmap_df = pd.DataFrame(data=df_cell_data,
+                              columns=list(active_indices),
+                              index=index_labels)
+    return heatmap_df
