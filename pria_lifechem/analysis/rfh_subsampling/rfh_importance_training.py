@@ -87,7 +87,7 @@ if __name__ == '__main__':
     task.save_model_params(config_csv_file)
                                        
     # save evaluation results
-    output_dir = model_dir+'/rule_{}/'.format(process_num)
+    output_dir = model_dir+'/rule_{}/fold_0/'.format(process_num)
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
     if not os.path.exists(output_dir+'/train_metrics/'):
