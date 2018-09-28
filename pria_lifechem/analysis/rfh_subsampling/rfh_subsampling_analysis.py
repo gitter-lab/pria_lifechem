@@ -54,9 +54,10 @@ def get_active_count_dict(model_directory, y_train, gather_df, column, idxfunc, 
     
     
 """
-    Returns the train actives counts for runs that are true for col_threshold_fun and tsize_threshold_func.
+    Returns the train active/inactive counts for runs that are true for col_threshold_fun and tsize_threshold_func.
 """
-def get_active_count_dict_with_tsize_thresh(model_directory, y_train, gather_df, column, col_threshold_func, tsize_threshold_func):
+def get_activity_count_dict_with_tsize_thresh(model_directory, y_train, gather_df, column, 
+                                              col_threshold_func, tsize_threshold_func):
     col_df = gather_df[column]
     tsize_run_pairs = col_df.index.tolist()
     func_run_train_indices_dirs = [model_directory+'/n_{}/fold_{}/train_indices.npy'.format(tsize, int(func_run.replace('run ',''))) for tsize, func_run in tsize_run_pairs]
@@ -69,18 +70,25 @@ def get_active_count_dict_with_tsize_thresh(model_directory, y_train, gather_df,
         assert tsize == train_indices_dict[tsize_run].shape[0]
     # maintain counts of the number of times each active appeared in the training set
     train_actives_count_dict = {}
+    train_inactives_count_dict = {}
     active_indices = np.where(y_train == 1)[0]
+    inactive_indices = np.where(y_train == 0)[0]
     for aidx in active_indices:
         train_actives_count_dict[aidx] = 0
+    for aidx in inactive_indices:
+        train_inactives_count_dict[aidx] = 0
+        
     for tsize_run in train_indices_dict:
         tsize, run = tsize_run
         if tsize_threshold_func(tsize) and col_threshold_func(col_df[tsize][run]):
             for aidx in train_indices_dict[tsize_run][np.where(y_train[train_indices_dict[tsize_run]] == 1)[0]]:
                 train_actives_count_dict[aidx] += 1
-    return train_actives_count_dict
+            for aidx in train_indices_dict[tsize_run][np.where(y_train[train_indices_dict[tsize_run]] == 0)[0]]:
+                train_inactives_count_dict[aidx] += 1
+    return train_actives_count_dict, train_inactives_count_dict
 
 """
-    The columns are the clusters with active training set compounds, the rows are the runs.
+    The columns are the clusters with active/inactive training set compounds, the rows are the runs.
     Then use one color (black) for the training set clusters that were sampled in that run and 
     another (white) for those that were not sampled.
 """
@@ -97,20 +105,31 @@ def heatmap_idea(model_directory, y_train, gather_df, column, col_threshold_func
         assert tsize == train_indices_dict[tsize_run].shape[0]
     
     # append qualifying rows and columns
-    df_cell_data = [] # contains 0/1 to indicate if train_active was present in n_{}/fold_{}
+    df_cell_data = [[], []] # contains 0/1 to indicate if active/inactive was present in n_{}/fold_{}
     index_labels = [] # row index labeling as n_{}/fold_{}
     active_indices = np.where(y_train == 1)[0]
+    inactive_indices = np.where(y_train == 0)[0]
     for tsize_run in train_indices_dict:
         tsize, run = tsize_run
         if tsize_threshold_func(tsize) and col_threshold_func(col_df[tsize][run]):
             index_labels.append('n_{}/{}'.format(tsize, run))
+            # handle actives
             curr_row = np.zeros(shape=(active_indices.shape[0],))
             for aidx in train_indices_dict[tsize_run][np.where(y_train[train_indices_dict[tsize_run]] == 1)[0]]:
                 curr_row[np.where(active_indices == aidx)[0][0]] = 1
-            df_cell_data.append(list(curr_row))
+            df_cell_data[0].append(list(curr_row))
+            # handle inactives
+            curr_row = np.zeros(shape=(inactive_indices.shape[0],))
+            for aidx in train_indices_dict[tsize_run][np.where(y_train[train_indices_dict[tsize_run]] == 0)[0]]:
+                curr_row[np.where(inactive_indices == aidx)[0][0]] = 1
+            df_cell_data[1].append(list(curr_row))
             
     # create dataframe
-    heatmap_df = pd.DataFrame(data=df_cell_data,
-                              columns=list(active_indices),
-                              index=index_labels)
-    return heatmap_df
+    heatmap_active_df = pd.DataFrame(data=df_cell_data[0],
+                                     columns=list(active_indices),
+                                     index=index_labels)
+    heatmap_inactive_df = pd.DataFrame(data=df_cell_data[1],
+                                       columns=list(inactive_indices),
+                                       index=index_labels)
+    
+    return heatmap_active_df, heatmap_inactive_df
