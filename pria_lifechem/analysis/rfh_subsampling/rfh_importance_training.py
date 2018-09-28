@@ -26,7 +26,7 @@ if __name__ == '__main__':
     parser.add_argument('--config_json_file', action="store", dest="config_json_file", required=True)
     parser.add_argument('--model_dir', action="store", dest="model_dir", required=True)
     parser.add_argument('--dataset_dir', action="store", dest="dataset_dir", required=True)
-    parser.add_argument('--tain_indices_file', action="store", dest="tain_indices_file", required=True)
+    parser.add_argument('--train_indices_file', action="store", dest="train_indices_file", required=True)
     parser.add_argument('--prospective_file', action="store", dest="prospective_file", required=True)
     parser.add_argument('--process_num', action="store", dest="process_num", required=True)
     
@@ -35,7 +35,7 @@ if __name__ == '__main__':
     config_json_file = given_args.config_json_file
     model_dir = given_args.model_dir
     dataset_dir = given_args.dataset_dir
-    tain_indices_file = given_args.tain_indices_file
+    train_indices_file = given_args.train_indices_file
     prospective_file = given_args.prospective_file
     process_num = int(given_args.process_num)
     #####
