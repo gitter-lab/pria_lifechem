@@ -23,3 +23,4 @@ pria_lifechem/analysis/rfh_subsampling/important_indices/rule_0.npy
 pria_lifechem/analysis/rfh_subsampling/important_indices/rule_1.npy
 pria_lifechem/analysis/rfh_subsampling/important_indices/rule_2.npy
 *.npy
+dataset/baseline/stage_1/baseline/fold_4.npz

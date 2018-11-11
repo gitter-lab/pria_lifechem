@@ -190,7 +190,9 @@ def get_top_mm_models(gather_df,
 """
 def get_mean_median_comps(gather_df, 
                           col_indices=list(range(10)) + list(range(15, 20)) + list(range(25, 65)) + list(range(145, 149)) + list(range(150, 183)),
-                          tol=1e-4):
+                          tol=1e-4,
+                          omit_metric_model_patterns=[('PriA-SSB FP', 'baseline'), ('RMI-FANCM FP', 'baseline'),
+                                                      ('Mean', 'baseline'), ('Median', 'baseline')]):
     metric_names = list(gather_df.columns.values[col_indices])
     model_names = list(gather_df.index.levels[0])
     comp_dicts = {}    
@@ -206,8 +208,14 @@ def get_mean_median_comps(gather_df,
         m_df = gather_df[metric]
         comp_dicts[metric] = {}
         
+        metric_model_names = model_names[:]
+        if any(pattern[0] in metric for pattern in omit_metric_model_patterns):
+            metric_model_names = [m for m in metric_model_names if not any(pattern[1] in m for pattern in omit_metric_model_patterns)]
+            
+        m_df = m_df.loc[metric_model_names]
+        
         for row_name in ['Folds Mean', 'Folds Median']:
-            comp_df = pd.DataFrame(0,index=model_names, columns=model_names)
+            comp_df = pd.DataFrame(0,index=metric_model_names, columns=metric_model_names)
             
             temp_df = m_df.xs(row_name, level='fold')
             temp_df = temp_df.sort_values(ascending=False)
@@ -274,7 +282,9 @@ def tukey_multi_metrics(gather_df,
 
 def dtk_multi_metrics(gather_df, 
                       col_indices=list(range(10)) + list(range(15, 20)) + list(range(25, 65)) + list(range(145, 149)) + list(range(150, 183)),
-                      alpha=0.05):
+                      alpha=0.05,
+                      omit_metric_model_patterns=[('PriA-SSB FP', 'baseline'), ('RMI-FANCM FP', 'baseline'),
+                                                  ('Mean', 'baseline'), ('Median', 'baseline')]):
     metric_names = list(gather_df.columns.values[col_indices])
     model_names = list(gather_df.index.levels[0])
     dtk_dict = {}
@@ -292,21 +302,29 @@ def dtk_multi_metrics(gather_df,
         model_names_rep.extend([m for _ in range(k)])
     
     
-    index_names_1 = []
-    index_names_2 = []
-    for i in range(len(model_names)):
-        for j in range(i+1, len(model_names)):
-            index_names_1.append(model_names[j])
-            index_names_2.append(model_names[i])
-       
     for i, metric in zip(range(len(metric_names)), metric_names):
         m_df = gather_df[metric]
         m_df.sort_index(inplace=True)
-        m_df = m_df.loc[model_names]
+        
+        metric_model_names = model_names[:]
+        metric_model_names_rep = model_names_rep[:]
+        if any(pattern[0] in metric for pattern in omit_metric_model_patterns):
+            metric_model_names = [m for m in metric_model_names if not any(pattern[1] in m for pattern in omit_metric_model_patterns)]
+            metric_model_names_rep = [m for m in metric_model_names_rep if not any(pattern[1] in m for pattern in omit_metric_model_patterns)]
+            
+        m_df = m_df.loc[metric_model_names]
         m_df_mat = np.around(m_df.as_matrix(), decimals=4)
         
-        dtk_results = dtk_lib.DTK_test(robjects.FloatVector(m_df_mat), robjects.FactorVector(model_names_rep), alpha)
-        dtk_results = np.array(dtk_results[1])        
+        dtk_results = dtk_lib.DTK_test(robjects.FloatVector(m_df_mat), robjects.FactorVector(metric_model_names_rep), alpha)
+        dtk_results = np.array(dtk_results[1])
+        
+        index_names_1 = []
+        index_names_2 = []
+        for i in range(len(metric_model_names)):
+            for j in range(i+1, len(metric_model_names)):
+                index_names_1.append(metric_model_names[j])
+                index_names_2.append(metric_model_names[i])
+            
         dtk_pd = pd.DataFrame(data=[index_names_1, index_names_2, list(dtk_results[:,0]),list(dtk_results[:,1]),list(dtk_results[:,2]), [False for _ in range(len(index_names_1))]]).T
         dtk_pd.columns = ['group1', 'group2', 'meandiff', 'Lower CI', 'Upper CI', 'reject'] 
         
@@ -317,6 +335,8 @@ def dtk_multi_metrics(gather_df,
         dtk_dict[metric] = dtk_pd
     
     return dtk_dict
+
+
 """
     Given a tukey_dict with metric names as key and TukeyHSDResults objects as
     values, it creates pd dataframes from the results, reject matrix and 
@@ -365,10 +385,10 @@ def analyze_tukey_dict(tukey_dict):
 
 def analyze_dtk_dict(dtk_dict):
     metric_names = list(dtk_dict.keys())
-    model_names = list(np.unique(list(dtk_dict[metric_names[0]]['group2']) + list(dtk_dict[metric_names[0]]['group1'])))
     dtk_analysis_dict = {}
     
-    for i, metric in zip(range(len(metric_names)), metric_names):               
+    for i, metric in zip(range(len(metric_names)), metric_names):
+        model_names = list(np.unique(list(dtk_dict[metric]['group2']) + list(dtk_dict[metric]['group1'])))
         dtk_df = dtk_dict[metric]
         
         reject_df = pd.DataFrame(0,index=model_names, columns=model_names)
@@ -437,6 +457,10 @@ def get_model_ordering(agg_comp_dict, metric_names):
         ranking_list = agg_comp_dict[metric]['top'].rank(method='min', ascending=False).tolist()
         m_ordering_list = agg_comp_dict[metric]['top'].index.tolist()
         m_order_rank_list = [str(m) + ", " + str(r) for m, r in zip(m_ordering_list, ranking_list)]
+        
+        if len(m_order_rank_list) < ordered_df[metric].shape[0]:
+            m_order_rank_list += ['']
+            
         ordered_df[metric] = m_order_rank_list
         
     return ordered_df
