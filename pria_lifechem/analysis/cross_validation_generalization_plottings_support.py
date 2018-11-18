@@ -34,7 +34,8 @@ file_paths_dict = {
         31: 'consensus_bcs_efr1_opt/',
         32: 'consensus_bcs_rocauc_opt/',
         33: 'consensus_dockscore_median/',
-        34: 'consensus_dockscore_mean/'
+        34: 'consensus_dockscore_mean/',
+        35: 'baseline/'
     },
     'Keck_Pria_FP': {
         0: 'single_classification_22/45710870/',
@@ -133,5 +134,6 @@ model_list = [
     'consensus_bcs_efr1_opt',
     'consensus_bcs_rocauc_opt',
     'consensus_dockscore_median',
-    'consensus_dockscore_mean'
+    'consensus_dockscore_mean', 
+    'baseline'
 ]

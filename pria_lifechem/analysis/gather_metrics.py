@@ -6,6 +6,7 @@ from statsmodels.stats.libqsturng import psturng
 from matplotlib import pyplot as plt
 from matplotlib.widgets import Slider
 import matplotlib.gridspec as gridspec
+import seaborn as sns
 from model_names import model_name_dict 
 from scipy.stats import spearmanr
 import rpy2.robjects as robjects
@@ -973,8 +974,8 @@ def plot_metrics_bp(gather_df, metric_names, labels, save_dir):
                 os.makedirs(save_dir+'/'+l.replace(' ','_')+'/')
             file_name = save_dir+'/'+l.replace(' ','_')+'/'+file_name+'.png'
 
-            plt.figure(figsize=(30, 10))
-            plt.boxplot(x=boxplot_data, labels=boxplot_names)
+            plt.figure(figsize=(30, 14))
+            sns.boxplot(x=boxplot_names, y=boxplot_data)
             plt.xticks(rotation=90)
             plt.ylabel(metric.replace(' '+l, ''))
             plt.title(metric)
