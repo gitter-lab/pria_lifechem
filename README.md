@@ -8,8 +8,8 @@
 If you use this software or the new high-throughput screening data, please cite:
 
 Shengchao Liu<sup>+</sup>, Moayad Alnammi<sup>+</sup>, Spencer S. Ericksen, Andrew F. Voter, Gene E. Ananiev, James L. Keck, F. Michael Hoffmann, Scott A. Wildman, Anthony Gitter.
-Practical model selection for prospective virtual screening.
-*bioRxiv* 2018. [doi:10.1101/337956](https://doi.org/10.1101/337956)
+[Practical model selection for prospective virtual screening](https://doi.org/10.1021/acs.jcim.8b00363).
+*Journal of Chemical Information and Modelling* 2018.
 
 <sup>+</sup> denotes co-first authors.
 
