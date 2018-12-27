@@ -8,8 +8,8 @@
 If you use this software or the new high-throughput screening data, please cite:
 
 Shengchao Liu<sup>+</sup>, Moayad Alnammi<sup>+</sup>, Spencer S. Ericksen, Andrew F. Voter, Gene E. Ananiev, James L. Keck, F. Michael Hoffmann, Scott A. Wildman, Anthony Gitter.
-Practical model selection for prospective virtual screening.
-*bioRxiv* 2018. [doi:10.1101/337956](https://doi.org/10.1101/337956)
+[Practical model selection for prospective virtual screening](https://doi.org/10.1021/acs.jcim.8b00363).
+*Journal of Chemical Information and Modeling* 2018.
 
 <sup>+</sup> denotes co-first authors.
 
@@ -49,7 +49,7 @@ The random forest code is still compatible with `conda_env.yml`, but the results
 
 The dataset subdirectory contains a description of the expected file format and an example dataset that has been split into five folds.
 
-The complete high-throughput screening data will be uploaded to PubChem.
+The complete high-throughput screening data are available on PubChem ([AID:1272365](https://pubchem.ncbi.nlm.nih.gov/bioassay/1272365) and [AID:1159607](https://pubchem.ncbi.nlm.nih.gov/bioassay/1159607)).
 Pre-processed, merged versions of the data are available on Zenodo ([doi:10.5281/zenodo.1411506](https://doi.org/10.5281/zenodo.1411506)).
 The Zenodo files are:
 - **pria_rmi_cv.tar.gz**: The LifeChem compounds used for cross validation with PriA-SSB and RMI-FANCM split into five folds.
